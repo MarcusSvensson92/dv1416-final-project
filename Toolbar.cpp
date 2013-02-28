@@ -23,7 +23,7 @@ namespace GUI
 	{
 		m_hInstance	   = hInstance;
 		m_toolbarDesc  = toolbarDesc;
-		m_style		   = WS_POPUP | WS_CAPTION | WS_VISIBLE | WS_CLIPCHILDREN | WS_CHILD;
+		m_style		   = WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD;
 		m_clientWidth  = toolbarDesc.width();
 		m_clientHeight = toolbarDesc.height(0);
 
@@ -33,7 +33,7 @@ namespace GUI
 		ZeroMemory(&ccs, sizeof(ccs));
 
 		m_hWnd = CreateWindow("MDICLIENT", m_toolbarDesc.caption.c_str(), m_style,
-							  CW_USEDEFAULT, CW_USEDEFAULT, wndSize.x, wndSize.y,
+							  toolbarDesc.x, toolbarDesc.y, wndSize.x, wndSize.y,
 							  hParentWnd, NULL, m_hInstance, (LPSTR)&ccs);
 
 		g_toolbar = this;

@@ -54,8 +54,6 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		m_toolbar->addButton("8", this, "life.bmp");
 		m_toolbar->addButton("9", this, "life.bmp");
 
-		m_toolbar->hide(true);
-
 		break;
 	}
 	}
