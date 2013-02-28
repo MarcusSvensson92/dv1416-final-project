@@ -10,6 +10,11 @@ LRESULT CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
 }
 
+BOOL CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
+}
+
 namespace GUI
 {
 	Toolbar::Toolbar(HINSTANCE	 hInstance,
@@ -18,15 +23,18 @@ namespace GUI
 	{
 		m_hInstance	   = hInstance;
 		m_toolbarDesc  = toolbarDesc;
-		m_style		   = WS_POPUP | WS_CAPTION | WS_VISIBLE;
+		m_style		   = WS_POPUP | WS_CAPTION | WS_VISIBLE | WS_CLIPCHILDREN | WS_CHILD;
 		m_clientWidth  = toolbarDesc.width();
 		m_clientHeight = toolbarDesc.height(0);
 
 		const POINT wndSize = computeWndSize();
 
+		CLIENTCREATESTRUCT ccs;
+		ZeroMemory(&ccs, sizeof(ccs));
+
 		m_hWnd = CreateWindow("MDICLIENT", m_toolbarDesc.caption.c_str(), m_style,
 							  CW_USEDEFAULT, CW_USEDEFAULT, wndSize.x, wndSize.y,
-							  hParentWnd, NULL, m_hInstance, NULL);
+							  hParentWnd, NULL, m_hInstance, (LPSTR)&ccs);
 
 		g_toolbar = this;
 

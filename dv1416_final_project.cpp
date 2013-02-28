@@ -43,7 +43,7 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		tbd.buttonSize	  = 32;
 		tbd.buttonMargin  = 4;
 
-		m_toolbar = new GUI::Toolbar(m_hInstance, m_hWnd, tbd);
+		m_toolbar = new GUI::Toolbar(m_hInstance, hWnd, tbd);
 		m_toolbar->addButton("1", this, "life.bmp");
 		m_toolbar->addButton("2", this, "life.bmp");
 		m_toolbar->addButton("3", this, "life.bmp");
