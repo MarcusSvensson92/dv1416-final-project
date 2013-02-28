@@ -39,7 +39,7 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		tbd.caption		  = "Toolbar";
 		tbd.x			  = CW_USEDEFAULT;
 		tbd.y			  = CW_USEDEFAULT;
-		tbd.buttonsPerRow = 2;
+		tbd.buttonsPerRow = 4;
 		tbd.buttonSize	  = 32;
 		tbd.buttonMargin  = 4;
 
@@ -52,7 +52,6 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		m_toolbar->addButton("6", this, "life.bmp");
 		m_toolbar->addButton("7", this, "life.bmp");
 		m_toolbar->addButton("8", this, "life.bmp");
-		m_toolbar->addButton("9", this, "life.bmp");
 
 		break;
 	}

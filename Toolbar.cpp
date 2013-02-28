@@ -59,7 +59,7 @@ namespace GUI
 
 		if (y >= m_clientHeight)
 		{
-			const UINT rowCount = (count + 2) / m_toolbarDesc.buttonsPerRow;
+			const UINT rowCount = count / m_toolbarDesc.buttonsPerRow + 1;
 			m_clientHeight = m_toolbarDesc.height(rowCount);
 
 			const POINT wndSize = computeWndSize();
