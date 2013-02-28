@@ -67,6 +67,12 @@ namespace GUI
 		m_buttons.push_back(EventElement(name, eventReceiver));
 	}
 
+	void Toolbar::hide(const bool hide)
+	{
+		int cmdShow = (hide) ? SW_HIDE : SW_SHOW;
+		ShowWindow(m_hWnd, cmdShow);
+	}
+
 	LRESULT Toolbar::subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		if (message == WM_COMMAND)

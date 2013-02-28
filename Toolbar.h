@@ -31,7 +31,8 @@ namespace GUI
 		~Toolbar(void);
 
 		void addButton(const std::string& name, EventReceiver* eventReceiver, const std::string& bitmapFilename);
-		
+		void hide(const bool hide);
+
 		LRESULT subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	private:
 		HINSTANCE m_hInstance;

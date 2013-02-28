@@ -30,22 +30,11 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	switch (msg)
 	{
 	case WM_CREATE:
+	{
 		menu.addItem("File", "Exit", this);
 		menu.addItem("View", "Tools", this);
 		menu.assignToWindow(hWnd);
-	}
-	
-	return D3DApp::wndProc(hWnd, msg, wParam, lParam);
-}
 
-void dv1416_final_project::onEvent(const std::string& sender, const std::string& eventName)
-{
-	if (sender == "Menu" && eventName == "Exit")
-	{
-		DestroyWindow(m_hWnd);
-	}
-	if (sender == "Menu" && eventName == "Tools")
-	{
 		GUI::ToolbarDesc tbd;
 		tbd.caption		  = "Toolbar";
 		tbd.x			  = CW_USEDEFAULT;
@@ -64,6 +53,28 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 		m_toolbar->addButton("7", this, "life.bmp");
 		m_toolbar->addButton("8", this, "life.bmp");
 		m_toolbar->addButton("9", this, "life.bmp");
+
+		m_toolbar->hide(true);
+
+		break;
+	}
+	}
+	
+	return D3DApp::wndProc(hWnd, msg, wParam, lParam);
+}
+
+void dv1416_final_project::onEvent(const std::string& sender, const std::string& eventName)
+{
+	if (sender == "Menu" && eventName == "Exit")
+	{
+		DestroyWindow(m_hWnd);
+	}
+	if (sender == "Menu" && eventName == "Tools")
+	{
+		GUI::Menu& menu = GUI::Menu::getInstance();
+		bool check = menu.isItemChecked(eventName);
+		menu.checkItem(eventName, !check);
+		m_toolbar->hide(check);
 	}
 }
 
