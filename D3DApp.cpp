@@ -123,9 +123,12 @@ LRESULT D3DApp::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		return 0;
+		break;
+
+	default:
+		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
-	return DefWindowProc(hWnd, msg, wParam, lParam);
+	return 0;
 }
 
 bool D3DApp::initMainWindow(void)

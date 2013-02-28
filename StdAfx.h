@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <map>
 
 #define RELEASE(x) { if (x) { x->Release(); x = NULL; } }
 

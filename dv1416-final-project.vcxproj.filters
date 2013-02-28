@@ -8,6 +8,12 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="dv1416_final_project.cpp" />
+    <ClCompile Include="EventReceiver.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>GUI\Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -15,6 +21,15 @@
     </Filter>
     <Filter Include="Precompiled Header">
       <UniqueIdentifier>{533852db-4e57-4892-b740-bd9082f92a20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{d4a0fa8a-7f5c-444c-a2b4-07fc7bade7d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Menu">
+      <UniqueIdentifier>{47c767dc-f7a1-444d-9197-df849b6256e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Toolbar">
+      <UniqueIdentifier>{2f5f839e-8552-4026-8836-f96330e4d910}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -28,5 +43,11 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="dv1416_final_project.h" />
+    <ClInclude Include="EventReceiver.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>GUI\Menu</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
