@@ -7,6 +7,7 @@ public:
 	Timer(void);
 
 	double getDeltaTime(void) const { return m_deltaTime; }
+	int	   getFPS(void)		  const { return (int)(1.f/m_deltaTime); }
 	bool   isStopped(void)	  const { return m_stopped; }
 
 	void reset(void);
