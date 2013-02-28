@@ -3,6 +3,7 @@
 
 #include "D3DApp.h"
 #include "Menu.h"
+#include "Toolbar.h"
 
 class dv1416_final_project : public D3DApp, GUI::EventReceiver
 {
@@ -20,6 +21,8 @@ protected:
 	void onMouseDown(WPARAM buttonState, int x, int y);
 	void onMouseUp(WPARAM buttonState, int x, int y);
 	void onMouseMove(int dx, int dy);
+private:
+	GUI::Toolbar* m_toolbar;
 };
 
 #endif

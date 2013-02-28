@@ -14,6 +14,9 @@
     <ClCompile Include="Menu.cpp">
       <Filter>GUI\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Toolbar.cpp">
+      <Filter>GUI\Toolbar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -48,6 +51,9 @@
     </ClInclude>
     <ClInclude Include="Menu.h">
       <Filter>GUI\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Toolbar.h">
+      <Filter>GUI\Toolbar</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
