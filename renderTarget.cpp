@@ -1,5 +1,5 @@
+#include "StdAfx.h"
 #include "renderTarget.h"
-
 
 renderTarget::renderTarget(void)
 {
