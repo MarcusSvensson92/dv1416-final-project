@@ -17,6 +17,7 @@
     <ClCompile Include="Toolbar.cpp">
       <Filter>GUI\Toolbar</Filter>
     </ClCompile>
+    <ClCompile Include="renderTarget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -55,5 +56,6 @@
     <ClInclude Include="Toolbar.h">
       <Filter>GUI\Toolbar</Filter>
     </ClInclude>
+    <ClInclude Include="renderTarget.h" />
   </ItemGroup>
 </Project>

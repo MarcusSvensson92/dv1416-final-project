@@ -81,6 +81,7 @@
     <ClCompile Include="dv1416_final_project.cpp" />
     <ClCompile Include="EventReceiver.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Toolbar.cpp" />
   </ItemGroup>
@@ -89,6 +90,7 @@
     <ClInclude Include="dv1416_final_project.h" />
     <ClInclude Include="EventReceiver.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="renderTarget.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Toolbar.h" />
