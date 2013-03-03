@@ -30,7 +30,7 @@ void Shader::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCS
 
 	HRESULT hr = S_OK;
 
-	ID3DBlob*		compShader = 0;
+	/*ID3DBlob*		compShader = 0;
 	ID3DBlob*		compMsgs = 0;
 
 	DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
@@ -58,12 +58,23 @@ void Shader::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCS
 	}
 	//other erros?
 	if ( FAILED(hr) )
-		MessageBoxA(0, "FX error 1", 0, 0);
+		MessageBoxA(0, "FX error 1", 0, 0);*/
+
+	std::ifstream file(filename, std::ios::binary);
+	if (!file) return;
+
+	file.seekg(0, std::ios_base::end);
+	int size = (int)file.tellg();
+	file.seekg(0, std::ios_base::beg);
+	std::vector<char> compiledShader(size);
+
+	file.read(&compiledShader[0], size);
+	file.close();
 
 	hr = D3DX11CreateEffectFromMemory(
-		compShader->GetBufferPointer(),
-		compShader->GetBufferSize(),
-		dwShaderFlags,
+		&compiledShader[0],
+		size,
+		0,
 		m_Device,
 		&m_pEffect
 		);
@@ -101,7 +112,47 @@ void Shader::Apply()
     }
 }
 
-void Shader::SetFloat(char* variable, float value)
+void Shader::setBool(const std::string& variable, const bool value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsScalar()->SetBool(value);
+}
+
+void Shader::setInt(const std::string& variable, const int value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsScalar()->SetInt(value);
+}
+
+void Shader::setFloat(const std::string& variable, const float value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsScalar()->SetFloat(value);
+}
+
+void Shader::setFloat3(const std::string& variable, const XMFLOAT3 value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);
+}
+
+void Shader::setFloat4(const std::string& variable, const XMFLOAT4 value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);
+}
+
+void Shader::setMatrix(const std::string& variable, const XMMATRIX& value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsMatrix()->SetMatrix((float*)&value);
+}
+
+void Shader::setResource(const std::string& variable, ID3D11ShaderResourceView* value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsShaderResource()->SetResource(value);
+}
+
+void Shader::setRawData(const std::string& variable, const void* data, const UINT size)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->SetRawValue(data, 0, size);
+}
+
+/*void Shader::SetFloat(char* variable, float value)
 {
 	m_pEffect->GetVariableByName(variable)->AsScalar()->SetFloat(value);
 }
@@ -136,4 +187,4 @@ void Shader::SetBool(char* variable, bool value)
 void Shader::SetRawData(char* variable, void* data, size_t size)
 {
 	m_pEffect->GetVariableByName(variable)->SetRawValue(data, 0, (UINT)size);
-}
+}*/

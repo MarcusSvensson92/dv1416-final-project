@@ -16,9 +16,12 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <fstream>
+#include <ostream>
 #include <map>
 
 #define RELEASE(x) { if (x) { x->Release(); x = NULL; } }
+#define DOUT(s) { std::ostringstream oss; oss << s; OutputDebugString(oss.str().c_str()); }
 
 #define PI 3.14159265358979323846f
 

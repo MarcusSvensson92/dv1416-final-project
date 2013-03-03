@@ -21,7 +21,16 @@ public:
 
 	void Apply();
 
-	void SetFloat(char* variable, float value);
+	void setBool(const std::string& variable, const bool value);
+	void setInt(const std::string& variable, const int value);
+	void setFloat(const std::string& variable, const float value);
+	void setFloat3(const std::string& variable, const XMFLOAT3 value);
+	void setFloat4(const std::string& variable, const XMFLOAT4 value);
+	void setMatrix(const std::string& variable, const XMMATRIX& value);
+	void setResource(const std::string& variable, ID3D11ShaderResourceView* value);
+	void setRawData(const std::string& variable, const void* data, const UINT size);
+
+	/*void SetFloat(char* variable, float value);
 	void SetMatrix(char* variable, D3DXMATRIX& mat);
 	void SetFloat3(char* variable, D3DXVECTOR3 value);
 	void SetFloat4(char* variable, D3DXVECTOR4 value);
@@ -29,7 +38,7 @@ public:
 	void SetUnorderedAccessView(char* variable, ID3D11UnorderedAccessView* value);
 	void SetInt(char* variable, int value);
 	void SetBool(char* variable, bool value);
-	void SetRawData(char* variable, void* data, size_t size);
+	void SetRawData(char* variable, void* data, size_t size);*/
 };
 
 #endif

@@ -77,7 +77,7 @@ namespace GUI
 
 	void Toolbar::hide(const bool hide)
 	{
-		int cmdShow = (hide) ? SW_HIDE : SW_SHOW;
+		const int cmdShow = (hide) ? SW_HIDE : SW_SHOW;
 		ShowWindow(m_hWnd, cmdShow);
 	}
 
