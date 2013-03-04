@@ -92,7 +92,7 @@ fxgroup
                 dcl_output o3.xy
                 dcl_temps 4
                 
-                #line 40 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
+                #line 40 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 r1.x, r0.xyzw, cb0[4].xyzw  // output<0:NaN:Inf>
@@ -146,7 +146,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float       
-                // POSITION                 0   xyz         1     NONE  float   x z 
+                // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float       
                 // TEX                      0   xy          3     NONE  float       
                 //
@@ -159,39 +159,29 @@ fxgroup
                 //
                 ps_4_0
                 dcl_constantbuffer cb0[10], immediateIndexed
-                dcl_input_ps linear v1.xz
+                dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 51 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
-                add r0.x, cb0[9].x, l(5.000000)
-                ge r0.x, r0.x, v1.x
-                add r0.y, cb0[9].x, l(-5.000000)
-                ge r0.y, v1.x, r0.y
-                and r0.x, r0.y, r0.x
-                add r0.y, cb0[9].z, l(5.000000)
-                ge r0.y, r0.y, v1.z
-                and r0.x, r0.y, r0.x
-                add r0.y, cb0[9].z, l(-5.000000)
-                ge r0.y, v1.z, r0.y
-                and r0.x, r0.y, r0.x
+                #line 57 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                mov r0.xyz, -v1.xyzx
+                add r0.xyz, r0.xyzx, cb0[9].xyzx  // distanceVector<0:Inf,1:Inf,2:Inf>
+                dp3 r0.x, r0.xyzx, r0.xyzx
+                sqrt r0.x, r0.x  // d<0:NaN:Inf>
+                lt r0.x, r0.x, l(0.500000)
                 if_nz r0.x
-                
-                #line 55
                   mov o0.xyzw, l(1.000000,0,0,1.000000)  // PS<0: 1f,1: 0f,2: 0f,3: 1f>
                   ret 
-                
-                #line 51
                 else 
                 
-                #line 57
+                #line 62
                   mov o0.xyzw, l(0,0,0,1.000000)  // PS<0: 0f,1: 0f,2: 0f,3: 1f>
                   ret 
                 
-                #line 51
+                #line 59
                 endif 
                 ret 
-                // Approximately 19 instruction slots used
+                // Approximately 13 instruction slots used
                             
             };
             RasterizerState = wireframeRS;
