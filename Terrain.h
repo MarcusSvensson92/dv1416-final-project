@@ -11,10 +11,6 @@ struct TerrainDesc
 {
 	UINT width;
 	UINT depth;
-	UINT vertexMultiplier;
-
-	UINT m(void) { return depth * vertexMultiplier; }
-	UINT n(void) { return width * vertexMultiplier; }
 };
 
 class Terrain
@@ -24,11 +20,14 @@ public:
 	~Terrain(void);
 
 	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
-	void loadHeightmap(const std::string& heightmapFilename);
+	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
+					   const float heightmapScale);
 	void loadBlendmap(ID3D11DeviceContext* deviceContext, const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
+
+	void computeIntersection(const Ray& ray);
 private:
 	TerrainDesc m_terrainDesc;
 
@@ -37,6 +36,8 @@ private:
 
 	Buffer m_vertexBuffer;
 	Buffer m_indexBuffer;
+
+	XMFLOAT3 m_targetPosition;
 
 	void createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices);
 };

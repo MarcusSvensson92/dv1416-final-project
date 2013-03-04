@@ -4,7 +4,7 @@ cbuffer cbPerFrame
 	matrix gWorldViewProj;
 	float3 gCameraPosition;
 
-	//float3 gTargetPosition;
+	float3 gTargetPosition;
 };
 
 RasterizerState wireframeRS
@@ -46,14 +46,15 @@ PSIn VS(VSIn input)
 
 float4 PS(PSIn input) : SV_TARGET
 {
-	/*float offset = 3.f;
+	float offset = 5.f;
 	
-	if (length(input.positionW - gTargetPosition) <= offset)
+	if (input.positionW.x <= gTargetPosition.x + offset &&
+		input.positionW.x >= gTargetPosition.x - offset &&
+		input.positionW.z <= gTargetPosition.z + offset &&
+		input.positionW.z >= gTargetPosition.z - offset)
 		return float4(1.f, 0.f, 0.f, 1.f);
 	else
-		return float4(0.f, 0.f, 0.f, 1.f);*/
-
-	return float4(0.f, 0.f, 0.f, 1.f);
+		return float4(0.f, 0.f, 0.f, 1.f);
 }
 
 technique11 RenderTech

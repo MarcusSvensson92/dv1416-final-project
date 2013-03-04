@@ -3,6 +3,12 @@
 
 #include "Stdafx.h"
 
+struct Ray
+{
+	XMVECTOR origin;
+	XMVECTOR direction;
+};
+
 class Camera
 {
 public:
@@ -11,7 +17,7 @@ public:
 
 	void setPosition(XMFLOAT3 position);
 	void setPosition(float x, float y, float z);
-	void setProj(float fovAngleY, float aspectRatio, float nearZ, float farZ); 
+	void setProj(UINT clientWidth, UINT clientHeight, float fov, float nearZ, float farZ); 
 
 	XMFLOAT3 getPosition(void) const;
 	XMMATRIX getView(void) const;
@@ -20,11 +26,12 @@ public:
 
 	void strafe(float d);
 	void walk(float d);
-	void levitate(float d);
 	void pitch(float angle);
 	void rotateY(float angle);
 
 	void updateViewMatrix(void);
+
+	Ray computeRay(POINT cursorPosition);
 private:
 	XMFLOAT3 m_position;
 	XMFLOAT3 m_right;
@@ -33,6 +40,11 @@ private:
 
 	XMFLOAT4X4 m_view;
 	XMFLOAT4X4 m_proj;
+
+	float m_fov;
+	float m_aspectRatio;
+	UINT  m_clientWidth;
+	UINT  m_clientHeight;
 };
 
 #endif

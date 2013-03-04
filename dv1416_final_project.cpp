@@ -30,7 +30,7 @@ bool dv1416_final_project::init(void)
 	initTerrain();
 
 	m_camera.setPosition(0.f, 10.f, 0.f);
-	m_camera.setProj(PI * 0.25f, (float)m_clientWidth / (float)m_clientHeight, 1.f, 1000.f);
+	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
 
 	return true;
 }
@@ -103,6 +103,18 @@ void dv1416_final_project::update(void)
 		m_camera.strafe(20.0f * dt);
 
 	m_camera.updateViewMatrix();
+
+	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+	{
+		POINT cursorPosition;
+		if (GetCursorPos(&cursorPosition))
+		{
+			ScreenToClient(m_hWnd, &cursorPosition);
+
+			Ray ray = m_camera.computeRay(cursorPosition);
+			m_terrain.computeIntersection(ray);
+		}
+	}
 }
 
 void dv1416_final_project::render(void)
@@ -144,8 +156,7 @@ void dv1416_final_project::initShaders(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width			= 256;
-	td.depth			= 256;
-	td.vertexMultiplier = 1;
+	td.width			= 64;
+	td.depth			= 64;
 	m_terrain.init(m_device, td);
 }

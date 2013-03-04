@@ -23,9 +23,14 @@ void Camera::setPosition(float x, float y, float z)
 	m_position = XMFLOAT3(x, y, z);
 }
 
-void Camera::setProj(float fovAngleY, float aspectRatio, float nearZ, float farZ)
+void Camera::setProj(UINT clientWidth, UINT clientHeight, float fov, float nearZ, float farZ)
 {
-	XMMATRIX P = XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
+	m_fov		   = fov;
+	m_aspectRatio  = (float)clientWidth / (float)clientHeight;
+	m_clientWidth  = clientWidth;
+	m_clientHeight = clientHeight;
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(fov, m_aspectRatio, nearZ, farZ);
 	XMStoreFloat4x4(&m_proj, P);
 }
 
@@ -63,11 +68,6 @@ void Camera::walk(float d)
 	XMVECTOR l = XMLoadFloat3(&m_look);
 	XMVECTOR p = XMLoadFloat3(&m_position);
 	XMStoreFloat3(&m_position, XMVectorMultiplyAdd(s, l, p));
-}
-
-void Camera::levitate(float d)
-{
-	m_position.y += d;
 }
 
 void Camera::pitch(float angle)
@@ -126,4 +126,25 @@ void Camera::updateViewMatrix(void)
 	m_view(1, 3) = 0.0f;
 	m_view(2, 3) = 0.0f;
 	m_view(3, 3) = 1.0f;
+}
+
+Ray Camera::computeRay(POINT cursorPosition)
+{
+	float x = (2.f * (float)cursorPosition.x) / (float)m_clientWidth - 1.f;
+	float y = -((2.f * (float)cursorPosition.y) / (float)m_clientHeight - 1.f);
+
+	x /= m_proj._11;
+	y /= m_proj._22;
+
+	XMVECTOR determinant; // Dummy
+	XMMATRIX inverseView = XMMatrixInverse(&determinant, getView());
+
+	Ray ray;
+	ray.origin	  = XMLoadFloat3(&m_position);
+	ray.direction = XMVector3Normalize(XMVectorSet(
+						x * inverseView._11 + y * inverseView._21 + inverseView._31,
+						x * inverseView._12 + y * inverseView._22 + inverseView._32,
+						x * inverseView._13 + y * inverseView._23 + inverseView._33,
+						0.f));
+	return ray;
 }
