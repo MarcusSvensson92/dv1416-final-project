@@ -23,14 +23,12 @@ void Camera::setPosition(float x, float y, float z)
 	m_position = XMFLOAT3(x, y, z);
 }
 
-void Camera::setProj(UINT clientWidth, UINT clientHeight, float fov, float nearZ, float farZ)
+void Camera::setProj(UINT clientWidth, UINT clientHeight, float fovAngleY, float nearZ, float farZ)
 {
-	m_fov		   = fov;
-	m_aspectRatio  = (float)clientWidth / (float)clientHeight;
 	m_clientWidth  = clientWidth;
 	m_clientHeight = clientHeight;
 
-	XMMATRIX P = XMMatrixPerspectiveFovLH(fov, m_aspectRatio, nearZ, farZ);
+	XMMATRIX P = XMMatrixPerspectiveFovLH(fovAngleY, (float)clientWidth / (float)clientHeight, nearZ, farZ);
 	XMStoreFloat4x4(&m_proj, P);
 }
 

@@ -141,6 +141,13 @@ void dv1416_final_project::onMouseMove(int dx, int dy)
 	}
 }
 
+void dv1416_final_project::onResize(void)
+{
+	D3DApp::onResize();
+
+	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
+}
+
 void dv1416_final_project::initShaders(void)
 {
 	m_shaderManager.init(m_device, m_deviceContext);

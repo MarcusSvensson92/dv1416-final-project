@@ -30,6 +30,11 @@ D3DApp::D3DApp(HINSTANCE	   hInstance,
 	m_clientHeight = clientHeight;
 	m_driverType   = driverType;
 
+	m_paused	= false;
+	m_minimized = false;
+	m_maximized = false;
+	m_resizing  = false;
+
 	g_d3dApp = this;
 }
 
@@ -84,15 +89,69 @@ LRESULT D3DApp::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_ACTIVATE:
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			m_paused = true;
+			m_timer.stop();
+		}
+		else
+		{
+			m_paused = false;
+			m_timer.start();
+		}
+		break;
+
 	case WM_ENTERSIZEMOVE:
+		m_paused   = true;
+		m_resizing = true;
 		m_timer.stop();
 		break;
+	case WM_SIZE:
+		m_clientWidth  = LOWORD(lParam);
+		m_clientHeight = HIWORD(lParam);
+		if (m_device)
+		{
+			if (wParam == SIZE_MINIMIZED)
+			{
+				m_paused	= true;
+				m_minimized = true;
+				m_maximized = false;
+			}
+			else if (wParam == SIZE_MAXIMIZED)
+			{
+				m_paused	= false;
+				m_minimized = false;
+				m_maximized = true;
+				onResize();
+			}
+			else if (wParam == SIZE_RESTORED)
+			{
+				if (m_minimized)
+				{
+					m_paused	= false;
+					m_minimized = false;
+					onResize();
+				}
+				else if (m_maximized)
+				{
+					m_paused	= false;
+					m_maximized = false;
+					onResize();
+				}
+				else if (m_resizing) { }
+				else
+				{
+					onResize();
+				}
+			}
+		}
+		break;
 	case WM_EXITSIZEMOVE:
-		RECT rect;
-		GetClientRect(m_hWnd, &rect);
-		m_clientWidth  = rect.right  - rect.left;
-		m_clientHeight = rect.bottom - rect.top;
+		m_paused   = false;
+		m_resizing = false;
 		m_timer.start();
+		onResize();
 		break;
 			
 	case WM_LBUTTONDOWN:
@@ -153,7 +212,7 @@ bool D3DApp::initMainWindow(void)
 	}
 
 	RECT rect = {0, 0, m_clientWidth, m_clientHeight};
-	AdjustWindowRect(&rect, m_wndStyle, false);
+	AdjustWindowRect(&rect, m_wndStyle, true);
 	int wndWidth  = rect.right  - rect.left;
 	int wndHeight = rect.bottom - rect.top;
 
@@ -173,26 +232,6 @@ bool D3DApp::initMainWindow(void)
 }
 
 bool D3DApp::initDirect3D(void)
-{
-	if (!initDeviceAndSwapChain()) return false;
-	if (!initRenderTargetView())   return false;
-	if (!initDepthStencil())	   return false;
-	initViewport();
-		
-	return true;
-}
-
-void D3DApp::initInputDevice(void)
-{
-	RAWINPUTDEVICE rawInputDevice[1];
-    rawInputDevice[0].usUsagePage = ((USHORT) 0x01);
-    rawInputDevice[0].usUsage	  = ((USHORT) 0x02);
-    rawInputDevice[0].dwFlags	  = RIDEV_INPUTSINK;
-    rawInputDevice[0].hwndTarget  = m_hWnd;
-    RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
-}
-
-bool D3DApp::initDeviceAndSwapChain(void)
 {
 	HRESULT hr;
 
@@ -233,70 +272,54 @@ bool D3DApp::initDeviceAndSwapChain(void)
 		return false;
 	}
 
+	onResize();
+
 	return true;
 }
 
-bool D3DApp::initRenderTargetView(void)
+void D3DApp::initInputDevice(void)
 {
-	HRESULT hr;
+	RAWINPUTDEVICE rawInputDevice[1];
+    rawInputDevice[0].usUsagePage = ((USHORT) 0x01);
+    rawInputDevice[0].usUsage	  = ((USHORT) 0x02);
+    rawInputDevice[0].dwFlags	  = RIDEV_INPUTSINK;
+    rawInputDevice[0].hwndTarget  = m_hWnd;
+    RegisterRawInputDevices(rawInputDevice, 1, sizeof(rawInputDevice[0]));
+}
 
+void D3DApp::onResize(void)
+{
+	assert(m_deviceContext);
+	assert(m_device);
+	assert(m_swapChain);
+
+	RELEASE(m_renderTargetView);
+	RELEASE(m_depthStencilView);
+	RELEASE(m_depthStencilBuffer);
+
+	m_swapChain->ResizeBuffers(1, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	ID3D11Texture2D* backBuffer;
-	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, "GetBuffer failed.", m_wndCaption.c_str(), MB_ICONERROR);
-		return false;
-	}
+	m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+	m_device->CreateRenderTargetView(backBuffer, 0, &m_renderTargetView);
+	RELEASE(backBuffer);
 
-	hr = m_device->CreateRenderTargetView(backBuffer, NULL, &m_renderTargetView);
-	backBuffer->Release();
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, "CreateRenderTargetView failed.", m_wndCaption.c_str(), MB_ICONERROR);
-		return false;
-	}
-
-	return true;
-}
-
-bool D3DApp::initDepthStencil(void)
-{
-	HRESULT hr;
-
-	D3D11_TEXTURE2D_DESC descDepth;
-	descDepth.Width				 = m_clientWidth;
-	descDepth.Height			 = m_clientHeight;
-	descDepth.MipLevels			 = 1;
-	descDepth.ArraySize			 = 1;
-	descDepth.Format			 = DXGI_FORMAT_D32_FLOAT;
-	descDepth.SampleDesc.Count	 = 1;
-	descDepth.SampleDesc.Quality = 0;
-	descDepth.Usage				 = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags			 = D3D11_BIND_DEPTH_STENCIL;
-	descDepth.CPUAccessFlags	 = 0;
-	descDepth.MiscFlags			 = 0;
-
-	hr = m_device->CreateTexture2D(&descDepth, NULL, &m_depthStencilBuffer);
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, "CreateTexture2D failed.", m_wndCaption.c_str(), MB_ICONERROR);
-		return false;
-	}
-
-	hr = m_device->CreateDepthStencilView(m_depthStencilBuffer, NULL, &m_depthStencilView);
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, "CreateDepthStencilView failed.", m_wndCaption.c_str(), MB_ICONERROR);
-		return false;
-	}
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	depthStencilDesc.Width				= m_clientWidth;
+	depthStencilDesc.Height				= m_clientHeight;
+	depthStencilDesc.MipLevels			= 1;
+	depthStencilDesc.ArraySize			= 1;
+	depthStencilDesc.Format				= DXGI_FORMAT_D32_FLOAT;
+	depthStencilDesc.SampleDesc.Count	= 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Usage				= D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags		= 0;
+	depthStencilDesc.MiscFlags			= 0;
+	m_device->CreateTexture2D(&depthStencilDesc, 0, &m_depthStencilBuffer);
+	m_device->CreateDepthStencilView(m_depthStencilBuffer, 0, &m_depthStencilView);
 
 	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 
-	return true;
-}
-
-void D3DApp::initViewport(void)
-{
 	m_viewport.Width	= (float)m_clientWidth;
 	m_viewport.Height	= (float)m_clientHeight;
 	m_viewport.MinDepth = 0.0f;

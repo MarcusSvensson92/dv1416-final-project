@@ -17,7 +17,7 @@ public:
 
 	void setPosition(XMFLOAT3 position);
 	void setPosition(float x, float y, float z);
-	void setProj(UINT clientWidth, UINT clientHeight, float fov, float nearZ, float farZ); 
+	void setProj(UINT clientWidth, UINT clientHeight, float fovAngleY, float nearZ, float farZ); 
 
 	XMFLOAT3 getPosition(void) const;
 	XMMATRIX getView(void) const;
@@ -41,8 +41,6 @@ private:
 	XMFLOAT4X4 m_view;
 	XMFLOAT4X4 m_proj;
 
-	float m_fov;
-	float m_aspectRatio;
 	UINT  m_clientWidth;
 	UINT  m_clientHeight;
 };

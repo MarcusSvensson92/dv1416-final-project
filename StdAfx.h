@@ -19,6 +19,7 @@
 #include <fstream>
 #include <ostream>
 #include <map>
+#include <assert.h>
 
 #define RELEASE(x) { if (x) { x->Release(); x = NULL; } }
 #define DOUT(s) { std::ostringstream oss; oss << s; OutputDebugString(oss.str().c_str()); }

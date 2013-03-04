@@ -25,6 +25,8 @@ protected:
 	void onMouseDown(WPARAM buttonState, int x, int y);
 	void onMouseUp(WPARAM buttonState, int x, int y);
 	void onMouseMove(int dx, int dy);
+
+	void onResize(void);
 private:
 	GUI::Toolbar* m_toolbar;
 	Camera m_camera;

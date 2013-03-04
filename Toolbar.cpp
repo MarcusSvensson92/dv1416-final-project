@@ -10,11 +10,6 @@ LRESULT CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
 }
 
-BOOL CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
-}
-
 namespace GUI
 {
 	Toolbar::Toolbar(HINSTANCE	 hInstance,

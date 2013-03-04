@@ -45,15 +45,17 @@ protected:
 	virtual void onMouseDown(WPARAM buttonState, int x, int y) = 0;
 	virtual void onMouseUp(WPARAM buttonState, int x, int y)   = 0;
 	virtual void onMouseMove(int dx, int dy)				   = 0;
+
+	virtual void onResize(void);
 private:
+	bool m_paused;
+	bool m_minimized;
+	bool m_maximized;
+	bool m_resizing;
+
 	bool initMainWindow(void);
 	bool initDirect3D(void);
 	void initInputDevice(void);
-
-	bool initDeviceAndSwapChain(void);
-	bool initRenderTargetView(void);
-	bool initDepthStencil(void);
-	void initViewport(void);
 };
 
 #endif
