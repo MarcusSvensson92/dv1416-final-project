@@ -1,12 +1,19 @@
 #include "StdAfx.h"
 #include "Terrain.h"
+#include "Utilities.h"
 
 Terrain::Terrain(void)
 {
+	m_blendmapSRV	   = NULL;
+	m_layermapArraySRV = NULL;
+
+	m_useBlendmap = false;
 }
 
 Terrain::~Terrain(void)
 {
+	RELEASE(m_blendmapSRV);
+	RELEASE(m_layermapArraySRV);
 }
 
 void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
@@ -59,9 +66,14 @@ void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext, const std::strin
 	m_vertexBuffer.unmap(deviceContext);
 }
 
-void Terrain::loadBlendmap(ID3D11DeviceContext* deviceContext, const std::string& blendmapFilename,
+void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+						   const std::string& blendmapFilename,
 						   std::vector<std::string> layermapFilenames)
 {
+	D3DX11CreateShaderResourceViewFromFile(device, blendmapFilename.c_str(), NULL, NULL, &m_blendmapSRV, NULL);
+	m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
+
+	m_useBlendmap = true;
 }
 
 void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
@@ -74,6 +86,9 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	shader->setMatrix("gWorld", world);
 	shader->setMatrix("gWorldViewProj", worldViewProj);
 	shader->setFloat3("gCameraPosition", cameraPosition);
+	shader->setResource("gBlendmap", m_blendmapSRV);
+	shader->setResource("gLayermapArray", m_layermapArraySRV);
+	shader->setBool("gUseBlendmap", m_useBlendmap);
 	shader->setFloat3("gTargetPosition", m_targetPosition);
 
 	m_vertexBuffer.apply(deviceContext);
@@ -95,8 +110,8 @@ void Terrain::computeIntersection(const Ray& ray)
 
 void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices)
 {
-	const UINT width = m_terrainDesc.width;
-	const UINT depth = m_terrainDesc.depth;
+	const float width = (float)m_terrainDesc.width;
+	const float depth = (float)m_terrainDesc.depth;
 
 	UINT vertexCount   = depth * width;
 	UINT triangleCount = (depth - 1) * (width - 1) * 2;

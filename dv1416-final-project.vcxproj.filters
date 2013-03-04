@@ -36,6 +36,9 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -64,6 +67,9 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{673354ad-40e9-489a-b528-ad47dd5567be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{824a8e1c-022b-4e06-8b9a-dafb849bd89a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="ShaderManager.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.h">
+      <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

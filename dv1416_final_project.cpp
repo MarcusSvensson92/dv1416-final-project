@@ -29,7 +29,7 @@ bool dv1416_final_project::init(void)
 	initShaders();
 	initTerrain();
 
-	m_camera.setPosition(0.f, 10.f, 0.f);
+	m_camera.setPosition(0.f, 50.f, 0.f);
 	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
 
 	return true;
@@ -163,7 +163,14 @@ void dv1416_final_project::initShaders(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width			= 64;
-	td.depth			= 64;
+	td.width			= 257;
+	td.depth			= 257;
 	m_terrain.init(m_device, td);
+	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	std::vector<std::string> layermapFilenames;
+	layermapFilenames.push_back("temp-textures/sandripple.png");
+	layermapFilenames.push_back("temp-textures/longGrass.png");
+	layermapFilenames.push_back("temp-textures/cliff.png");
+	layermapFilenames.push_back("temp-textures/grayRock.png");
+	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
 }

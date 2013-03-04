@@ -90,6 +90,7 @@
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Toolbar.cpp" />
+    <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +107,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Toolbar.h" />
+    <ClInclude Include="Utilities.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>

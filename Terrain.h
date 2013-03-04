@@ -22,7 +22,8 @@ public:
 	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
 	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
 					   const float heightmapScale);
-	void loadBlendmap(ID3D11DeviceContext* deviceContext, const std::string& blendmapFilename,
+	void loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
@@ -36,6 +37,11 @@ private:
 
 	Buffer m_vertexBuffer;
 	Buffer m_indexBuffer;
+
+	ID3D11ShaderResourceView* m_blendmapSRV;
+	ID3D11ShaderResourceView* m_layermapArraySRV;
+
+	bool m_useBlendmap;
 
 	XMFLOAT3 m_targetPosition;
 

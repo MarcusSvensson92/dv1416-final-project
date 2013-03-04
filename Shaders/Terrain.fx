@@ -5,11 +5,34 @@ cbuffer cbPerFrame
 	float3 gCameraPosition;
 
 	float3 gTargetPosition;
+
+	bool gUseBlendmap;
+};
+
+cbuffer cbConstant
+{
+	float gTextureScale = 10.f;
+};
+
+Texture2D	   gBlendmap;
+Texture2DArray gLayermapArray;
+
+BlendState TransparentBlending
+{
+	AlphaToCoverageEnable	 = FALSE;
+	BlendEnable[0]			 = TRUE;
+	SrcBlend				 = SRC_ALPHA;
+	DestBlend				 = INV_SRC_ALPHA;
+	BlendOp					 = ADD;
+	SrcBlendAlpha			 = ONE;
+	DestBlendAlpha			 = ZERO;
+	BlendOpAlpha			 = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
 };
 
 RasterizerState wireframeRS
 {
-	FillMode = Wireframe;
+	FillMode = Solid;
 };
 
 SamplerState linearSampler
@@ -32,6 +55,7 @@ struct PSIn
 	float3 positionW : POSITION;
 	float3 normalW   : NORMAL;
 	float2 tex0		 : TEX0;
+	float2 tiledTex0 : TEX1;
 };
 
 PSIn VS(VSIn input)
@@ -41,12 +65,13 @@ PSIn VS(VSIn input)
 	output.positionW = mul(input.position, (float3x3)gWorld);
 	output.normalW	 = mul(input.normal, (float3x3)gWorld);
 	output.tex0		 = input.tex0;
+	output.tiledTex0 = input.tex0;
 	return output;
 }
 
 float4 PS(PSIn input) : SV_TARGET
 {
-	float offset = 0.5f;
+	/*float offset = 0.5f;
 	
 	//if (input.positionW.x <= gTargetPosition.x + offset &&
 	//	input.positionW.x >= gTargetPosition.x - offset &&
@@ -57,9 +82,29 @@ float4 PS(PSIn input) : SV_TARGET
 	float3 distanceVector = gTargetPosition - input.positionW;	
 	float d = length(distanceVector);
 	if( d < offset )
-		return float4(1.f, 0.f, 0.f, 1.f);
-	else
-		return float4(0.f, 0.f, 0.f, 1.f);
+		return float4(1.f, 0.f, 0.f, 1.f);*/
+
+	if (gUseBlendmap)
+	{
+		float4 c0 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 0.f));
+		float4 c1 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 1.f));
+		float4 c2 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 2.f));
+		float4 c3 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 3.f));
+		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
+
+		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
+
+		float4 texColor = c0;
+		texColor = lerp(texColor, c1, t.r);
+		texColor = lerp(texColor, c2, t.g);
+		texColor = lerp(texColor, c3, t.b);
+		texColor.a = 1.f;
+		//texColor = lerp(texColor, c4, t.a);
+
+		return texColor;
+	}
+
+	return float4(0.f, 0.f, 0.f, 1.f);
 }
 
 technique11 RenderTech
@@ -70,6 +115,7 @@ technique11 RenderTech
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
-		SetRasterizerState(wireframeRS);
+		//SetRasterizerState(wireframeRS);
+		SetBlendState(TransparentBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
 	}
 }
