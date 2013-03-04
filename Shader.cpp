@@ -84,18 +84,20 @@ void Shader::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCS
 
 		m_pTechnique = m_pEffect->GetTechniqueByIndex(0);
 
-	D3DX11_PASS_DESC PassDesc;
-	m_pTechnique->GetPassByIndex(0)->GetDesc(&PassDesc);
-	hr = m_Device->CreateInputLayout(
-			inputElementDesc,
-			numElements,
-			PassDesc.pIAInputSignature,
-			PassDesc.IAInputSignatureSize,
-			&m_pInputLayout
-	);
-	//other erros?
-	if ( FAILED(hr) )
-		MessageBoxA(0, "Cannot create input layout.", "CreateInputLayout error", MB_OK | MB_ICONERROR);
+	if (inputElementDesc)
+	{
+		D3DX11_PASS_DESC PassDesc;
+		m_pTechnique->GetPassByIndex(0)->GetDesc(&PassDesc);
+		hr = m_Device->CreateInputLayout(
+				inputElementDesc,
+				numElements,
+				PassDesc.pIAInputSignature,
+				PassDesc.IAInputSignatureSize,
+				&m_pInputLayout
+		);
+		if ( FAILED(hr) )
+			MessageBoxA(0, "Cannot create input layout.", "CreateInputLayout error", MB_OK | MB_ICONERROR);
+	}
 }
 
 void Shader::Apply()

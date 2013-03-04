@@ -83,7 +83,7 @@ void GS(point GSIn input[1], inout TriangleStream<PSIn> stream)
 	float3 up = float3(0.f, 1.f, 0.f);
 	float3 look;
 
-	look = gCamPos - input[0].positionW;
+	look = gCameraPosition - input[0].positionW;
 	look = normalize(look);
 	float3 right = cross(up, look);
 	right = normalize(right);
@@ -104,7 +104,7 @@ void GS(point GSIn input[1], inout TriangleStream<PSIn> stream)
 	for (int i = 0; i < 4; i++)
 	{
 		output.tex0		 = gTexCoords[i];
-		output.positionH = mul(positions[i], gViewProj);
+		output.positionH = mul(positions[i], gWorldViewProj);
 		output.positionW = positions[i].xyz;
 		output.normalW	 = look;
 
