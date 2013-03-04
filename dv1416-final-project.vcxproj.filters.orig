@@ -36,14 +36,16 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="Utilities.cpp">
       <Filter>Utilities</Filter>
-    </ClCompile>
+=======
     <ClCompile Include="Light.cpp">
       <Filter>Light</Filter>
     </ClCompile>
     <ClCompile Include="LightManager.cpp">
       <Filter>Light</Filter>
+>>>>>>> c6f1721928f42ca5d579277b37bf5be02344d70e
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,11 +76,13 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{673354ad-40e9-489a-b528-ad47dd5567be}</UniqueIdentifier>
     </Filter>
+<<<<<<< HEAD
     <Filter Include="Utilities">
       <UniqueIdentifier>{824a8e1c-022b-4e06-8b9a-dafb849bd89a}</UniqueIdentifier>
-    </Filter>
+=======
     <Filter Include="Light">
       <UniqueIdentifier>{5918e944-bff7-471d-b9b6-fd56e308fb33}</UniqueIdentifier>
+>>>>>>> c6f1721928f42ca5d579277b37bf5be02344d70e
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -120,25 +124,29 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="Utilities.h">
       <Filter>Utilities</Filter>
-    </ClInclude>
+=======
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
     </ClInclude>
     <ClInclude Include="LightManager.h">
       <Filter>Light</Filter>
+>>>>>>> c6f1721928f42ca5d579277b37bf5be02344d70e
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Shaders\Terrain.fx">
       <Filter>Shaders</Filter>
     </CustomBuild>
-    <CustomBuild Include="Shaders\Light.fx">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Light.fx">
       <Filter>Shaders</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Shaders\LightShader.fx">
+    </None>
+    <None Include="Shaders\LightShader.fx">
       <Filter>Shaders</Filter>
-    </CustomBuild>
+    </None>
   </ItemGroup>
 </Project>

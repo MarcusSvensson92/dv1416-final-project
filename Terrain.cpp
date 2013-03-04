@@ -105,7 +105,7 @@ void Terrain::computeIntersection(const Ray& ray)
 
 	float t = -XMVectorGetX(XMVector3Dot(ray.origin, n)) / XMVectorGetX(XMVector3Dot(ray.direction, n));
 	if (t > 0.f)
-		XMStoreFloat3(&m_targetPosition, ray.origin + t * ray.direction);
+		XMStoreFloat3(&m_targetPosition, ray.origin + (t * ray.direction));
 }
 
 void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices)

@@ -82,7 +82,7 @@ void Shader::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCS
 	if ( FAILED(hr) )
 		MessageBoxA(0, "FX error 2", 0, 0);
 
-	m_pTechnique = m_pEffect->GetTechniqueByIndex(0);
+		m_pTechnique = m_pEffect->GetTechniqueByIndex(0);
 
 	D3DX11_PASS_DESC PassDesc;
 	m_pTechnique->GetPassByIndex(0)->GetDesc(&PassDesc);
