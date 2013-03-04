@@ -176,7 +176,7 @@ void dv1416_final_project::initTerrain(void)
 	td.width			= 257;
 	td.depth			= 257;
 	m_terrain.init(m_device, td);
-	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");

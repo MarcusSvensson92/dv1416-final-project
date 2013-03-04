@@ -11,24 +11,11 @@ cbuffer cbPerFrame
 
 cbuffer cbConstant
 {
-	float gTextureScale = 10.f;
+	float gTextureScale = 5.f;
 };
 
 Texture2D	   gBlendmap;
 Texture2DArray gLayermapArray;
-
-BlendState TransparentBlending
-{
-	AlphaToCoverageEnable	 = FALSE;
-	BlendEnable[0]			 = TRUE;
-	SrcBlend				 = SRC_ALPHA;
-	DestBlend				 = INV_SRC_ALPHA;
-	BlendOp					 = ADD;
-	SrcBlendAlpha			 = ONE;
-	DestBlendAlpha			 = ZERO;
-	BlendOpAlpha			 = ADD;
-	RenderTargetWriteMask[0] = 0x0F;
-};
 
 RasterizerState wireframeRS
 {
@@ -65,21 +52,21 @@ PSIn VS(VSIn input)
 	output.positionW = mul(input.position, (float3x3)gWorld);
 	output.normalW	 = mul(input.normal, (float3x3)gWorld);
 	output.tex0		 = input.tex0;
-	output.tiledTex0 = input.tex0;
+	output.tiledTex0 = input.tex0 * gTextureScale;
 	return output;
 }
 
 float4 PS(PSIn input) : SV_TARGET
 {
-	/*float offset = 0.5f;
+	float offset = 1.f;
 	
-	//if (input.positionW.x <= gTargetPosition.x + offset &&
-	//	input.positionW.x >= gTargetPosition.x - offset &&
-	//	input.positionW.z <= gTargetPosition.z + offset &&
-	//	input.positionW.z >= gTargetPosition.z - offset)
-	//	return float4(1.f, 0.f, 0.f, 1.f);
+	if (input.positionW.x <= gTargetPosition.x + offset &&
+		input.positionW.x >= gTargetPosition.x - offset &&
+		input.positionW.z <= gTargetPosition.z + offset &&
+		input.positionW.z >= gTargetPosition.z - offset)
+		return float4(1.f, 0.f, 0.f, 1.f);
 
-	float3 distanceVector = gTargetPosition - input.positionW;	
+	/*float3 distanceVector = gTargetPosition - input.positionW;
 	float d = length(distanceVector);
 	if( d < offset )
 		return float4(1.f, 0.f, 0.f, 1.f);*/
@@ -90,7 +77,7 @@ float4 PS(PSIn input) : SV_TARGET
 		float4 c1 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 1.f));
 		float4 c2 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 2.f));
 		float4 c3 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 3.f));
-		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
+		float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
 
 		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
 
@@ -98,8 +85,7 @@ float4 PS(PSIn input) : SV_TARGET
 		texColor = lerp(texColor, c1, t.r);
 		texColor = lerp(texColor, c2, t.g);
 		texColor = lerp(texColor, c3, t.b);
-		texColor.a = 1.f;
-		//texColor = lerp(texColor, c4, t.a);
+		texColor = lerp(texColor, c4, t.a);
 
 		return texColor;
 	}
@@ -116,6 +102,5 @@ technique11 RenderTech
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
 		//SetRasterizerState(wireframeRS);
-		SetBlendState(TransparentBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
 	}
 }
