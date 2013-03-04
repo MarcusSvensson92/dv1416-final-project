@@ -19,6 +19,17 @@ namespace Light
 		XMFLOAT3 Att;
 		float Pad;
 	};
+
+	struct Material
+	{
+		Material() { ZeroMemory(this, sizeof(this)); }
+		//std::string name;
+
+		D3DXVECTOR4 Ambient;
+		D3DXVECTOR4 Diffuse;
+		D3DXVECTOR4 Specular; // w = SpecPower
+		D3DXVECTOR4 Reflect;
+	};
 };
 
 #endif

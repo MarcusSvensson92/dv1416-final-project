@@ -1,2 +1,10 @@
 //
 // FX Version: fx_5_0
+//
+// 1 local buffer(s)
+//
+cbuffer Lights
+{
+    PointLight gPointLights[10];        // Offset:    0, size:  800
+}
+

@@ -70,8 +70,9 @@ struct PSIn
 GSIn VS()
 {
 	GSIn output;
+	float size = 2.f;
 	output.positionW = mul(float4(gLight.Position, 1.f), gWorld).xyz;
-	output.sizeW	 = float2(1.f,1.f);
+	output.sizeW	 = float2(size,size);
 	return output;
 }
 
@@ -115,7 +116,8 @@ void GS(point GSIn input[1], inout TriangleStream<PSIn> stream)
 float4 PS(PSIn input) : SV_TARGET
 {
 	float4 texColor = gDiffuseMap.Sample( linSampler, input.tex0 );
-	return texColor;
+	float4 litColor = texColor*gLight.Diffuse;
+	return litColor;
 }
 
 technique11 RenderTech

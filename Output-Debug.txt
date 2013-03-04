@@ -1,0 +1,89 @@
+﻿'dv1416-final-project.exe': Loaded 'C:\Users\Anders\Documents\GitHub\dv1416-final-project\Debug\dv1416-final-project.exe', Symbols loaded.
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\ntdll.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\kernel32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\KernelBase.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\d3d11.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\D3DX10d_43.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\D3DX11d_43.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\WinSxS\x86_microsoft.windows.common-controls_6595b64144ccf1df_5.82.9200.16384_none_bf100cd445f4d954\comctl32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\user32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\gdi32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\msvcp100d.dll', Symbols loaded.
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\msvcr100d.dll', Symbols loaded.
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\D3DCompiler_43.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\msvcrt.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\dxgi.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\advapi32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\ole32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\sechost.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\rpcrt4.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\combase.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\sspicli.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\cryptbase.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\bcryptprimitives.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\imm32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\msctf.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\uxtheme.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\dwmapi.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\oleaut32.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\dxgidebug.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\nvwgf2um.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\psapi.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\version.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\d3d11_1sdklayers.dll', Cannot find or open the PDB file
+'dv1416-final-project.exe': Loaded 'C:\Windows\SysWOW64\WindowsCodecs.dll', Cannot find or open the PDB file
+D3D11 INFO: Destroy ID3D11ClassLinkage: Name="unnamed", Addr=0x00612C24 [ STATE_CREATION INFO #2097295: DESTROY_CLASSLINKAGE]
+D3D11 INFO: Destroy ID3D11ClassLinkage: Name="unnamed", Addr=0x0060F7D4 [ STATE_CREATION INFO #2097295: DESTROY_CLASSLINKAGE]
+The thread 'Win32 Thread' (0x21a8) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x140c) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x22b4) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x1f74) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x18f0) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x1be0) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x1a74) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x19fc) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x20e8) has exited with code 0 (0x0).
+The thread 'Win32 Thread' (0x1be4) has exited with code 0 (0x0).
+D3D11 WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: Live Producer at 0x005E2E68, Refcount: 2. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x005E4450, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00607A00, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060DB04, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060DCE4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060DE2C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060DF9C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060E894, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060E9E0, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060EF14, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060F17C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060F3D4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060F63C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060FA5C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060FCB4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0060FF0C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00610164, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006103EC, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006105A4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00612734, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006129A4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00610814, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00610A6C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00610CC4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00610E0C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0061107C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00611334, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00612F94, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00611ABC, Refcount: 1. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006131FC, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006135B4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x0061383C, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00613AD4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x006147BC, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00614A54, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: 	Live Object at 0x00613ED4, Refcount: 0. [ STATE_CREATION WARNING #0: UNKNOWN]
+D3D11 WARNING: Live                         Object :     35 [ STATE_CREATION WARNING #0: UNKNOWN]
+DXGI WARNING: Process is terminating. Using simple reporting. Please call ReportLiveObjects() at runtime for standard reporting. [ STATE_CREATION WARNING #0: ]
+DXGI WARNING: Live Producer at 0x005DF5D8, Refcount: 4. [ STATE_CREATION WARNING #0: ]
+DXGI WARNING: 	Live Object at 0x005E1E58, Refcount: 2. [ STATE_CREATION WARNING #0: ]
+DXGI WARNING: Live                         Object :      1 [ STATE_CREATION WARNING #0: ]
+The program '[5376] dv1416-final-project.exe: Native' has exited with code 0 (0x0).

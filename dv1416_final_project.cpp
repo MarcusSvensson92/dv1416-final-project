@@ -114,18 +114,32 @@ void dv1416_final_project::update(void)
 
 			Ray ray = m_camera.computeRay(cursorPosition);
 			m_terrain.computeIntersection(ray);
+
+			// Click to turn the lights red
+			PointLight* selected_light = m_lightManager.computeIntersection(ray);
+			if (selected_light != NULL)
+				selected_light->Diffuse = XMFLOAT4(1.0f, 0.2f, 0.2f, 1.0f);
 		}
 	}
 }
 
 void dv1416_final_project::render(void)
 {
-	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	// TEMP FIX
+	Material	mMaterial;
+	mMaterial.Ambient  = D3DXVECTOR4(0.8f, 0.8f, 0.8f, 1.0f);
+	mMaterial.Diffuse  = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+	mMaterial.Specular = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	m_shaderManager.get("Terrain")->setRawData("gMaterial", &mMaterial, sizeof(Material)); 
+	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_lightManager.getLights()[0], sizeof(PointLight)*m_lightManager.getLights().size());
+
 	m_terrain.render(m_deviceContext, m_shaderManager.get("Terrain"), m_camera);
-	//m_lightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
+	m_lightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
 
 	m_swapChain->Present(0, 0);
 }
@@ -167,7 +181,10 @@ void dv1416_final_project::initLights(void)
 {
 	m_lightManager.init(m_device);
 
-	m_lightManager.AddLight(XMFLOAT3(0,0,0),POINT_LIGHT);
+	m_lightManager.AddLight(XMFLOAT3(-80,30,-80),POINT_LIGHT);
+	m_lightManager.AddLight(XMFLOAT3(-80,30, 80),POINT_LIGHT);
+	m_lightManager.AddLight(XMFLOAT3( 80,30,-80),POINT_LIGHT);
+	m_lightManager.AddLight(XMFLOAT3( 80,30, 80),POINT_LIGHT);
 }
 
 void dv1416_final_project::initTerrain(void)

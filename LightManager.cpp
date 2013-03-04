@@ -18,11 +18,13 @@ void LightManager::init(ID3D11Device* device)
 void LightManager::AddLight( XMFLOAT3 position, LightType type )
 {
 	PointLight standardLight;
-	standardLight.Ambient =		XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	standardLight.Diffuse =		XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	standardLight.Specular =	XMFLOAT4(0.001f, 0.001f, 0.001f, 1.0f);
-	standardLight.Position =	position;
-	standardLight.Range =		10;
+	standardLight.Ambient  = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	standardLight.Diffuse  = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	standardLight.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 4.0f);
+	standardLight.Position = position;
+	standardLight.Range    = 500.0f;
+	standardLight.Att      = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	standardLight.Pad		 = 0;
 
 	m_Lights.push_back(standardLight);
 }
@@ -69,7 +71,7 @@ void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, co
 		shader->setResource("gDiffuseMap", m_texture);
 
 		shader->Apply();
-		deviceContext->DrawIndexed(m_Lights.size(), 0, 0);
+		deviceContext->DrawIndexed(1, 0, 0);
 	}
 }
 
@@ -93,8 +95,8 @@ PointLight* LightManager::computeIntersection(const Ray& ray)
 			{
 				if(l_sq-l2*l2 <= r_sq) 
 				{
-					float b = XMVectorGetX(XMVector3Dot(ray.direction, ray.origin - light_pos));
-					float c = XMVectorGetX(XMVector3Dot((ray.origin - light_pos), (ray.origin - light_pos)));
+					float b = XMVectorGetX(XMVector3Dot(ray.direction, (ray.origin - light_pos)));
+					float c = XMVectorGetX(XMVector3Dot((ray.origin - light_pos), (ray.origin - light_pos)))-r_sq;
 					float h = b*b-c;
 					if (h > 0)
 					{

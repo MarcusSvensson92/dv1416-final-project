@@ -1,3 +1,5 @@
+#include		"Light.fx"
+
 cbuffer cbPerFrame
 {
 	matrix gWorld;
@@ -8,6 +10,11 @@ cbuffer cbPerFrame
 
 	bool gUseBlendmap;
 };
+
+cbuffer cbPerObject
+{
+	Material gMaterial;
+}
 
 cbuffer cbConstant
 {
@@ -87,7 +94,33 @@ float4 PS(PSIn input) : SV_TARGET
 		texColor = lerp(texColor, c3, t.b);
 		texColor = lerp(texColor, c4, t.a);
 
-		return texColor;
+		// The toEye vector is used in lighting.
+		float3 toEye = gCameraPosition - input.positionW;
+		// Cache the distance to the eye from this surface point.
+		float distToEye = length(toEye); 
+		// Normalize.
+		toEye /= distToEye;
+		// Lighting.
+		float4 litColor = texColor;
+		// Start with a sum of zero. 
+		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		[loop]
+		for( uint i = 0;i < POINTLIGHTS; i++ )
+		{
+			float4 A,D,S;
+			ComputePointLight(gMaterial, gPointLights[i], input.positionW, input.normalW, toEye, A, D, S);
+			ambient += A;
+			diffuse += D;
+			spec += S;
+		}
+
+		// Modulate with late add.
+		litColor = texColor*(ambient + diffuse) + spec;
+		litColor.a = gMaterial.Diffuse.a * texColor.a;
+		return litColor;
 	}
 
 	return float4(0.f, 0.f, 0.f, 1.f);
