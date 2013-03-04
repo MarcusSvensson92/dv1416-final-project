@@ -128,8 +128,8 @@ void Camera::updateViewMatrix(void)
 
 Ray Camera::computeRay(POINT cursorPosition)
 {
-	float x = (2.f * (float)cursorPosition.x) / (float)m_clientWidth - 1.f;
-	float y = -((2.f * (float)cursorPosition.y) / (float)m_clientHeight - 1.f);
+	float x = ((2.f * (float)cursorPosition.x) / (float)m_clientWidth) - 1.f;
+	float y = (((2.f * (float)cursorPosition.y) / (float)m_clientHeight) - 1.f) * -1.f;
 
 	x /= m_proj._11;
 	y /= m_proj._22;

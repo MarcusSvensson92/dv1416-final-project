@@ -11,6 +11,12 @@ namespace Vertex
 		XMFLOAT3 normal;
 		XMFLOAT2 tex0;
 	};
+	struct Light
+	{
+		XMFLOAT3 position;
+		XMFLOAT2 size;
+		XMFLOAT4 color;
+	};
 }
 
 #endif

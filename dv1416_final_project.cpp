@@ -27,6 +27,7 @@ bool dv1416_final_project::init(void)
 	if (!D3DApp::init()) return false;
 
 	initShaders();
+	initLights();
 	initTerrain();
 
 	m_camera.setPosition(0.f, 10.f, 0.f);
@@ -124,6 +125,7 @@ void dv1416_final_project::render(void)
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	m_terrain.render(m_deviceContext, m_shaderManager.get("Terrain"), m_camera);
+	//m_lightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
 
 	m_swapChain->Present(0, 0);
 }
@@ -158,6 +160,14 @@ void dv1416_final_project::initShaders(void)
 		{ "TEX",	  0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", basicInputDesc, 3);
+	//m_shaderManager.add("Light", "Shaders/LightShader.fx", NULL, 0);
+}
+
+void dv1416_final_project::initLights(void)
+{
+	m_lightManager.init(m_device);
+
+	m_lightManager.AddLight(XMFLOAT3(0,0,0),POINT_LIGHT);
 }
 
 void dv1416_final_project::initTerrain(void)

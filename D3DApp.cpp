@@ -153,7 +153,6 @@ LRESULT D3DApp::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		m_timer.start();
 		onResize();
 		break;
-			
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:

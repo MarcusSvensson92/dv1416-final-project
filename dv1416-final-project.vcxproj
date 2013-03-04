@@ -83,7 +83,9 @@
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="dv1416_final_project.cpp" />
     <ClCompile Include="EventReceiver.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -98,7 +100,9 @@
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="dv1416_final_project.h" />
     <ClInclude Include="EventReceiver.h" />
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="renderTarget.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -115,6 +119,10 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc compile for debug: %(FullPath)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Shaders/%(Filename).fxo;%(Outputs)</Outputs>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Light.fx" />
+    <None Include="Shaders\LightShader.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
