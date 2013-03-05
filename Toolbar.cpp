@@ -1,50 +1,39 @@
 #include "StdAfx.h"
 #include "Toolbar.h"
 
-const UINT g_toolbarButtonIDStart = 2001;
-
-GUI::Toolbar* g_toolbar;
-
-LRESULT CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubClass, DWORD_PTR refDat)
-{
-	return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
-}
-
 namespace GUI
 {
-	Toolbar::Toolbar(HINSTANCE	 hInstance,
-					 HWND		 hParentWnd,
-					 ToolbarDesc toolbarDesc)
+	const UINT g_toolbarItemIDStart = 2001;
+
+	Toolbar* g_toolbar;
+
+	LRESULT CALLBACK toolbarMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubClass, DWORD_PTR refDat)
 	{
-		m_hInstance	   = hInstance;
-		m_toolbarDesc  = toolbarDesc;
-		m_style		   = WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD;
-		m_clientWidth  = toolbarDesc.width();
-		m_clientHeight = toolbarDesc.height(0);
+		return g_toolbar->subWndProc(hWnd, message, wParam, lParam);
+	}
 
-		const POINT wndSize = computeWndSize();
-
-		CLIENTCREATESTRUCT ccs;
-		ZeroMemory(&ccs, sizeof(ccs));
-
-		m_hWnd = CreateWindow("MDICLIENT", m_toolbarDesc.caption.c_str(), m_style,
-							  toolbarDesc.x, toolbarDesc.y, wndSize.x, wndSize.y,
-							  hParentWnd, NULL, m_hInstance, (LPSTR)&ccs);
-
+	Toolbar::Toolbar(void)
+	{
 		g_toolbar = this;
+	}
+
+	void Toolbar::init(HINSTANCE hInstance, HWND hParentWnd, const ToolbarDesc toolbarDesc)
+	{
+		m_toolbarDesc = toolbarDesc;
+
+		initWindow(hInstance, hParentWnd, toolbarDesc.caption, WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
+				   toolbarDesc.x, toolbarDesc.y, toolbarDesc.width(), toolbarDesc.height(0));
 
 		SetWindowSubclass(m_hWnd, toolbarMsgRouter, 0, 0);
 	}
 
-	Toolbar::~Toolbar(void) { }
-
 	void Toolbar::addButton(const std::string& name, EventReceiver* eventReceiver, const std::string& bitmapFilename)
 	{
-		const UINT count = (UINT)m_buttons.size();
+		const UINT count = (UINT)m_items.size();
 		const UINT x	 = m_toolbarDesc.buttonX(count);
 		const UINT y	 = m_toolbarDesc.buttonY(count);
 		const UINT size  = m_toolbarDesc.buttonSize;
-		const UINT id	 = g_toolbarButtonIDStart + count;
+		const UINT id	 = g_toolbarItemIDStart + count;
 
 		HWND hButton = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_PUSHLIKE,
 									x, y, size, size, m_hWnd, (HMENU)id, m_hInstance, NULL);
@@ -57,7 +46,7 @@ namespace GUI
 			const UINT rowCount = count / m_toolbarDesc.buttonsPerRow + 1;
 			m_clientHeight = m_toolbarDesc.height(rowCount);
 
-			const POINT wndSize = computeWndSize();
+			const POINT wndSize = computeWindowSize();
 
 			RECT rect;
 			GetWindowRect(m_hWnd, &rect);
@@ -67,13 +56,7 @@ namespace GUI
 			SetWindowPos(m_hWnd, HWND_TOP, x, y, wndSize.x, wndSize.y, NULL);
 		}
 
-		m_buttons.push_back(EventElement(name, eventReceiver));
-	}
-
-	void Toolbar::hide(const bool hide)
-	{
-		const int cmdShow = (hide) ? SW_HIDE : SW_SHOW;
-		ShowWindow(m_hWnd, cmdShow);
+		m_items.push_back(EventElement(name, eventReceiver));
 	}
 
 	LRESULT Toolbar::subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -81,35 +64,28 @@ namespace GUI
 		if (message == WM_COMMAND)
 		{
 			const UINT id = LOWORD(wParam);
-			for (UINT i = 0; i < (UINT)m_buttons.size(); i++)
+			for (UINT i = 0; i < (UINT)m_items.size(); i++)
 			{
-				const UINT buttonID = g_toolbarButtonIDStart + i;
-				if (buttonID == id)
+				const UINT itemID = getItemID(i);
+				if (itemID == id)
 				{
 					resetButtonHighlights();
-					Button_SetState(GetDlgItem(m_hWnd, buttonID), true);
-
-					m_buttons[i].second->onEvent("Toolbar", m_buttons[i].first);
+					Button_SetState(GetDlgItem(m_hWnd, itemID), true);
 				}
 			}
 		}
 
-		return DefSubclassProc(hWnd, message, wParam, lParam);
+		return Subwindow::subWndProc(hWnd, message, wParam, lParam);
 	}
 
-	POINT Toolbar::computeWndSize(void) const
+	int Toolbar::getItemID(const UINT i) const
 	{
-		RECT rect = {0, 0, m_clientWidth, m_clientHeight};
-		AdjustWindowRect(&rect, m_style, false);
-		POINT wndSize;
-		wndSize.x = rect.right  - rect.left;
-		wndSize.y = rect.bottom - rect.top;
-		return wndSize;
+		return (i < (UINT)m_items.size()) ? g_toolbarItemIDStart + i : -1;
 	}
 
 	void Toolbar::resetButtonHighlights(void)
 	{
-		for (UINT i = 0; i < (UINT)m_buttons.size(); i++)
-			Button_SetState(GetDlgItem(m_hWnd, g_toolbarButtonIDStart + i), false);
+		for (UINT i = 0; i < (UINT)m_items.size(); i++)
+			Button_SetState(GetDlgItem(m_hWnd, getItemID(i)), false);
 	}
 }

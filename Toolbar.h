@@ -2,6 +2,7 @@
 #define TOOLBAR_H
 
 #include "StdAfx.h"
+#include "Subwindow.h"
 #include "EventReceiver.h"
 
 namespace GUI
@@ -22,30 +23,29 @@ namespace GUI
 		UINT buttonY(const UINT buttonCount) const { return (buttonCount / buttonsPerRow) * (buttonSize + buttonMargin) + buttonMargin; }
 	};
 
-	class Toolbar
+	class Toolbar : public Subwindow
 	{
 	public:
-		Toolbar(HINSTANCE   hInstance,
-			    HWND		hParentWnd,
-			    ToolbarDesc toolbarDesc);
-		~Toolbar(void);
+		static Toolbar& getInstance(void)
+		{
+			static Toolbar instance;
+			return instance;
+		}
+	private:
+		Toolbar(void);
+		Toolbar(Toolbar const&);
+		void operator=(Toolbar const&);
 
-		void addButton(const std::string& name, EventReceiver* eventReceiver, const std::string& bitmapFilename);
-		void hide(const bool hide);
+	public:
+		void init(HINSTANCE hInstance, HWND hParentWnd, const ToolbarDesc toolbarDesc);
+		void addButton(const std::string& name, EventReceiver* eventReceiver,
+					   const std::string& bitmapFilename);
 
 		LRESULT subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	protected:
+		int getItemID(const UINT i) const;
 	private:
-		HINSTANCE m_hInstance;
-		HWND	  m_hWnd;
-
 		ToolbarDesc m_toolbarDesc;
-		DWORD		m_style;
-		UINT		m_clientWidth;
-		UINT		m_clientHeight;
-
-		std::vector<EventElement> m_buttons;
-
-		POINT computeWndSize(void) const;
 
 		void resetButtonHighlights(void);
 	};

@@ -8,6 +8,7 @@
 #include "Terrain.h"
 #include "ShaderManager.h"
 #include "LightManager.h"
+#include "LevelToolWindow.h"
 
 class dv1416_final_project : public D3DApp, GUI::EventReceiver
 {
@@ -29,7 +30,6 @@ protected:
 
 	void onResize(void);
 private:
-	GUI::Toolbar* m_toolbar;
 	Camera m_camera;
 	ShaderManager m_shaderManager;
 	LightManager m_lightManager;

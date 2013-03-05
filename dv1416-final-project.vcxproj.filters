@@ -15,7 +15,7 @@
       <Filter>GUI\Menu</Filter>
     </ClCompile>
     <ClCompile Include="Toolbar.cpp">
-      <Filter>GUI\Toolbar</Filter>
+      <Filter>GUI\Subwindow\Toolbar</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
@@ -45,6 +45,12 @@
     <ClCompile Include="LightManager.cpp">
       <Filter>Light</Filter>
     </ClCompile>
+    <ClCompile Include="Subwindow.cpp">
+      <Filter>GUI\Subwindow</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelToolWindow.cpp">
+      <Filter>GUI\Subwindow\Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -58,9 +64,6 @@
     </Filter>
     <Filter Include="GUI\Menu">
       <UniqueIdentifier>{47c767dc-f7a1-444d-9197-df849b6256e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GUI\Toolbar">
-      <UniqueIdentifier>{2f5f839e-8552-4026-8836-f96330e4d910}</UniqueIdentifier>
     </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{187bcbda-2839-4643-bedf-dfaa0b9fb26a}</UniqueIdentifier>
@@ -79,6 +82,15 @@
     </Filter>
     <Filter Include="Light">
       <UniqueIdentifier>{5918e944-bff7-471d-b9b6-fd56e308fb33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindow">
+      <UniqueIdentifier>{6801a670-3de2-44f5-9305-a3e3c74a863e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindow\Toolbar">
+      <UniqueIdentifier>{2f5f839e-8552-4026-8836-f96330e4d910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindow\Tools">
+      <UniqueIdentifier>{f91a82e1-a95a-40e7-bd8c-db6caa453fca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -99,7 +111,7 @@
       <Filter>GUI\Menu</Filter>
     </ClInclude>
     <ClInclude Include="Toolbar.h">
-      <Filter>GUI\Toolbar</Filter>
+      <Filter>GUI\Subwindow\Toolbar</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
@@ -128,6 +140,12 @@
     </ClInclude>
     <ClInclude Include="LightManager.h">
       <Filter>Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Subwindow.h">
+      <Filter>GUI\Subwindow</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelToolWindow.h">
+      <Filter>GUI\Subwindow\Tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

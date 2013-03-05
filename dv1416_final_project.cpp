@@ -12,15 +12,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 dv1416_final_project::dv1416_final_project(HINSTANCE hInstance)
 	: D3DApp(hInstance, "dv1416-final-project", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-			 800, 600, D3D_DRIVER_TYPE_HARDWARE)
-{
-	m_toolbar = NULL;
-}
+			 800, 600, D3D_DRIVER_TYPE_HARDWARE) { }
 
-dv1416_final_project::~dv1416_final_project(void)
-{
-	if (m_toolbar) delete m_toolbar;
-}
+dv1416_final_project::~dv1416_final_project(void) { }
 
 bool dv1416_final_project::init(void)
 {
@@ -56,17 +50,32 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		tbd.buttonsPerRow = 2;
 		tbd.buttonSize	  = 32;
 		tbd.buttonMargin  = 4;
+		GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
+		toolbar.init(m_hInstance, hWnd, tbd);
+		toolbar.addButton("1", this, "life.bmp");
+		toolbar.addButton("2", this, "life.bmp");
+		toolbar.addButton("3", this, "life.bmp");
+		toolbar.addButton("4", this, "life.bmp");
+		toolbar.addButton("5", this, "life.bmp");
+		toolbar.addButton("6", this, "life.bmp");
+		toolbar.addButton("7", this, "life.bmp");
+		toolbar.addButton("8", this, "life.bmp");
+		toolbar.addButton("9", this, "life.bmp");
 
-		m_toolbar = new GUI::Toolbar(m_hInstance, hWnd, tbd);
-		m_toolbar->addButton("1", this, "life.bmp");
-		m_toolbar->addButton("2", this, "life.bmp");
-		m_toolbar->addButton("3", this, "life.bmp");
-		m_toolbar->addButton("4", this, "life.bmp");
-		m_toolbar->addButton("5", this, "life.bmp");
-		m_toolbar->addButton("6", this, "life.bmp");
-		m_toolbar->addButton("7", this, "life.bmp");
-		m_toolbar->addButton("8", this, "life.bmp");
-		m_toolbar->addButton("9", this, "life.bmp");
+		GUI::LevelToolWindowDesc ltwd;
+		ltwd.caption	= "Level Tool";
+		ltwd.x				= 0;
+		ltwd.y				= 0;
+		ltwd.width			= 150;
+		ltwd.height			= 300;
+		ltwd.margin			= 5;
+		ltwd.trackbarHeight = 30;
+		GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
+		levelToolWindow.init(m_hInstance, hWnd, ltwd);
+		levelToolWindow.addTrackbar("1", this, 1, 10, 5);
+		levelToolWindow.addTrackbar("2", this, 1, 10, 2);
+		levelToolWindow.addTrackbar("3", this, 1, 10, 8);
+		levelToolWindow.show(true);
 
 		break;
 	}
@@ -77,6 +86,7 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 void dv1416_final_project::onEvent(const std::string& sender, const std::string& eventName)
 {
+	DOUT("Sender: " << sender << " | Event: " << eventName << std::endl);
 	if (sender == "Menu" && eventName == "Exit")
 	{
 		DestroyWindow(m_hWnd);
@@ -86,7 +96,7 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 		GUI::Menu& menu = GUI::Menu::getInstance();
 		bool check = menu.isItemChecked(eventName);
 		menu.checkItem(eventName, !check);
-		m_toolbar->hide(check);
+		GUI::Toolbar::getInstance().show(!check);
 	}
 }
 
