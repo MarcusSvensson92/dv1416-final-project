@@ -24,7 +24,10 @@ public:
 
 	void		init(ID3D11Device* device);
 
-	void		AddLight(XMFLOAT3, LightType);
+	bool		AddLight(XMFLOAT3, LightType);
+	void		RemoveLight(PointLight*);
+	void		ClearLights();
+
 	PointLight*	computeIntersection(const Ray& ray);
 
 	std::vector<PointLight> getLights();

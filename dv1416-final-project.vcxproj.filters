@@ -57,6 +57,9 @@
     <ClCompile Include="LevelTool.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowManager.cpp">
+      <Filter>Shadow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -100,6 +103,9 @@
     </Filter>
     <Filter Include="GUI\Subwindows\Tools">
       <UniqueIdentifier>{f91a82e1-a95a-40e7-bd8c-db6caa453fca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shadow">
+      <UniqueIdentifier>{f71ca997-9cbd-45a4-aeb4-f88bdcb9ba91}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +168,9 @@
     <ClInclude Include="LevelTool.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowManager.h">
+      <Filter>Shadow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Shaders\Terrain.fx">
@@ -171,6 +180,9 @@
       <Filter>Shaders</Filter>
     </CustomBuild>
     <CustomBuild Include="Shaders\LightShader.fx">
+      <Filter>Shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Shaders\ShadowmapShader.fx">
       <Filter>Shaders</Filter>
     </CustomBuild>
   </ItemGroup>

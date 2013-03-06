@@ -91,6 +91,7 @@
     <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="Subwindow.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="renderTarget.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Subwindow.h" />
     <ClInclude Include="Terrain.h" />
@@ -138,6 +140,14 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Shaders/%(Filename).fxo;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Shaders\LightShader.fx">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Fc /Od /Zi /T fx_5_0 /Fo "Shaders/%(Filename).fxo" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc compile for debug: %(FullPath)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Shaders/%(Filename).fxo;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Shaders\ShadowmapShader.fx">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Fc /Od /Zi /T fx_5_0 /Fo "Shaders/%(Filename).fxo" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc compile for debug: %(FullPath)</Message>

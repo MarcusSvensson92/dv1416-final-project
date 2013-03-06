@@ -33,7 +33,7 @@ protected:
 private:
 	Camera m_camera;
 	ShaderManager m_shaderManager;
-	LightManager m_lightManager;
+	LightManager m_LightManager;
 	Terrain m_terrain;
 	LevelTool m_levelTool;
 
