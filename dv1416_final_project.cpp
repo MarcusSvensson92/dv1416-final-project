@@ -126,9 +126,9 @@ void dv1416_final_project::update(void)
 			m_terrain.computeIntersection(ray);
 
 			// Click to turn the lights red
-			PointLight* selected_light = m_lightManager.computeIntersection(ray);
+			PointLight* selected_light = m_LightManager.computeIntersection(ray);
 			if (selected_light != NULL)
-				selected_light->Diffuse = XMFLOAT4(1.0f, 0.2f, 0.2f, 1.0f);
+				m_LightManager.RemoveLight(selected_light);
 		}
 	}
 }
@@ -146,10 +146,10 @@ void dv1416_final_project::render(void)
 	mMaterial.Specular = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	m_shaderManager.get("Terrain")->setRawData("gMaterial", &mMaterial, sizeof(Material)); 
-	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_lightManager.getLights()[0], sizeof(PointLight)*m_lightManager.getLights().size());
+	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_LightManager.getLights()[0], sizeof(PointLight)*m_LightManager.getLights().size());
 
 	m_terrain.render(m_deviceContext, m_shaderManager.get("Terrain"), m_camera);
-	m_lightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
+	m_LightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
 
 	m_swapChain->Present(0, 0);
 }
@@ -189,12 +189,16 @@ void dv1416_final_project::initShaders(void)
 
 void dv1416_final_project::initLights(void)
 {
-	m_lightManager.init(m_device);
+	m_LightManager.init(m_device);
 
-	m_lightManager.AddLight(XMFLOAT3(-80,30,-80),POINT_LIGHT);
-	m_lightManager.AddLight(XMFLOAT3(-80,30, 80),POINT_LIGHT);
-	m_lightManager.AddLight(XMFLOAT3( 80,30,-80),POINT_LIGHT);
-	m_lightManager.AddLight(XMFLOAT3( 80,30, 80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3(-80,30,-80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3(-80,30, 80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3( 80,30,-80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3( 80,30, 80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3( 80,30, 00),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3(-80,30, 00),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3( 00,30,-80),POINT_LIGHT);
+	m_LightManager.AddLight(XMFLOAT3( 00,30, 80),POINT_LIGHT);
 }
 
 void dv1416_final_project::initTerrain(void)

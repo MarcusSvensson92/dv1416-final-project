@@ -6,5 +6,6 @@
 cbuffer Lights
 {
     PointLight gPointLights[10];        // Offset:    0, size:  800
+    DirectionalLight gDirectionalLights[2];// Offset:  800, size:  128
 }
 

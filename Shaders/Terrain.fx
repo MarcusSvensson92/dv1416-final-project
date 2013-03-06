@@ -1,4 +1,5 @@
 #include		"Light.fx"
+#include		"Shadow.fx"
 
 cbuffer cbPerFrame
 {
@@ -94,27 +95,55 @@ float4 PS(PSIn input) : SV_TARGET
 		texColor = lerp(texColor, c3, t.b);
 		texColor = lerp(texColor, c4, t.a);
 
-		// The toEye vector is used in lighting.
+
 		float3 toEye = gCameraPosition - input.positionW;
-		// Cache the distance to the eye from this surface point.
 		float distToEye = length(toEye); 
-		// Normalize.
 		toEye /= distToEye;
-		// Lighting.
 		float4 litColor = texColor;
-		// Start with a sum of zero. 
+
 		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		[loop]
+		//[loop]
 		for( uint i = 0;i < POINTLIGHTS; i++ )
 		{
+			float shadow;
+			shadow = 1.0f;
+			/*if ( gPointLights[i].Pad > 0 )
+			{
+				shadow = 0.0f;
+				uint x = gPointLights[i].Pad*6;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] );
+			}*/
+
 			float4 A,D,S;
 			ComputePointLight(gMaterial, gPointLights[i], input.positionW, input.normalW, toEye, A, D, S);
 			ambient += A;
-			diffuse += D;
-			spec += S;
+			diffuse += shadow*D;
+			spec += shadow*S;
+		}
+		[loop]
+		for( uint i = 0;i < DIRECTIONALLIGHTS; i++ )
+		{
+			float shadow;
+			if ( gDirectionalLights[i].Pad == 1.f )
+				shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP0 ), gDLightShadow0 );
+			else if ( gDirectionalLights[i].Pad == 2.f )
+				shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP1 ), gDLightShadow1 );
+			else
+				shadow = 1.0f;
+
+			float4 A,D,S;
+			ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
+			ambient += A;
+			diffuse += shadow*D;
+			spec += shadow*S;
 		}
 
 		// Modulate with late add.

@@ -5,6 +5,16 @@
 
 namespace Light
 {
+	struct DirectionalLight
+	{
+		DirectionalLight() { ZeroMemory(this, sizeof(this)); }
+
+		XMFLOAT4 Ambient;
+		XMFLOAT4 Diffuse;
+		XMFLOAT4 Specular;
+		XMFLOAT3 Direction;
+		float Pad;
+	};
 	struct PointLight
 	{
 		PointLight() { ZeroMemory(this, sizeof(this)); }
