@@ -148,6 +148,6 @@ technique11 RenderTech
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
-		SetRasterizerState(wireframeRS);
+		//SetRasterizerState(wireframeRS);
 	}
 }

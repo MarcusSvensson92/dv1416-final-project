@@ -26,6 +26,8 @@ public:
 					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
 
+	void updateNormals(void);
+
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
 	std::vector<Vertex::Basic*> getVerticesWithinRadius(const XMFLOAT3 position, const UINT radius);
@@ -45,6 +47,9 @@ private:
 	bool m_useBlendmap;
 
 	void createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices);
+
+	void computeNormal(int i, int j);
+	bool inBounds(int i, int j);
 };
 
 #endif

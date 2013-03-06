@@ -720,7 +720,6 @@ fxgroup
                 // Approximately 319 instruction slots used
                             
             };
-            RasterizerState = wireframeRS;
         }
 
     }

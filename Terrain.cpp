@@ -24,6 +24,8 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 	createGrid(m_vertices, indices);
 	m_indexCount = (UINT)indices.size();
 
+	updateNormals();
+
 	BufferInitDesc vertexBufferInitDesc;
 	vertexBufferInitDesc.usage			= D3D11_USAGE_DYNAMIC;
 	vertexBufferInitDesc.elementSize	= sizeof(Vertex::Basic);
@@ -72,6 +74,13 @@ void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 	m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
 
 	m_useBlendmap = true;
+}
+
+void Terrain::updateNormals(void)
+{
+	for (UINT i = 0; i < m_terrainDesc.depth; i++)
+		for (UINT j = 0; j < m_terrainDesc.width; j++)
+			computeNormal(i, j);
 }
 
 void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
@@ -165,4 +174,23 @@ void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>
 			k += 6;
 		}
 	}
+}
+
+void Terrain::computeNormal(int i, int j)
+{
+	if (inBounds(i, j))
+	{
+		float top    = inBounds(i + 1, j) ? m_vertices[(i + 1) * m_terrainDesc.width + j].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
+		float left   = inBounds(i, j + 1) ? m_vertices[i * m_terrainDesc.width + j + 1].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
+		float bottom = inBounds(i - 1, j) ? m_vertices[(i - 1) * m_terrainDesc.width + j].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
+		float right  = inBounds(i, j - 1) ? m_vertices[i * m_terrainDesc.width + j - 1].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
+		
+		XMStoreFloat3(&m_vertices[i * m_terrainDesc.width].normal, XMVector3Normalize(XMLoadFloat3(&XMFLOAT3(bottom - top, 2.f, right - left))));
+	}
+}
+
+bool Terrain::inBounds(int i, int j)
+{
+	return i >= 0 && i < (int)m_terrainDesc.depth &&
+		   j >= 0 && j < (int)m_terrainDesc.width;
 }

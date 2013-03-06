@@ -40,6 +40,7 @@ private:
 	void initShaders(void);
 	void initLights(void);
 	void initTerrain(void);
+	void initGUI(HWND hWnd);
 };
 
 #endif

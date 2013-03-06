@@ -41,46 +41,8 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	switch (msg)
 	{
 	case WM_CREATE:
-	{
-		menu.addItem("File", "Exit", this);
-		menu.addItem("View", "Tools", this);
-		menu.assignToWindow(hWnd);
-
-		GUI::ToolbarDesc tbd;
-		tbd.caption		  = "Toolbar";
-		tbd.x			  = CW_USEDEFAULT;
-		tbd.y			  = CW_USEDEFAULT;
-		tbd.buttonsPerRow = 2;
-		tbd.buttonSize	  = 32;
-		tbd.buttonMargin  = 4;
-		GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
-		toolbar.init(m_hInstance, hWnd, tbd);
-		toolbar.addButton("1", this, "life.bmp");
-		toolbar.addButton("2", this, "life.bmp");
-		toolbar.addButton("3", this, "life.bmp");
-		toolbar.addButton("4", this, "life.bmp");
-		toolbar.addButton("5", this, "life.bmp");
-		toolbar.addButton("6", this, "life.bmp");
-		toolbar.addButton("7", this, "life.bmp");
-		toolbar.addButton("8", this, "life.bmp");
-		toolbar.addButton("9", this, "life.bmp");
-
-		GUI::LevelToolWindowDesc ltwd;
-		ltwd.caption	= "Level Tool";
-		ltwd.x				= 0;
-		ltwd.y				= 0;
-		ltwd.width			= 150;
-		ltwd.height			= 300;
-		ltwd.margin			= 5;
-		GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
-		levelToolWindow.init(m_hInstance, hWnd, ltwd);
-		levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
-		levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
-		levelToolWindow.addTrackbar("Brush Opacity", &m_levelTool, 1, 100, 100);
-		levelToolWindow.show(true);
-
+		initGUI(hWnd);
 		break;
-	}
 	}
 	
 	return D3DApp::wndProc(hWnd, msg, wParam, lParam);
@@ -210,11 +172,52 @@ void dv1416_final_project::initTerrain(void)
 	td.width			= 257;
 	td.depth			= 257;
 	m_terrain.init(m_device, td);
-	/*m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
 	layermapFilenames.push_back("temp-textures/grayRock.png");
-	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);*/
+	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
+}
+
+void dv1416_final_project::initGUI(HWND hWnd)
+{
+	GUI::Menu& menu = GUI::Menu::getInstance();
+	menu.addItem("File", "Exit", this);
+	menu.addItem("View", "Tools", this);
+	menu.assignToWindow(hWnd);
+
+	GUI::ToolbarDesc tbd;
+	tbd.caption		  = "Toolbar";
+	tbd.x			  = CW_USEDEFAULT;
+	tbd.y			  = CW_USEDEFAULT;
+	tbd.buttonsPerRow = 2;
+	tbd.buttonSize	  = 32;
+	tbd.buttonMargin  = 4;
+	GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
+	toolbar.init(m_hInstance, hWnd, tbd);
+	toolbar.addButton("1", this, "life.bmp");
+	toolbar.addButton("2", this, "life.bmp");
+	toolbar.addButton("3", this, "life.bmp");
+	toolbar.addButton("4", this, "life.bmp");
+	toolbar.addButton("5", this, "life.bmp");
+	toolbar.addButton("6", this, "life.bmp");
+	toolbar.addButton("7", this, "life.bmp");
+	toolbar.addButton("8", this, "life.bmp");
+	toolbar.addButton("9", this, "life.bmp");
+
+	GUI::LevelToolWindowDesc ltwd;
+	ltwd.caption	= "Level Tool";
+	ltwd.x				= 0;
+	ltwd.y				= 0;
+	ltwd.width			= 150;
+	ltwd.height			= 300;
+	ltwd.margin			= 5;
+	GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
+	levelToolWindow.init(m_hInstance, hWnd, ltwd);
+	levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
+	levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
+	levelToolWindow.addTrackbar("Brush Opacity", &m_levelTool, 1, 100, 100);
+	levelToolWindow.show(true);
 }
