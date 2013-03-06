@@ -26,7 +26,7 @@ Texture2DArray gLayermapArray;
 
 RasterizerState wireframeRS
 {
-	FillMode = Solid;
+	FillMode = Wireframe;
 };
 
 SamplerState linearSampler
@@ -123,7 +123,7 @@ float4 PS(PSIn input) : SV_TARGET
 		return litColor;
 	}
 
-	return float4(0.f, 0.f, 0.f, 1.f);
+	return float4(1.f, 1.f, 1.f, 1.f);
 }
 
 technique11 RenderTech
@@ -134,6 +134,6 @@ technique11 RenderTech
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
-		//SetRasterizerState(wireframeRS);
+		SetRasterizerState(wireframeRS);
 	}
 }

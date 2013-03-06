@@ -28,7 +28,8 @@ public:
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
-	void computeIntersection(const Ray& ray);
+	std::vector<Vertex::Basic*> getVerticesWithinRadius(const XMFLOAT3 position, const UINT radius);
+	void updateVertexBuffer(ID3D11DeviceContext* deviceContext);
 private:
 	TerrainDesc m_terrainDesc;
 

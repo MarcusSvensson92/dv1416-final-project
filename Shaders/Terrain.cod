@@ -5,7 +5,7 @@
 //
 cbuffer Lights
 {
-    PointLight gPointLights[4];         // Offset:    0, size:  320
+    PointLight gPointLights[10];        // Offset:    0, size:  800
 }
 
 cbuffer cbPerFrame
@@ -34,7 +34,7 @@ Texture2D gBlendmap;
 Texture2DArray gLayermapArray;
 RasterizerState wireframeRS
 {
-    FillMode = uint(SOLID /* 3 */);
+    FillMode = uint(WIREFRAME /* 2 */);
 };
 SamplerState linearSampler
 {
@@ -123,7 +123,7 @@ fxgroup
                 dcl_output o3.zw
                 dcl_temps 4
                 
-                #line 58 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 58 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 r1.x, r0.xyzw, cb0[4].xyzw  // output<0:NaN:Inf>
@@ -169,7 +169,7 @@ fxgroup
                 //       float3 Att;                    // Offset:   64
                 //       float Pad;                     // Offset:   76
                 //
-                //   } gPointLights[4];                 // Offset:    0 Size:   320
+                //   } gPointLights[10];                // Offset:    0 Size:   800
                 //
                 // }
                 //
@@ -231,7 +231,7 @@ fxgroup
                 // SV_TARGET                0   xyzw        0   TARGET  float   xyzw
                 //
                 ps_4_0
-                dcl_constantbuffer cb0[20], dynamicIndexed
+                dcl_constantbuffer cb0[50], dynamicIndexed
                 dcl_constantbuffer cb1[10], immediateIndexed
                 dcl_constantbuffer cb2[3], immediateIndexed
                 dcl_sampler s0, mode_default
@@ -244,7 +244,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 17
                 
-                #line 70 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 70 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                 add r0.x, cb1[9].x, l(1.000000)
                 ge r0.x, r0.x, v1.x
                 add r0.y, cb1[9].x, l(-1.000000)
@@ -325,7 +325,7 @@ fxgroup
                   mov r5.xyz, r2.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mov r2.w, r1.w  // i<0>
                   loop 
-                    ult r3.w, r2.w, l(4)
+                    ult r3.w, r2.w, l(10)
                     breakc_z r3.w
                 
                 #line 114
@@ -392,7 +392,7 @@ fxgroup
                       mov r8.xyz, l(0,0,0,0)  // spec<0: 0f,1: 0f,2: 0f>
                     endif 
                 
-                #line 114 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 114 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                     mov r6.xyz, r6.xyzx  // A<0:Inf,1:Inf,2:Inf>
                     mov r7.xyz, r7.xyzx  // D<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     mov r8.xyz, r8.xyzx  // S<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -417,11 +417,12 @@ fxgroup
                 endif 
                 
                 #line 126
-                mov o0.xyzw, l(0,0,0,1.000000)  // PS<0: 0f,1: 0f,2: 0f,3: 1f>
+                mov o0.xyzw, l(1.000000,1.000000,1.000000,1.000000)  // PS<0: 1f,1: 1f,2: 1f,3: 1f>
                 ret 
                 // Approximately 134 instruction slots used
                             
             };
+            RasterizerState = wireframeRS;
         }
 
     }

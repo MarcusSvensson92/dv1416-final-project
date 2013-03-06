@@ -27,6 +27,9 @@ bool dv1416_final_project::init(void)
 	m_camera.setPosition(0.f, 50.f, 0.f);
 	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
 
+	m_levelTool.init(m_hWnd, m_deviceContext, &m_camera);
+	m_levelTool.setTerrain(&m_terrain);
+
 	return true;
 }
 
@@ -69,12 +72,11 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		ltwd.width			= 150;
 		ltwd.height			= 300;
 		ltwd.margin			= 5;
-		ltwd.trackbarHeight = 30;
 		GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
 		levelToolWindow.init(m_hInstance, hWnd, ltwd);
-		levelToolWindow.addTrackbar("1", this, 1, 10, 5);
-		levelToolWindow.addTrackbar("2", this, 1, 10, 2);
-		levelToolWindow.addTrackbar("3", this, 1, 10, 8);
+		levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
+		levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
+		levelToolWindow.addTrackbar("Brush Opacity", &m_levelTool, 1, 100, 100);
 		levelToolWindow.show(true);
 
 		break;
@@ -115,6 +117,8 @@ void dv1416_final_project::update(void)
 
 	m_camera.updateViewMatrix();
 
+	m_levelTool.update(dt);
+
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
 		POINT cursorPosition;
@@ -123,7 +127,23 @@ void dv1416_final_project::update(void)
 			ScreenToClient(m_hWnd, &cursorPosition);
 
 			Ray ray = m_camera.computeRay(cursorPosition);
-			m_terrain.computeIntersection(ray);
+			/*m_terrain.computeIntersection(ray);
+
+			// Temp test
+			std::vector<Vertex::Basic*> vertices = m_terrain.getVerticesWithinRadius(XMFLOAT3(0.f, 0.f, 0.f), 50);
+			XMFLOAT3 targetPosition = m_terrain.getTargetPosition();
+			XMVECTOR v1 = XMVectorSet(targetPosition.x, targetPosition.z, 0.f, 0.f);
+			for (std::vector<Vertex::Basic*>::iterator it = vertices.begin(); it != vertices.end(); it++)
+			{
+				XMVECTOR v2 = XMVectorSet((*it)->position.x, (*it)->position.z, 0.f, 0.f);
+				float length = XMVectorGetX(XMVector2Length(v2 - v1));
+				length /= 50.f;
+
+				const float dy = 1 - length * length;
+				if (dy > 0.f)
+					(*it)->position.y += dt * dy * 5.f;
+			}
+			m_terrain.updateBuffer(m_deviceContext);*/
 
 			// Click to turn the lights red
 			PointLight* selected_light = m_lightManager.computeIntersection(ray);
@@ -203,11 +223,11 @@ void dv1416_final_project::initTerrain(void)
 	td.width			= 257;
 	td.depth			= 257;
 	m_terrain.init(m_device, td);
-	m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	/*m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
 	layermapFilenames.push_back("temp-textures/grayRock.png");
-	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
+	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);*/
 }

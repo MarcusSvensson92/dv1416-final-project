@@ -9,6 +9,7 @@
 #include "ShaderManager.h"
 #include "LightManager.h"
 #include "LevelToolWindow.h"
+#include "LevelTool.h"
 
 class dv1416_final_project : public D3DApp, GUI::EventReceiver
 {
@@ -34,6 +35,7 @@ private:
 	ShaderManager m_shaderManager;
 	LightManager m_lightManager;
 	Terrain m_terrain;
+	LevelTool m_levelTool;
 
 	void initShaders(void);
 	void initLights(void);

@@ -19,6 +19,7 @@
 #include <fstream>
 #include <ostream>
 #include <map>
+#include <math.h>
 #include <assert.h>
 
 #define RELEASE(x) { if (x) { x->Release(); x = NULL; } }

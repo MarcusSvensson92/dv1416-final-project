@@ -99,13 +99,25 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
 }
 
-void Terrain::computeIntersection(const Ray& ray)
+std::vector<Vertex::Basic*> Terrain::getVerticesWithinRadius(const XMFLOAT3 position, const UINT radius)
 {
-	XMVECTOR n = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	const int col = (int)floorf( position.x + 0.5f * (m_terrainDesc.width - 1));
+	const int row = (int)floorf(-position.z + 0.5f * (m_terrainDesc.depth - 1));
 
-	float t = -XMVectorGetX(XMVector3Dot(ray.origin, n)) / XMVectorGetX(XMVector3Dot(ray.direction, n));
-	if (t > 0.f)
-		XMStoreFloat3(&m_targetPosition, ray.origin + (t * ray.direction));
+	std::vector<Vertex::Basic*> vertices;
+	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
+		if (i >= 0 && i < m_terrainDesc.depth)
+			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
+				if (j >= 0 && j < m_terrainDesc.width)
+					vertices.push_back(&m_vertices[i * m_terrainDesc.width + j]);
+	return vertices;
+}
+
+void Terrain::updateVertexBuffer(ID3D11DeviceContext* deviceContext)
+{
+	void* data = m_vertexBuffer.map(deviceContext);
+	memcpy(data, &m_vertices[0], sizeof(Vertex::Basic) * (UINT)m_vertices.size());
+	m_vertexBuffer.unmap(deviceContext);
 }
 
 void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices)

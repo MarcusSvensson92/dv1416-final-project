@@ -5,6 +5,9 @@ namespace GUI
 {
 	const UINT g_levelToolWindowItemIDStart = 3001;
 
+	const UINT g_trackbarHeight		= 30;
+	const UINT g_trackbarTextHeight = 12;
+
 	LevelToolWindow* g_levelToolWindow;
 
 	LRESULT CALLBACK levelToolWindowMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubClass, DWORD_PTR refDat)
@@ -17,7 +20,7 @@ namespace GUI
 		g_levelToolWindow = this;
 	}
 
-	void LevelToolWindow::init(HINSTANCE hInstance,HWND hParentWnd,
+	void LevelToolWindow::init(HINSTANCE hInstance, HWND hParentWnd,
 							   const LevelToolWindowDesc levelToolWindowDesc)
 	{
 		m_levelToolWindowDesc = levelToolWindowDesc;
@@ -36,10 +39,21 @@ namespace GUI
 		const UINT count  = (UINT)m_items.size();
 		const UINT margin = m_levelToolWindowDesc.margin;
 		const UINT width  = m_levelToolWindowDesc.width - 2 * margin;
-		const UINT height = m_levelToolWindowDesc.trackbarHeight;
+		const UINT height = g_trackbarHeight;
 		const UINT x	  = margin;
-		const UINT y	  = count * (height + margin) + margin;
+			  UINT y	  = count * (height + margin + g_trackbarTextHeight) + margin;
 		const UINT id	  = g_levelToolWindowItemIDStart + count;
+
+		HWND hText = CreateWindow("STATIC", name.c_str(), WS_VISIBLE | WS_CHILD,
+								  x, y, width, g_trackbarTextHeight,
+								  m_hWnd, NULL, m_hInstance, NULL);
+
+		HFONT hFont = CreateFont(g_trackbarTextHeight, 0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE,
+								 ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+								 DEFAULT_PITCH | FF_DONTCARE, "Tahoma");
+		SendMessage(hText, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		y += g_trackbarTextHeight;
 
 		HWND hTrackbar = CreateWindow(TRACKBAR_CLASS, m_levelToolWindowDesc.caption.c_str(),
 									  WS_CHILD | WS_VISIBLE | TBS_TOOLTIPS,
@@ -51,8 +65,23 @@ namespace GUI
 		m_items.push_back(EventElement(name, eventReceiver));
 	}
 
+	UINT LevelToolWindow::getTrackbarValue(const std::string& itemName) const
+	{
+		const int id = getItemID(itemName);
+		if (id != -1)
+			return (UINT)SendMessage(GetDlgItem(m_hWnd, id), TBM_GETPOS, NULL, NULL);
+	}
+
 	int LevelToolWindow::getItemID(const UINT i) const
 	{
 		return (i < (UINT)m_items.size()) ? g_levelToolWindowItemIDStart + i : -1;
+	}
+
+	int LevelToolWindow::getItemID(const std::string& itemName) const
+	{
+		for (UINT i = 0; i < (UINT)m_items.size(); i++)
+			if (m_items[i].first == itemName)
+				return g_levelToolWindowItemIDStart + i;
+		return -1;
 	}
 }

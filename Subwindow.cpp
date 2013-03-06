@@ -47,7 +47,6 @@ namespace GUI
 			hbr = GetSysColorBrush(COLOR_3DFACE);
 			FillRect(hdc, &rect, hbr);
 			EndPaint(hWnd, &ps);
-
 			break;
 		}
 
