@@ -44,8 +44,6 @@ private:
 
 	bool m_useBlendmap;
 
-	XMFLOAT3 m_targetPosition;
-
 	void createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices);
 };
 

@@ -7,8 +7,6 @@ cbuffer cbPerFrame
 	matrix gWorldViewProj;
 	float3 gCameraPosition;
 
-	float3 gTargetPosition;
-
 	bool gUseBlendmap;
 };
 
@@ -66,19 +64,6 @@ PSIn VS(VSIn input)
 
 float4 PS(PSIn input) : SV_TARGET
 {
-	float offset = 1.f;
-	
-	if (input.positionW.x <= gTargetPosition.x + offset &&
-		input.positionW.x >= gTargetPosition.x - offset &&
-		input.positionW.z <= gTargetPosition.z + offset &&
-		input.positionW.z >= gTargetPosition.z - offset)
-		return float4(1.f, 0.f, 0.f, 1.f);
-
-	/*float3 distanceVector = gTargetPosition - input.positionW;
-	float d = length(distanceVector);
-	if( d < offset )
-		return float4(1.f, 0.f, 0.f, 1.f);*/
-
 	if (gUseBlendmap)
 	{
 		float4 c0 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 0.f));

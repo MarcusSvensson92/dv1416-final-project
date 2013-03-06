@@ -39,8 +39,6 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 	indexBufferInitDesc.type		 = IndexBuffer;
 	indexBufferInitDesc.data		 = &indices[0];
 	m_indexBuffer.init(device, indexBufferInitDesc);
-
-	m_targetPosition = XMFLOAT3(0.f, 0.f, 0.f);
 }
 
 void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
@@ -89,7 +87,6 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	shader->setResource("gBlendmap", m_blendmapSRV);
 	shader->setResource("gLayermapArray", m_layermapArraySRV);
 	shader->setBool("gUseBlendmap", m_useBlendmap);
-	shader->setFloat3("gTargetPosition", m_targetPosition);
 
 	m_vertexBuffer.apply(deviceContext);
 	m_indexBuffer.apply(deviceContext);
