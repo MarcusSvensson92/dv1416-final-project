@@ -47,7 +47,7 @@ D3DApp::~D3DApp(void)
 	if (m_deviceContext)
 		m_deviceContext->ClearState();
 	RELEASE(m_deviceContext);
-	RELEASE(m_device);
+	if (m_device) while(m_device->Release());
 }
 
 int D3DApp::run(void)

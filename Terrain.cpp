@@ -157,7 +157,7 @@ void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>
 			indices[k]	   = i * width + j;
 			indices[k + 1] = i * width + j + 1;
 			indices[k + 2] = (i + 1) * width + j;
-
+			
 			indices[k + 3] = (i + 1) * width + j;
 			indices[k + 4] = i * width + j + 1;
 			indices[k + 5] = (i + 1) * width + j + 1;

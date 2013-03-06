@@ -127,23 +127,6 @@ void dv1416_final_project::update(void)
 			ScreenToClient(m_hWnd, &cursorPosition);
 
 			Ray ray = m_camera.computeRay(cursorPosition);
-			/*m_terrain.computeIntersection(ray);
-
-			// Temp test
-			std::vector<Vertex::Basic*> vertices = m_terrain.getVerticesWithinRadius(XMFLOAT3(0.f, 0.f, 0.f), 50);
-			XMFLOAT3 targetPosition = m_terrain.getTargetPosition();
-			XMVECTOR v1 = XMVectorSet(targetPosition.x, targetPosition.z, 0.f, 0.f);
-			for (std::vector<Vertex::Basic*>::iterator it = vertices.begin(); it != vertices.end(); it++)
-			{
-				XMVECTOR v2 = XMVectorSet((*it)->position.x, (*it)->position.z, 0.f, 0.f);
-				float length = XMVectorGetX(XMVector2Length(v2 - v1));
-				length /= 50.f;
-
-				const float dy = 1 - length * length;
-				if (dy > 0.f)
-					(*it)->position.y += dt * dy * 5.f;
-			}
-			m_terrain.updateBuffer(m_deviceContext);*/
 
 			// Click to turn the lights red
 			PointLight* selected_light = m_LightManager.computeIntersection(ray);
