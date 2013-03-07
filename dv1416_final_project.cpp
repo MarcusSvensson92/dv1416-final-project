@@ -148,7 +148,11 @@ void dv1416_final_project::initShaders(void)
 		{ "NORMAL",	  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEX",	  0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", basicInputDesc, 3);
+	D3D11_INPUT_ELEMENT_DESC terrainInputDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEX",	  0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", terrainInputDesc, 2);
 	m_shaderManager.add("Light", "Shaders/LightShader.fxo", NULL, 0);
 }
 
@@ -169,16 +173,16 @@ void dv1416_final_project::initLights(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width			= 257;
-	td.depth			= 257;
+	td.width			= 256;
+	td.depth			= 256;
 	m_terrain.init(m_device, td);
-	m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	/*m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
 	layermapFilenames.push_back("temp-textures/grayRock.png");
-	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
+	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);*/
 }
 
 void dv1416_final_project::initGUI(HWND hWnd)

@@ -66,17 +66,17 @@ void LevelTool::updateTerrainAltitude(const float dt)
 {
 	const UINT brushRadius = (UINT)ceil(m_brushDiameter / 2.f);
 	XMVECTOR targetPosition = XMVectorSet(m_targetPosition.x, m_targetPosition.z, 0.f, 0.f);
-	std::vector<Vertex::Basic*> vertices = m_terrain->getVerticesWithinRadius(m_targetPosition, brushRadius);
-	for (std::vector<Vertex::Basic*>::iterator it = vertices.begin(); it != vertices.end(); it++)
+	std::vector<std::pair<XMFLOAT2, float*>> vertices = m_terrain->getHeightmapDataWithinRadius(m_targetPosition, brushRadius);
+	for (std::vector<std::pair<XMFLOAT2, float*>>::iterator it = vertices.begin(); it != vertices.end(); it++)
 	{
-		XMVECTOR vertexPosition = XMVectorSet((*it)->position.x, (*it)->position.z, 0.f, 0.f);
+		XMVECTOR vertexPosition = XMLoadFloat2(&it->first);
 		const float length = XMVectorGetX(XMVector2Length(vertexPosition - targetPosition)) / brushRadius;
 		if (length <= 1.f)
 		{
 			const float dy = (m_brushHardness < 0.99f) ? 1 - pow(length, 1.f / (1.f - m_brushHardness)) : 1.f;
 			if (dy > 0.f)
-				(*it)->position.y += dy * dt * m_brushOpacity * 5.f;
+				*it->second += dy * dt * m_brushOpacity * 5.f;
 		}
 	}
-	m_terrain->updateVertexBuffer(m_deviceContext);
+	m_terrain->updateHeightmapTexture(m_deviceContext);
 }

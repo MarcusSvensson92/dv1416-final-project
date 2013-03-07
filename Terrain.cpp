@@ -2,8 +2,12 @@
 #include "Terrain.h"
 #include "Utilities.h"
 
+const UINT g_cellsPerPatch = 64;
+
 Terrain::Terrain(void)
 {
+	m_heightmapTexture = NULL;
+	m_heightmapSRV	   = NULL;
 	m_blendmapSRV	   = NULL;
 	m_layermapArraySRV = NULL;
 
@@ -12,6 +16,8 @@ Terrain::Terrain(void)
 
 Terrain::~Terrain(void)
 {
+	RELEASE(m_heightmapTexture);
+	RELEASE(m_heightmapSRV);
 	RELEASE(m_blendmapSRV);
 	RELEASE(m_layermapArraySRV);
 }
@@ -20,18 +26,22 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 {
 	m_terrainDesc = terrainDesc;
 
+	m_patchVertexRowCount = m_terrainDesc.depth / g_cellsPerPatch + 1;
+	m_patchVertexColCount = m_terrainDesc.width / g_cellsPerPatch + 1;
+	m_patchVertexCount	  = m_patchVertexRowCount * m_patchVertexColCount;
+	m_patchQuadFaceCount  = (m_patchVertexRowCount - 1) * (m_patchVertexColCount - 1);
+
+	std::vector<Vertex::Terrain> vertices;
 	std::vector<UINT> indices;
-	createGrid(m_vertices, indices);
+	createQuadPatchGrid(vertices, indices);
 	m_indexCount = (UINT)indices.size();
 
-	updateNormals();
-
 	BufferInitDesc vertexBufferInitDesc;
-	vertexBufferInitDesc.usage			= D3D11_USAGE_DYNAMIC;
-	vertexBufferInitDesc.elementSize	= sizeof(Vertex::Basic);
-	vertexBufferInitDesc.elementCount	= (UINT)m_vertices.size();
-	vertexBufferInitDesc.type			= VertexBuffer;
-	vertexBufferInitDesc.data			= &m_vertices[0];
+	vertexBufferInitDesc.usage		  = D3D11_USAGE_IMMUTABLE;
+	vertexBufferInitDesc.elementSize  = sizeof(Vertex::Terrain);
+	vertexBufferInitDesc.elementCount = (UINT)vertices.size();
+	vertexBufferInitDesc.type		  = VertexBuffer;
+	vertexBufferInitDesc.data		  = &vertices[0];
 	m_vertexBuffer.init(device, vertexBufferInitDesc);
 
 	BufferInitDesc indexBufferInitDesc;
@@ -41,12 +51,15 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 	indexBufferInitDesc.type		 = IndexBuffer;
 	indexBufferInitDesc.data		 = &indices[0];
 	m_indexBuffer.init(device, indexBufferInitDesc);
+
+	m_heightmap.resize((m_terrainDesc.width + 1) * (m_terrainDesc.depth + 1), 0);
+	buildHeightmapSRV(device);
 }
 
-void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
-							const float heightmapScale)
+void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext,
+							const std::string& heightmapFilename, const float heightmapScale)
 {
-	UINT size = m_terrainDesc.width * m_terrainDesc.depth;
+	UINT size = (m_terrainDesc.width + 1) * (m_terrainDesc.depth + 1);
 
 	std::vector<unsigned char> in(size);
 
@@ -58,12 +71,11 @@ void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext, const std::strin
 		file.close();
 	}
 
+	m_heightmap.resize(size);
 	for (UINT i = 0; i < size; i++)
-		m_vertices[i].position.y = (in[i] / 255.f) * heightmapScale;
+		m_heightmap[i] = (in[i] / 255.f) * heightmapScale;
 
-	void* data = m_vertexBuffer.map(deviceContext);
-	memcpy(data, &m_vertices[0], sizeof(Vertex::Basic) * (UINT)m_vertices.size());
-	m_vertexBuffer.unmap(deviceContext);
+	updateHeightmapTexture(deviceContext);
 }
 
 void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
@@ -76,25 +88,29 @@ void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 	m_useBlendmap = true;
 }
 
-void Terrain::updateNormals(void)
-{
-	for (UINT i = 0; i < m_terrainDesc.depth; i++)
-		for (UINT j = 0; j < m_terrainDesc.width; j++)
-			computeNormal(i, j);
-}
-
 void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
 {
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
 	XMMATRIX world			= XMMatrixIdentity();
-	XMMATRIX worldViewProj  = world * camera.getViewProj();
+	XMMATRIX viewProj		= camera.getViewProj();
 	XMFLOAT3 cameraPosition = camera.getPosition();
 	shader->setMatrix("gWorld", world);
-	shader->setMatrix("gWorldViewProj", worldViewProj);
+	shader->setMatrix("gViewProj", viewProj);
 	shader->setFloat3("gCameraPosition", cameraPosition);
+
+	shader->setFloat("gMinDistance", 50.f);
+	shader->setFloat("gMaxDistance", 500.f);
+	shader->setFloat("gMinTessellation", 0.f);
+	shader->setFloat("gMaxTessellation", 6.f);
+
+	shader->setFloat2("gTexelSize", XMFLOAT2(1.f / (m_terrainDesc.width + 1),
+											 1.f / (m_terrainDesc.depth + 1)));
+
+	shader->setResource("gHeightmap", m_heightmapSRV);
 	shader->setResource("gBlendmap", m_blendmapSRV);
 	shader->setResource("gLayermapArray", m_layermapArraySRV);
+
 	shader->setBool("gUseBlendmap", m_useBlendmap);
 
 	m_vertexBuffer.apply(deviceContext);
@@ -103,36 +119,18 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	shader->Apply();
 
 	deviceContext->DrawIndexed(m_indexCount, 0, 0);
+
+	deviceContext->HSSetShader(NULL, NULL, 0);
+	deviceContext->DSSetShader(NULL, NULL, 0);
 }
 
-std::vector<Vertex::Basic*> Terrain::getVerticesWithinRadius(const XMFLOAT3 position, const UINT radius)
+std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
 {
-	const int col = (int)floorf( position.x + 0.5f * (m_terrainDesc.width - 1));
-	const int row = (int)floorf(-position.z + 0.5f * (m_terrainDesc.depth - 1));
+	const int col = (int)floorf( position.x + 0.5f * m_terrainDesc.width);
+	const int row = (int)floorf(-position.z + 0.5f * m_terrainDesc.depth);
 
-	std::vector<Vertex::Basic*> vertices;
-	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
-		if (i >= 0 && i < m_terrainDesc.depth)
-			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
-				if (j >= 0 && j < m_terrainDesc.width)
-					vertices.push_back(&m_vertices[i * m_terrainDesc.width + j]);
-	return vertices;
-}
-
-void Terrain::updateVertexBuffer(ID3D11DeviceContext* deviceContext)
-{
-	void* data = m_vertexBuffer.map(deviceContext);
-	memcpy(data, &m_vertices[0], sizeof(Vertex::Basic) * (UINT)m_vertices.size());
-	m_vertexBuffer.unmap(deviceContext);
-}
-
-void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices)
-{
-	const float width = (float)m_terrainDesc.width;
-	const float depth = (float)m_terrainDesc.depth;
-
-	UINT vertexCount   = depth * width;
-	UINT triangleCount = (depth - 1) * (width - 1) * 2;
+	const float width = (float)m_terrainDesc.width + 1;
+	const float depth = (float)m_terrainDesc.depth + 1;
 
 	const float halfWidth = 0.5f * width;
 	const float halfDepth = 0.5f * depth;
@@ -140,57 +138,117 @@ void Terrain::createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>
 	const float dx = (float)(width / (width - 1));
 	const float dz = (float)(depth / (depth - 1));
 
-	vertices.resize(vertexCount);
+	std::vector<std::pair<XMFLOAT2, float*>> heightmapData;
+	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
+		if (i >= 0 && i < depth)
+			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
+				if (j >= 0 && j < width)
+					heightmapData.push_back(
+						std::pair<XMFLOAT2, float*>(
+							XMFLOAT2(-halfWidth + j * dx, halfDepth - i * dz),
+							&m_heightmap[i * width + j]));
+	return heightmapData;
+}
 
-	for (UINT i = 0; i < depth; i++)
+void Terrain::updateHeightmapTexture(ID3D11DeviceContext* deviceContext)
+{
+	std::vector<HALF> heightmap(m_heightmap.size());
+	std::transform(m_heightmap.begin(), m_heightmap.end(), heightmap.begin(), XMConvertFloatToHalf);
+
+	D3D11_MAPPED_SUBRESOURCE resource;
+	deviceContext->Map(m_heightmapTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+
+	const uint32_t pitch  = sizeof(HALF) * (m_terrainDesc.width + 1);
+	uint8_t* textureData = reinterpret_cast<uint8_t*>(resource.pData);
+	const uint8_t* heightmapData = reinterpret_cast<uint8_t*>(&heightmap[0]);
+	for (uint32_t i = 0; i < (m_terrainDesc.depth + 1); i++)
 	{
-		float z = halfDepth - i * dz;
-		for (UINT j = 0; j < width; j++)
-		{
-			float x = -halfWidth + j * dx;
+		memcpy(textureData, heightmapData, pitch);
 
-			vertices[i * width + j].position = XMFLOAT3(x, 0.f, z);
-			vertices[i * width + j].normal	 = XMFLOAT3(0.f, 1.f, 0.f);
-			vertices[i * width + j].tex0.x   = (x + halfWidth) / width;
-			vertices[i * width + j].tex0.y   = (z - halfDepth) / -depth;
+		textureData += resource.RowPitch;
+		heightmapData += pitch;
+	}
+
+	deviceContext->Unmap(m_heightmapTexture, 0);
+}
+
+void Terrain::createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices)
+{
+	const float width = (float)m_terrainDesc.width;
+	const float depth = (float)m_terrainDesc.depth;
+
+	const float halfWidth = 0.5f * width;
+	const float halfDepth = 0.5f * depth;
+
+	const float patchWidth = width / (m_patchVertexColCount - 1);
+	const float patchDepth = depth / (m_patchVertexRowCount - 1);
+
+	const float du = 1.f / (m_patchVertexColCount - 1);
+	const float dv = 1.f / (m_patchVertexRowCount - 1);
+
+	vertices.resize(m_patchVertexCount);
+
+	for (UINT i = 0; i < m_patchVertexRowCount; i++)
+	{
+		float z = halfDepth - i * patchDepth;
+		for (UINT j = 0; j < m_patchVertexColCount; j++)
+		{
+			float x = -halfWidth + j * patchWidth;
+
+			vertices[i * m_patchVertexColCount + j].position = XMFLOAT3(x, 0.f, z);
+			vertices[i * m_patchVertexColCount + j].tex0.x   = j * du;
+			vertices[i * m_patchVertexColCount + j].tex0.y   = i * dv;
 		}
 	}
 
-	indices.resize(triangleCount * 3);
+	indices.resize(m_patchQuadFaceCount * 4);
 
 	UINT k = 0;
-	for (UINT i = 0; i < depth - 1; i++)
+	for (UINT i = 0; i < m_patchVertexRowCount - 1; i++)
 	{
-		for (UINT j = 0; j < width - 1; j++)
+		for (UINT j = 0; j < m_patchVertexColCount - 1; j++)
 		{
-			indices[k]	   = i * width + j;
-			indices[k + 1] = i * width + j + 1;
-			indices[k + 2] = (i + 1) * width + j;
+			indices[k]	   = i * m_patchVertexColCount + j;
+			indices[k + 1] = i * m_patchVertexColCount + j + 1;
 			
-			indices[k + 3] = (i + 1) * width + j;
-			indices[k + 4] = i * width + j + 1;
-			indices[k + 5] = (i + 1) * width + j + 1;
+			indices[k + 2] = (i + 1) * m_patchVertexColCount + j;
+			indices[k + 3] = (i + 1) * m_patchVertexColCount + j + 1;
 
-			k += 6;
+			k += 4;
 		}
 	}
 }
 
-void Terrain::computeNormal(int i, int j)
+void Terrain::buildHeightmapSRV(ID3D11Device* device)
 {
-	if (inBounds(i, j))
-	{
-		float top    = inBounds(i + 1, j) ? m_vertices[(i + 1) * m_terrainDesc.width + j].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
-		float left   = inBounds(i, j + 1) ? m_vertices[i * m_terrainDesc.width + j + 1].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
-		float bottom = inBounds(i - 1, j) ? m_vertices[(i - 1) * m_terrainDesc.width + j].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
-		float right  = inBounds(i, j - 1) ? m_vertices[i * m_terrainDesc.width + j - 1].position.y : m_vertices[i * m_terrainDesc.width + j].position.y;
-		
-		XMStoreFloat3(&m_vertices[i * m_terrainDesc.width].normal, XMVector3Normalize(XMLoadFloat3(&XMFLOAT3(bottom - top, 2.f, right - left))));
-	}
-}
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width			   = m_terrainDesc.width + 1;
+	textureDesc.Height			   = m_terrainDesc.depth + 1;
+	textureDesc.MipLevels		   = 1;
+	textureDesc.ArraySize		   = 1;
+	textureDesc.Format			   = DXGI_FORMAT_R16_FLOAT;
+	textureDesc.SampleDesc.Count   = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage			   = D3D11_USAGE_DYNAMIC;
+	textureDesc.BindFlags		   = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags	   = D3D11_CPU_ACCESS_WRITE;
+	textureDesc.MiscFlags		   = 0;
 
-bool Terrain::inBounds(int i, int j)
-{
-	return i >= 0 && i < (int)m_terrainDesc.depth &&
-		   j >= 0 && j < (int)m_terrainDesc.width;
+	std::vector<HALF> heightmap(m_heightmap.size());
+	std::transform(m_heightmap.begin(), m_heightmap.end(), heightmap.begin(), XMConvertFloatToHalf);
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem		  = &heightmap[0];
+	data.SysMemPitch	  = (m_terrainDesc.width + 1) * sizeof(HALF);
+	data.SysMemSlicePitch = 0;
+
+	RELEASE(m_heightmapTexture);
+	device->CreateTexture2D(&textureDesc, &data, &m_heightmapTexture);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format					  = textureDesc.Format;
+	srvDesc.ViewDimension			  = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels		  = -1;
+	device->CreateShaderResourceView(m_heightmapTexture, &srvDesc, &m_heightmapSRV);
 }

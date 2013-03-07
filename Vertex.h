@@ -11,6 +11,13 @@ namespace Vertex
 		XMFLOAT3 normal;
 		XMFLOAT2 tex0;
 	};
+
+	struct Terrain
+	{
+		XMFLOAT3 position;
+		XMFLOAT2 tex0;
+	};
+
 	struct Light
 	{
 		XMFLOAT3 position;

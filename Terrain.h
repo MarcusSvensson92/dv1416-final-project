@@ -26,30 +26,37 @@ public:
 					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
 
-	void updateNormals(void);
-
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
-	std::vector<Vertex::Basic*> getVerticesWithinRadius(const XMFLOAT3 position, const UINT radius);
-	void updateVertexBuffer(ID3D11DeviceContext* deviceContext);
+	std::vector<std::pair<XMFLOAT2, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
 private:
 	TerrainDesc m_terrainDesc;
 
-	std::vector<Vertex::Basic> m_vertices;
+	std::vector<Vertex::Terrain> m_vertices;
 	UINT m_indexCount;
 
 	Buffer m_vertexBuffer;
 	Buffer m_indexBuffer;
 
+	UINT m_patchVertexCount;
+	UINT m_patchQuadFaceCount;
+	UINT m_patchVertexRowCount;
+	UINT m_patchVertexColCount;
+
+	std::vector<float> m_heightmap;
+
+	ID3D11Texture2D* m_heightmapTexture;
+
+	ID3D11ShaderResourceView* m_heightmapSRV;
 	ID3D11ShaderResourceView* m_blendmapSRV;
 	ID3D11ShaderResourceView* m_layermapArraySRV;
 
 	bool m_useBlendmap;
 
-	void createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices);
+	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 
-	void computeNormal(int i, int j);
-	bool inBounds(int i, int j);
+	void buildHeightmapSRV(ID3D11Device* device);
 };
 
 #endif

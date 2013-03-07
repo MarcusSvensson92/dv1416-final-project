@@ -99,6 +99,11 @@ void Shader::setFloat(const std::string& variable, const float value)
 	m_pEffect->GetVariableByName(variable.c_str())->AsScalar()->SetFloat(value);
 }
 
+void Shader::setFloat2(const std::string& variable, const XMFLOAT2 value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);
+}
+
 void Shader::setFloat3(const std::string& variable, const XMFLOAT3 value)
 {
 	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);

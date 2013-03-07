@@ -23,7 +23,6 @@ void Buffer::init(ID3D11Device* device, const BufferInitDesc bufferInitDesc)
 	{
 	case VertexBuffer:
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		break;
 	case IndexBuffer:
 		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -34,6 +33,9 @@ void Buffer::init(ID3D11Device* device, const BufferInitDesc bufferInitDesc)
 		bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		break;
 	}
+
+	if (bufferInitDesc.usage == D3D11_USAGE_DYNAMIC)
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	D3D11_SUBRESOURCE_DATA initData;
 	initData.pSysMem = bufferInitDesc.data;
