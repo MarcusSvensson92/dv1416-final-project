@@ -29,7 +29,7 @@ private:
 
 	float m_brushDiameter;
 	float m_brushHardness;
-	float m_brushOpacity;
+	float m_brushStrength;
 
 	void computeTargetPosition(POINT cursorPosition);
 

@@ -152,15 +152,12 @@ std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(c
 
 void Terrain::updateHeightmapTexture(ID3D11DeviceContext* deviceContext)
 {
-	std::vector<HALF> heightmap(m_heightmap.size());
-	std::transform(m_heightmap.begin(), m_heightmap.end(), heightmap.begin(), XMConvertFloatToHalf);
-
 	D3D11_MAPPED_SUBRESOURCE resource;
 	deviceContext->Map(m_heightmapTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 
-	const uint32_t pitch  = sizeof(HALF) * (m_terrainDesc.width + 1);
+	const uint32_t pitch = sizeof(float) * (m_terrainDesc.width + 1);
 	uint8_t* textureData = reinterpret_cast<uint8_t*>(resource.pData);
-	const uint8_t* heightmapData = reinterpret_cast<uint8_t*>(&heightmap[0]);
+	const uint8_t* heightmapData = reinterpret_cast<uint8_t*>(&m_heightmap[0]);
 	for (uint32_t i = 0; i < (m_terrainDesc.depth + 1); i++)
 	{
 		memcpy(textureData, heightmapData, pitch);
@@ -226,7 +223,7 @@ void Terrain::buildHeightmapSRV(ID3D11Device* device)
 	textureDesc.Height			   = m_terrainDesc.depth + 1;
 	textureDesc.MipLevels		   = 1;
 	textureDesc.ArraySize		   = 1;
-	textureDesc.Format			   = DXGI_FORMAT_R16_FLOAT;
+	textureDesc.Format			   = DXGI_FORMAT_R32_FLOAT;
 	textureDesc.SampleDesc.Count   = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage			   = D3D11_USAGE_DYNAMIC;
@@ -234,12 +231,9 @@ void Terrain::buildHeightmapSRV(ID3D11Device* device)
 	textureDesc.CPUAccessFlags	   = D3D11_CPU_ACCESS_WRITE;
 	textureDesc.MiscFlags		   = 0;
 
-	std::vector<HALF> heightmap(m_heightmap.size());
-	std::transform(m_heightmap.begin(), m_heightmap.end(), heightmap.begin(), XMConvertFloatToHalf);
-
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem		  = &heightmap[0];
-	data.SysMemPitch	  = (m_terrainDesc.width + 1) * sizeof(HALF);
+	data.pSysMem		  = &m_heightmap[0];
+	data.SysMemPitch	  = (m_terrainDesc.width + 1) * sizeof(float);
 	data.SysMemSlicePitch = 0;
 
 	RELEASE(m_heightmapTexture);

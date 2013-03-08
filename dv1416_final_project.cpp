@@ -173,11 +173,11 @@ void dv1416_final_project::initLights(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width			= 256;
-	td.depth			= 256;
+	td.width = 2048;
+	td.depth = 2048;
 	m_terrain.init(m_device, td);
-	/*m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
-	std::vector<std::string> layermapFilenames;
+	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	/*std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
@@ -222,6 +222,6 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	levelToolWindow.init(m_hInstance, hWnd, ltwd);
 	levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
 	levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
-	levelToolWindow.addTrackbar("Brush Opacity", &m_levelTool, 1, 100, 100);
+	levelToolWindow.addTrackbar("Brush Strength", &m_levelTool, 1, 100, 5);
 	levelToolWindow.show(true);
 }

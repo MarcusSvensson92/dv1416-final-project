@@ -133,6 +133,7 @@ struct PSIn
 {
 	float4 positionH : SV_POSITION;
 	float3 positionW : POSITION;
+	float3 normalW	 : NORMAL;
 	float2 tex0		 : TEX0;
 	float2 tiledTex0 : TEX1;
 };
@@ -154,16 +155,11 @@ PSIn DS(TessellationPatch tp, float2 uv : SV_DomainLocation, const OutputPatch<D
 
 	output.positionH = mul(float4(output.positionW, 1.f), gViewProj);
 
-	return output;
-}
-
-float4 PS(PSIn input) : SV_TARGET
-{
 	// Estimate normal
-	float2 leftTex0   = input.tex0 + float2(-gTexelSize.x, 0.f);
-	float2 rightTex0  = input.tex0 + float2( gTexelSize.x, 0.f);
-	float2 bottomTex0 = input.tex0 + float2(0.f,  gTexelSize.y);
-	float2 topTex0	  = input.tex0 + float2(0.f, -gTexelSize.y);
+	float2 leftTex0   = output.tex0 + float2(-gTexelSize.x, 0.f);
+	float2 rightTex0  = output.tex0 + float2( gTexelSize.x, 0.f);
+	float2 bottomTex0 = output.tex0 + float2(0.f,  gTexelSize.y);
+	float2 topTex0	  = output.tex0 + float2(0.f, -gTexelSize.y);
 
 	float leftY   = gHeightmap.SampleLevel(heightmapSampler, leftTex0,	 0).r;
 	float rightY  = gHeightmap.SampleLevel(heightmapSampler, rightTex0,  0).r;
@@ -172,8 +168,14 @@ float4 PS(PSIn input) : SV_TARGET
 
 	float3 tangent = normalize(float3(2.f, rightY - leftY, 0.f));
 	float3 bitan   = normalize(float3(0.f, bottomY - topY, -2.f));
-	float3 normalW = cross(tangent, bitan);
 
+	output.normalW = cross(tangent, bitan);
+
+	return output;
+}
+
+float4 PS(PSIn input) : SV_TARGET
+{
 	if (gUseBlendmap)
 	{
 		float4 c0 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 0.f));
@@ -218,7 +220,7 @@ float4 PS(PSIn input) : SV_TARGET
 			}*/
 
 			float4 A,D,S;
-			ComputePointLight(gMaterial, gPointLights[i], input.positionW, normalW, toEye, A, D, S);
+			ComputePointLight(gMaterial, gPointLights[i], input.positionW, input.normalW, toEye, A, D, S);
 			ambient += A;
 			diffuse += shadow*D;
 			spec += shadow*S;
@@ -235,7 +237,7 @@ float4 PS(PSIn input) : SV_TARGET
 				shadow = 1.0f;
 
 			float4 A,D,S;
-			ComputeDirectionalLight(gMaterial, gDirectionalLights[i], normalW, toEye, A, D, S);
+			ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
 			ambient += A;
 			diffuse += shadow*D;
 			spec += shadow*S;

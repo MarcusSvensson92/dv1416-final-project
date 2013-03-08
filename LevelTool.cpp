@@ -8,7 +8,7 @@ LevelTool::LevelTool(void)
 
 	m_brushDiameter = 10.f;
 	m_brushHardness = 0.5f;
-	m_brushOpacity  = 1.f;
+	m_brushStrength = 5.f;
 }
 
 LevelTool::~LevelTool(void)
@@ -48,8 +48,8 @@ void LevelTool::onEvent(const std::string& sender, const std::string& eventName)
 			m_brushDiameter = (float)levelToolWindow.getTrackbarValue(eventName);
 		else if (eventName == "Brush Hardness")
 			m_brushHardness = (float)levelToolWindow.getTrackbarValue(eventName) / 100.f;
-		else if (eventName == "Brush Opacity")
-			m_brushOpacity = (float)levelToolWindow.getTrackbarValue(eventName) / 100.f;
+		else if (eventName == "Brush Strength")
+			m_brushStrength = (float)levelToolWindow.getTrackbarValue(eventName);
 	}
 }
 
@@ -75,7 +75,7 @@ void LevelTool::updateTerrainAltitude(const float dt)
 		{
 			const float dy = (m_brushHardness < 0.99f) ? 1 - pow(length, 1.f / (1.f - m_brushHardness)) : 1.f;
 			if (dy > 0.f)
-				*it->second += dy * dt * m_brushOpacity * 5.f;
+				*it->second += dy * dt * m_brushStrength;
 		}
 	}
 	m_terrain->updateHeightmapTexture(m_deviceContext);
