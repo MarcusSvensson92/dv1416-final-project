@@ -1,12 +1,12 @@
 #include "StdAfx.h"
 #include "Terrain.h"
-#include "Utilities.h"
 
 const UINT g_cellsPerPatch = 64;
 
 Terrain::Terrain(void)
 {
 	m_heightmapTexture = NULL;
+	m_blendmapTexture  = NULL;
 	m_heightmapSRV	   = NULL;
 	m_blendmapSRV	   = NULL;
 	m_layermapArraySRV = NULL;
@@ -82,7 +82,8 @@ void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 						   const std::string& blendmapFilename,
 						   std::vector<std::string> layermapFilenames)
 {
-	D3DX11CreateShaderResourceViewFromFile(device, blendmapFilename.c_str(), NULL, NULL, &m_blendmapSRV, NULL);
+	Utilities::loadPNG(blendmapFilename, m_blendmap);
+	buildBlendmapSRV(device);
 	m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
 
 	m_useBlendmap = true;
@@ -169,6 +170,25 @@ void Terrain::updateHeightmapTexture(ID3D11DeviceContext* deviceContext)
 	deviceContext->Unmap(m_heightmapTexture, 0);
 }
 
+void Terrain::updateBlendmapTexture(ID3D11DeviceContext* deviceContext)
+{
+	D3D11_MAPPED_SUBRESOURCE resource;
+	deviceContext->Map(m_blendmapTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+
+	const uint32_t pitch = sizeof(XMFLOAT4) * m_blendmap.width;
+	uint8_t* textureData = reinterpret_cast<uint8_t*>(resource.pData);
+	const uint8_t* blendmapData = reinterpret_cast<uint8_t*>(&m_blendmap.texels[0]);
+	for (uint32_t i = 0; i < m_blendmap.height; i++)
+	{
+		memcpy(textureData, blendmapData, pitch);
+
+		textureData += resource.RowPitch;
+		blendmapData += pitch;
+	}
+
+	deviceContext->Unmap(m_blendmapTexture, 0);
+}
+
 void Terrain::createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices)
 {
 	const float width = (float)m_terrainDesc.width;
@@ -245,4 +265,35 @@ void Terrain::buildHeightmapSRV(ID3D11Device* device)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels		  = -1;
 	device->CreateShaderResourceView(m_heightmapTexture, &srvDesc, &m_heightmapSRV);
+}
+
+void Terrain::buildBlendmapSRV(ID3D11Device* device)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width			   = m_blendmap.width;
+	textureDesc.Height			   = m_blendmap.height;
+	textureDesc.MipLevels		   = 1;
+	textureDesc.ArraySize		   = 1;
+	textureDesc.Format			   = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count   = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage			   = D3D11_USAGE_DYNAMIC;
+	textureDesc.BindFlags		   = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags	   = D3D11_CPU_ACCESS_WRITE;
+	textureDesc.MiscFlags		   = 0;
+
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem		  = &m_blendmap.texels[0];
+	data.SysMemPitch	  = sizeof(XMFLOAT4) * m_blendmap.width;
+	data.SysMemSlicePitch = 0;
+
+	RELEASE(m_blendmapTexture);
+	device->CreateTexture2D(&textureDesc, &data, &m_blendmapTexture);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format					  = textureDesc.Format;
+	srvDesc.ViewDimension			  = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels		  = -1;
+	device->CreateShaderResourceView(m_blendmapTexture, &srvDesc, &m_blendmapSRV);
 }

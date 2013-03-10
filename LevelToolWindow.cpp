@@ -70,6 +70,7 @@ namespace GUI
 		const int id = getItemID(itemName);
 		if (id != -1)
 			return (UINT)SendMessage(GetDlgItem(m_hWnd, id), TBM_GETPOS, NULL, NULL);
+		return 0;
 	}
 
 	int LevelToolWindow::getItemID(const UINT i) const

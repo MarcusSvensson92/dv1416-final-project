@@ -79,4 +79,174 @@ namespace Utilities
 
 		return textureArraySRV;
 	}
+
+	bool loadPNG(const std::string& filename, PNGData& data)
+	{
+		FILE* file = fopen(filename.c_str(), "rb");
+		if (!file)
+			return false;
+
+		png_byte header[8];
+		fread(header, 1, 8, file);
+		if (png_sig_cmp(header, 0, 8))
+			return false;
+
+		png_structp readStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		if (!readStruct)
+			return false;
+
+		png_infop infoStruct = png_create_info_struct(readStruct);
+		if (!infoStruct)
+		{
+			png_destroy_read_struct(&readStruct, (png_infopp)NULL, (png_infopp)NULL);
+			return false;
+		}
+
+		if (setjmp(png_jmpbuf(readStruct)))
+		{
+			png_destroy_read_struct(&readStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_init_io(readStruct, file);
+		png_set_sig_bytes(readStruct, 8);
+
+		png_read_info(readStruct, infoStruct);
+
+		data.width     = png_get_image_width(readStruct, infoStruct);
+		data.height	   = png_get_image_height(readStruct, infoStruct);
+		data.colorType = png_get_color_type(readStruct, infoStruct);
+		data.bitDepth  = png_get_bit_depth(readStruct, infoStruct);
+
+		png_read_update_info(readStruct, infoStruct);
+
+		if (setjmp(png_jmpbuf(readStruct)))
+		{
+			png_destroy_read_struct(&readStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_bytep* rows = (png_bytep*)malloc(sizeof(png_bytep) * data.height);
+		for (UINT i = 0; i < data.height; i++)
+			rows[i] = (png_byte*)malloc(png_get_rowbytes(readStruct, infoStruct));
+
+		png_read_image(readStruct, rows);
+
+		fclose(file);
+
+		if (png_get_color_type(readStruct, infoStruct) != PNG_COLOR_TYPE_RGBA)
+		{
+			for (UINT i = 0; i < data.height; i++)
+				free(rows[i]);
+			free(rows);
+			png_destroy_read_struct(&readStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		data.texels.resize(data.width * data.height);
+
+		for (UINT i = 0; i < data.height; i++)
+		{
+			png_byte* row = rows[i];
+			for (UINT j = 0; j < data.width; j++)
+			{
+				png_byte* texel = &(row[j * 4]);
+				data.texels[i * data.width + j]
+					= XMFLOAT4(texel[0] / 255.f,
+							   texel[1] / 255.f,
+							   texel[2] / 255.f,
+							   texel[3] / 255.f);
+			}
+		}
+
+		for (UINT i = 0; i < data.height; i++)
+			free(rows[i]);
+		free(rows);
+		png_destroy_read_struct(&readStruct, &infoStruct, (png_infopp)NULL);
+
+		return true;
+	}
+
+	bool savePNG(const std::string& filename, PNGData data)
+	{
+		FILE* file = fopen(filename.c_str(), "rb");
+		if (!file)
+			return false;
+
+		png_structp writeStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		if (!writeStruct)
+			return false;
+
+		png_infop infoStruct = png_create_info_struct(writeStruct);
+		if (!infoStruct)
+		{
+			png_destroy_read_struct(&writeStruct, (png_infopp)NULL, (png_infopp)NULL);
+			return false;
+		}
+
+		if (setjmp(png_jmpbuf(writeStruct)))
+		{
+			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_init_io(writeStruct, file);
+
+		if (setjmp(png_jmpbuf(writeStruct)))
+		{
+			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_set_IHDR(writeStruct, infoStruct, data.width, data.height,
+					 data.bitDepth, data.colorType, PNG_INTERLACE_NONE,
+					 PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+		png_write_info(writeStruct, infoStruct);
+
+		if (setjmp(png_jmpbuf(writeStruct)))
+		{
+			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_bytep* rows = (png_bytep*)malloc(sizeof(png_bytep) * data.height);
+		for (UINT i = 0; i < data.height; i++)
+			rows[i] = (png_byte*)malloc(png_get_rowbytes(writeStruct, infoStruct));
+
+		for (UINT i = 0; i < data.height; i++)
+		{
+			png_byte* row = rows[i];
+			for (UINT j = 0; j < data.width; j++)
+			{
+				png_byte* texel = &(row[j * 4]);
+				texel[0] = data.texels[i * data.width + j].x * 255.f;
+				texel[1] = data.texels[i * data.width + j].y * 255.f;
+				texel[2] = data.texels[i * data.width + j].z * 255.f;
+				texel[3] = data.texels[i * data.width + j].w * 255.f;
+			}
+		}
+
+		png_write_image(writeStruct, rows);
+
+		if (setjmp(png_jmpbuf(writeStruct)))
+		{
+			for (UINT i = 0; i < data.height; i++)
+				free(rows[i]);
+			free(rows);
+			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			return false;
+		}
+
+		png_write_end(writeStruct, NULL);
+
+		fclose(file);
+
+		for (UINT i = 0; i < data.height; i++)
+			free(rows[i]);
+		free(rows);
+		png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+
+		return true;
+	}
 }

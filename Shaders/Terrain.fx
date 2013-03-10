@@ -182,15 +182,15 @@ float4 PS(PSIn input) : SV_TARGET
 		float4 c1 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 1.f));
 		float4 c2 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 2.f));
 		float4 c3 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 3.f));
-		float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
-
+		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
+		
 		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
 
 		float4 texColor = c0;
 		texColor = lerp(texColor, c1, t.r);
 		texColor = lerp(texColor, c2, t.g);
 		texColor = lerp(texColor, c3, t.b);
-		texColor = lerp(texColor, c4, t.a);
+		//texColor = lerp(texColor, c4, t.a);
 
 
 		float3 toEye = gCameraPosition - input.positionW;
@@ -262,6 +262,6 @@ technique11 RenderTech
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 
-		SetRasterizerState(wireframeRS);
+		//SetRasterizerState(wireframeRS);
 	}
 }

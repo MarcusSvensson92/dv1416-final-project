@@ -173,16 +173,16 @@ void dv1416_final_project::initLights(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width = 2048;
-	td.depth = 2048;
+	td.width = 256;
+	td.depth = 256;
 	m_terrain.init(m_device, td);
 	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
-	/*std::vector<std::string> layermapFilenames;
-	layermapFilenames.push_back("temp-textures/sandripple.png");
+	std::vector<std::string> layermapFilenames;
+	layermapFilenames.push_back("temp-textures/grayRock.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
-	layermapFilenames.push_back("temp-textures/grayRock.png");
-	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);*/
+	layermapFilenames.push_back("temp-textures/sandripple.png");
+	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
 }
 
 void dv1416_final_project::initGUI(HWND hWnd)

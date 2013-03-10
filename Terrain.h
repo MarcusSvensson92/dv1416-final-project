@@ -6,6 +6,7 @@
 #include "Buffer.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Utilities.h"
 
 struct TerrainDesc
 {
@@ -30,6 +31,7 @@ public:
 
 	std::vector<std::pair<XMFLOAT2, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
 	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
+	void updateBlendmapTexture(ID3D11DeviceContext* deviceContext);
 private:
 	TerrainDesc m_terrainDesc;
 
@@ -45,8 +47,10 @@ private:
 	UINT m_patchVertexColCount;
 
 	std::vector<float> m_heightmap;
+	Utilities::PNGData m_blendmap;
 
 	ID3D11Texture2D* m_heightmapTexture;
+	ID3D11Texture2D* m_blendmapTexture;
 
 	ID3D11ShaderResourceView* m_heightmapSRV;
 	ID3D11ShaderResourceView* m_blendmapSRV;
@@ -57,6 +61,7 @@ private:
 	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 
 	void buildHeightmapSRV(ID3D11Device* device);
+	void buildBlendmapSRV(ID3D11Device* device);
 };
 
 #endif
