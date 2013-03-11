@@ -3,10 +3,12 @@
 
 namespace GUI
 {
-	const UINT g_levelToolWindowItemIDStart = 3001;
+	const UINT g_itemIDStart = 3001;
 
+	const UINT g_trackbarWidth		= 111;
 	const UINT g_trackbarHeight		= 30;
 	const UINT g_trackbarTextHeight = 12;
+	const UINT g_margin				= 5;
 
 	LevelToolWindow* g_levelToolWindow;
 
@@ -21,14 +23,11 @@ namespace GUI
 	}
 
 	void LevelToolWindow::init(HINSTANCE hInstance, HWND hParentWnd,
-							   const LevelToolWindowDesc levelToolWindowDesc)
+							   const SubwindowDesc subwindowDesc)
 	{
-		m_levelToolWindowDesc = levelToolWindowDesc;
-
-		initWindow(hInstance, hParentWnd, levelToolWindowDesc.caption,
+		initWindow(hInstance, hParentWnd, subwindowDesc,
 				   WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
-				   levelToolWindowDesc.x, levelToolWindowDesc.y,
-				   levelToolWindowDesc.width, levelToolWindowDesc.height);
+				   g_trackbarWidth + 2 * g_margin, g_margin);
 
 		SetWindowSubclass(m_hWnd, levelToolWindowMsgRouter, 0, 0);
 	}
@@ -37,12 +36,11 @@ namespace GUI
 									  const UINT minValue, const UINT maxValue, const UINT startValue)
 	{
 		const UINT count  = (UINT)m_items.size();
-		const UINT margin = m_levelToolWindowDesc.margin;
-		const UINT width  = m_levelToolWindowDesc.width - 2 * margin;
+		const UINT width  = g_trackbarWidth;
 		const UINT height = g_trackbarHeight;
-		const UINT x	  = margin;
-			  UINT y	  = count * (height + margin + g_trackbarTextHeight) + margin;
-		const UINT id	  = g_levelToolWindowItemIDStart + count;
+		const UINT x	  = g_margin;
+			  UINT y	  = count * (height + g_margin + g_trackbarTextHeight) + g_margin;
+		const UINT id	  = g_itemIDStart + count;
 
 		HWND hText = CreateWindow("STATIC", name.c_str(), WS_VISIBLE | WS_CHILD,
 								  x, y, width, g_trackbarTextHeight,
@@ -55,14 +53,19 @@ namespace GUI
 
 		y += g_trackbarTextHeight;
 
-		HWND hTrackbar = CreateWindow(TRACKBAR_CLASS, m_levelToolWindowDesc.caption.c_str(),
-									  WS_CHILD | WS_VISIBLE | TBS_TOOLTIPS,
+		HWND hTrackbar = CreateWindow(TRACKBAR_CLASS, NULL, WS_CHILD | WS_VISIBLE | TBS_TOOLTIPS,
 									  x, y, width, height, m_hWnd, (HMENU)id, m_hInstance, NULL);
 
 		SendMessage(hTrackbar, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(minValue, maxValue));
 		SendMessage(hTrackbar, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)startValue);
 
 		m_items.push_back(EventElement(name, eventReceiver));
+
+		m_clientHeight += height + g_trackbarTextHeight + g_margin;
+
+		const POINT windowSize	   = getWindowSize();
+		const POINT windowPosition = getWindowPosition();
+		SetWindowPos(m_hWnd, HWND_TOP, windowPosition.x, windowPosition.y, windowSize.x, windowSize.y, NULL);
 	}
 
 	UINT LevelToolWindow::getTrackbarValue(const std::string& itemName) const
@@ -75,14 +78,14 @@ namespace GUI
 
 	int LevelToolWindow::getItemID(const UINT i) const
 	{
-		return (i < (UINT)m_items.size()) ? g_levelToolWindowItemIDStart + i : -1;
+		return (i < (UINT)m_items.size()) ? g_itemIDStart + i : -1;
 	}
 
 	int LevelToolWindow::getItemID(const std::string& itemName) const
 	{
 		for (UINT i = 0; i < (UINT)m_items.size(); i++)
 			if (m_items[i].first == itemName)
-				return g_levelToolWindowItemIDStart + i;
+				return g_itemIDStart + i;
 		return -1;
 	}
 }

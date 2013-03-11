@@ -16,7 +16,7 @@ namespace GUI
 			const UINT id = LOWORD(wParam);
 			for (UINT i = 0; i < (UINT)m_items.size(); i++)
 				if (getItemID(i) == id)
-					m_items[i].second->onEvent(m_caption, m_items[i].first);
+					m_items[i].second->onEvent(m_subwindowDesc.caption, m_items[i].first);
 			break;
 		}
 		case WM_NOTIFY:
@@ -26,7 +26,7 @@ namespace GUI
 				const UINT id = ((LPNMHDR)lParam)->idFrom;
 				for (UINT i = 0; i < (UINT)m_items.size(); i++)
 					if (getItemID(i) == id)
-						m_items[i].second->onEvent(m_caption, m_items[i].first);
+						m_items[i].second->onEvent(m_subwindowDesc.caption, m_items[i].first);
 			}
 			break;
 		}
@@ -62,32 +62,42 @@ namespace GUI
 		ShowWindow(m_hWnd, cmdShow);
 	}
 
-	void Subwindow::initWindow(HINSTANCE hInstance, HWND hParentWnd, const std::string& caption, const DWORD style,
-							   const UINT x, const UINT y, const UINT clientWidth, const UINT clientHeight)
+	void Subwindow::initWindow(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc,
+							   const DWORD style, const UINT clientWidth, const UINT clientHeight)
 	{
-		m_hInstance    = hInstance;
-		m_caption	   = caption;
-		m_style		   = style;
-		m_clientWidth  = clientWidth;
-		m_clientHeight = clientHeight;
+		m_hInstance     = hInstance;
+		m_subwindowDesc = subwindowDesc;
+		m_style		    = style;
+		m_clientWidth   = clientWidth;
+		m_clientHeight  = clientHeight;
 
-		const POINT windowSize = computeWindowSize();
+		const POINT windowSize = getWindowSize();
 
 		CLIENTCREATESTRUCT ccs;
 		ZeroMemory(&ccs, sizeof(ccs));
 
-		m_hWnd = CreateWindow("MDICLIENT", caption.c_str(), style,
-							  x, y, windowSize.x, windowSize.y,
+		m_hWnd = CreateWindow("MDICLIENT", subwindowDesc.caption.c_str(), style,
+							  subwindowDesc.x, subwindowDesc.y, windowSize.x, windowSize.y,
 							  hParentWnd, NULL, hInstance, (LPSTR)&ccs);
 	}
 
-	POINT Subwindow::computeWindowSize(void) const
+	POINT Subwindow::getWindowSize(void) const
 	{
 		RECT rect = {0, 0, m_clientWidth, m_clientHeight};
 		AdjustWindowRect(&rect, m_style, false);
-		POINT wndSize;
-		wndSize.x = rect.right  - rect.left;
-		wndSize.y = rect.bottom - rect.top;
-		return wndSize;
+		POINT windowSize;
+		windowSize.x = rect.right  - rect.left;
+		windowSize.y = rect.bottom - rect.top;
+		return windowSize;
+	}
+
+	POINT Subwindow::getWindowPosition(void) const
+	{
+		RECT rect;
+		GetWindowRect(m_hWnd, &rect);
+		POINT windowPosition;
+		windowPosition.x = rect.left;
+		windowPosition.y = rect.top;
+		return windowPosition;
 	}
 }

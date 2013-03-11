@@ -1,48 +1,41 @@
-#ifndef LEVELTOOL_H
-#define LEVELTOOL_H
+#ifndef TEXTURETOOL_H
+#define TEXTURETOOL_H
 
 #include "StdAfx.h"
-#include "Camera.h"
 #include "Tool.h"
 #include "Terrain.h"
+#include "Camera.h"
 
-class LevelTool : public Tool
+class TextureTool : public Tool
 {
 public:
-	enum State
-	{
-		Raising,
-		Lowering
-	};
-
-	LevelTool(void);
-	~LevelTool(void);
+	TextureTool(void);
+	~TextureTool(void);
 
 	void setTerrain(Terrain* terrain) { m_terrain = terrain; }
-	void setState(State state) { m_state = state; }
 
-	void init(HWND hWnd, ID3D11DeviceContext* deviceContext, Camera* camera);
+	void init(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, Camera* camera);
 	void update(const float dt);
 protected:
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	HWND m_hWnd;
-	Camera* m_camera;
+	ID3D11Device* m_device;
 	ID3D11DeviceContext* m_deviceContext;
+	Camera* m_camera;
 
 	Terrain* m_terrain;
 
 	XMFLOAT3 m_targetPosition;
+	XMFLOAT4 m_brush;
+	UINT m_brushIndex;
 
 	float m_brushDiameter;
-	float m_brushHardness;
 	float m_brushStrength;
-
-	State m_state;
 
 	void computeTargetPosition(POINT cursorPosition);
 
-	void updateTerrainHeightmap(const float dt);
+	void updateTerrainBlendmap(const float dt);
 };
 
 #endif

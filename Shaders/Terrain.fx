@@ -27,9 +27,13 @@ cbuffer cbConstant
 	float gTextureScale = 5.f;
 };
 
-Texture2D	   gHeightmap;
-Texture2D	   gBlendmap;
-Texture2DArray gLayermapArray;
+Texture2D gHeightmap;
+Texture2D gBlendmap;
+//Texture2DArray gLayermapArray;
+Texture2D gLayermap0;
+Texture2D gLayermap1;
+Texture2D gLayermap2;
+Texture2D gLayermap3;
 
 RasterizerState wireframeRS
 {
@@ -178,19 +182,24 @@ float4 PS(PSIn input) : SV_TARGET
 {
 	if (gUseBlendmap)
 	{
-		float4 c0 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 0.f));
-		float4 c1 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 1.f));
-		float4 c2 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 2.f));
-		float4 c3 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 3.f));
+		float4 c0 = gLayermap0.Sample(linearSampler, input.tiledTex0);
+		float4 c1 = gLayermap1.Sample(linearSampler, input.tiledTex0);
+		float4 c2 = gLayermap2.Sample(linearSampler, input.tiledTex0);
+		float4 c3 = gLayermap3.Sample(linearSampler, input.tiledTex0);
 		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
 		
 		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
 
-		float4 texColor = c0;
+		/*float4 texColor = c0;
 		texColor = lerp(texColor, c1, t.r);
 		texColor = lerp(texColor, c2, t.g);
-		texColor = lerp(texColor, c3, t.b);
+		texColor = lerp(texColor, c3, t.b);*/
 		//texColor = lerp(texColor, c4, t.a);
+		float4 texColor = float4(1.f, 1.f, 1.f, 1.f);
+		texColor = lerp(texColor, c0, t.r);
+		texColor = lerp(texColor, c1, t.g);
+		texColor = lerp(texColor, c2, t.b);
+		texColor = lerp(texColor, c3, t.a);
 
 
 		float3 toEye = gCameraPosition - input.positionW;

@@ -5,11 +5,14 @@ const UINT g_cellsPerPatch = 64;
 
 Terrain::Terrain(void)
 {
-	m_heightmapTexture = NULL;
-	m_blendmapTexture  = NULL;
-	m_heightmapSRV	   = NULL;
-	m_blendmapSRV	   = NULL;
-	m_layermapArraySRV = NULL;
+	m_heightmapTexture    = NULL;
+	m_blendmapTexture     = NULL;
+	m_heightmapSRV	      = NULL;
+	m_blendmapSRV		  = NULL;
+	m_layermapArraySRV[0] = NULL;
+	m_layermapArraySRV[1] = NULL;
+	m_layermapArraySRV[2] = NULL;
+	m_layermapArraySRV[3] = NULL;
 
 	m_useBlendmap = false;
 }
@@ -19,7 +22,10 @@ Terrain::~Terrain(void)
 	RELEASE(m_heightmapTexture);
 	RELEASE(m_heightmapSRV);
 	RELEASE(m_blendmapSRV);
-	RELEASE(m_layermapArraySRV);
+	RELEASE(m_layermapArraySRV[0]);
+	RELEASE(m_layermapArraySRV[1]);
+	RELEASE(m_layermapArraySRV[2]);
+	RELEASE(m_layermapArraySRV[3]);
 }
 
 void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
@@ -84,9 +90,15 @@ void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 {
 	Utilities::loadPNG(blendmapFilename, m_blendmap);
 	buildBlendmapSRV(device);
-	m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
+	//m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
 
 	m_useBlendmap = true;
+}
+
+void Terrain::loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename)
+{
+	RELEASE(m_layermapArraySRV[i]);
+	D3DX11CreateShaderResourceViewFromFile(device, filename.c_str(), NULL, NULL, &m_layermapArraySRV[i], NULL);
 }
 
 void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
@@ -100,7 +112,7 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	shader->setMatrix("gViewProj", viewProj);
 	shader->setFloat3("gCameraPosition", cameraPosition);
 
-	shader->setFloat("gMinDistance", 50.f);
+	shader->setFloat("gMinDistance", 20.f);
 	shader->setFloat("gMaxDistance", 500.f);
 	shader->setFloat("gMinTessellation", 0.f);
 	shader->setFloat("gMaxTessellation", 6.f);
@@ -110,7 +122,11 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 
 	shader->setResource("gHeightmap", m_heightmapSRV);
 	shader->setResource("gBlendmap", m_blendmapSRV);
-	shader->setResource("gLayermapArray", m_layermapArraySRV);
+	//shader->setResource("gLayermapArray", m_layermapArraySRV);
+	shader->setResource("gLayermap0", m_layermapArraySRV[0]);
+	shader->setResource("gLayermap1", m_layermapArraySRV[1]);
+	shader->setResource("gLayermap2", m_layermapArraySRV[2]);
+	shader->setResource("gLayermap3", m_layermapArraySRV[3]);
 
 	shader->setBool("gUseBlendmap", m_useBlendmap);
 
@@ -130,14 +146,14 @@ std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(c
 	const int col = (int)floorf( position.x + 0.5f * m_terrainDesc.width);
 	const int row = (int)floorf(-position.z + 0.5f * m_terrainDesc.depth);
 
-	const float width = (float)m_terrainDesc.width + 1;
-	const float depth = (float)m_terrainDesc.depth + 1;
+	const UINT width = m_terrainDesc.width + 1;
+	const UINT depth = m_terrainDesc.depth + 1;
 
-	const float halfWidth = 0.5f * width;
-	const float halfDepth = 0.5f * depth;
+	const float halfWidth = 0.5f * (float)width;
+	const float halfDepth = 0.5f * (float)depth;
 
-	const float dx = (float)(width / (width - 1));
-	const float dz = (float)(depth / (depth - 1));
+	const float dx = (float)width / ((float)width - 1);
+	const float dz = (float)depth / ((float)depth - 1);
 
 	std::vector<std::pair<XMFLOAT2, float*>> heightmapData;
 	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
@@ -149,6 +165,32 @@ std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(c
 							XMFLOAT2(-halfWidth + j * dx, halfDepth - i * dz),
 							&m_heightmap[i * width + j]));
 	return heightmapData;
+}
+
+std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> Terrain::getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
+{
+	const int col = (int)floorf( position.x + 0.5f * m_terrainDesc.width);
+	const int row = (int)floorf(-position.z + 0.5f * m_terrainDesc.depth);
+
+	const UINT width = m_terrainDesc.width;
+	const UINT depth = m_terrainDesc.depth;
+
+	const float halfWidth = 0.5f * (float)width;
+	const float halfDepth = 0.5f * (float)depth;
+
+	const float dx = (float)width / ((float)width - 1);
+	const float dz = (float)depth / ((float)depth - 1);
+
+	std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> blendmapData;
+	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
+		if (i >= 0 && i < depth)
+			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
+				if (j >= 0 && j < width)
+					blendmapData.push_back(
+						std::pair<XMFLOAT2, XMFLOAT4*>(
+							XMFLOAT2(-halfWidth + j * dx, halfDepth - i * dz),
+							&m_blendmap.texels[i * width + j]));
+	return blendmapData;
 }
 
 void Terrain::updateHeightmapTexture(ID3D11DeviceContext* deviceContext)

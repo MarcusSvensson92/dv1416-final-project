@@ -1,6 +1,8 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
+#include <vld.h>
+
 #include <png.h>
 
 #include <D3D11.h>

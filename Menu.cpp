@@ -1,10 +1,10 @@
 #include "StdAfx.h"
 #include "Menu.h"
 
-const UINT g_menuItemIDStart = 1001;
-
 namespace GUI
 {
+	const UINT g_itemIDStart = 1001;
+
 	Menu::Menu(void)
 	{
 		m_hMenu = CreateMenu();
@@ -26,7 +26,7 @@ namespace GUI
 		flags |= (enabled) ? MF_ENABLED : MF_DISABLED;
 		flags |= (checked) ? MF_CHECKED : MF_UNCHECKED;
 
-		const UINT id = g_menuItemIDStart + (UINT)m_items.size();
+		const UINT id = g_itemIDStart + (UINT)m_items.size();
 
 		AppendMenu(hSubMenu, flags, id, itemName.c_str());
 		m_items.push_back(EventElement(itemName, eventReceiver));
@@ -63,7 +63,7 @@ namespace GUI
 		{
 			const UINT id = LOWORD(wParam);
 			for (UINT i = 0; i < (UINT)m_items.size(); i++)
-				if (g_menuItemIDStart + i == id)
+				if (g_itemIDStart + i == id)
 					m_items[i].second->onEvent("Menu", m_items[i].first);
 		}
 	}
@@ -93,7 +93,7 @@ namespace GUI
 	{
 		for (UINT i = 0; i < (UINT)m_items.size(); i++)
 			if (m_items[i].first == itemName)
-				return g_menuItemIDStart + i;
+				return g_itemIDStart + i;
 		return -1;
 	}
 }

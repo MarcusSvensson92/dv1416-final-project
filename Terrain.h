@@ -26,10 +26,13 @@ public:
 	void loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
+	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
 	std::vector<std::pair<XMFLOAT2, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+	std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+
 	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
 	void updateBlendmapTexture(ID3D11DeviceContext* deviceContext);
 private:
@@ -54,7 +57,8 @@ private:
 
 	ID3D11ShaderResourceView* m_heightmapSRV;
 	ID3D11ShaderResourceView* m_blendmapSRV;
-	ID3D11ShaderResourceView* m_layermapArraySRV;
+	ID3D11ShaderResourceView* m_layermapArraySRV[4];
+	//ID3D11ShaderResourceView* m_layermapArraySRV;
 
 	bool m_useBlendmap;
 

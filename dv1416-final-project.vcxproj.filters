@@ -60,6 +60,15 @@
     <ClCompile Include="ShadowManager.cpp">
       <Filter>Shadow</Filter>
     </ClCompile>
+    <ClCompile Include="TextureToolWindow.cpp">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTool.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -170,6 +179,15 @@
     </ClInclude>
     <ClInclude Include="ShadowManager.h">
       <Filter>Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureToolWindow.h">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTool.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

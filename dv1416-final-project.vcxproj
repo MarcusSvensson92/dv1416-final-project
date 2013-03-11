@@ -58,7 +58,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>External\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;d3dx10d.lib;d3dx11d.lib;d3dcompiler.lib;Effects11d.lib;DxErr.lib;dxgi.lib;dxguid.lib;Comctl32.lib;libpng16d.lib;zlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dx10d.lib;d3dx11d.lib;d3dcompiler.lib;Effects11d.lib;DxErr.lib;dxgi.lib;dxguid.lib;Comctl32.lib;libpng16d.lib;zlibd.lib;vld.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,6 +84,7 @@
     <ClCompile Include="D3DApp.cpp" />
     <ClCompile Include="dv1416_final_project.cpp" />
     <ClCompile Include="EventReceiver.cpp" />
+    <ClCompile Include="GUI.cpp" />
     <ClCompile Include="LevelTool.cpp" />
     <ClCompile Include="LevelToolWindow.cpp" />
     <ClCompile Include="LightManager.cpp" />
@@ -95,6 +96,8 @@
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="Subwindow.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TextureTool.cpp" />
+    <ClCompile Include="TextureToolWindow.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Tool.cpp" />
     <ClCompile Include="Toolbar.cpp" />
@@ -107,6 +110,7 @@
     <ClInclude Include="D3DApp.h" />
     <ClInclude Include="dv1416_final_project.h" />
     <ClInclude Include="EventReceiver.h" />
+    <ClInclude Include="GUI.h" />
     <ClInclude Include="LevelTool.h" />
     <ClInclude Include="LevelToolWindow.h" />
     <ClInclude Include="LightManager.h" />
@@ -119,6 +123,8 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Subwindow.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TextureTool.h" />
+    <ClInclude Include="TextureToolWindow.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Tool.h" />
     <ClInclude Include="Toolbar.h" />

@@ -6,16 +6,6 @@
 
 namespace GUI
 {
-	struct LevelToolWindowDesc
-	{
-		std::string caption;
-		UINT		x;
-		UINT		y;
-		UINT		width;
-		UINT		height;
-		UINT		margin;
-	};
-
 	class LevelToolWindow : public Subwindow
 	{
 	public:
@@ -31,16 +21,14 @@ namespace GUI
 
 	public:
 		void init(HINSTANCE hInstance, HWND hParentWnd,
-				  const LevelToolWindowDesc levelToolWindowDesc);
+				  const SubwindowDesc subwindowDesc);
+
 		void addTrackbar(const std::string& name, EventReceiver* eventReceiver,
 						 const UINT minValue, const UINT maxValue, const UINT startValue);
 
 		UINT getTrackbarValue(const std::string& itemName) const;
 	protected:
 		int getItemID(const UINT i) const;
-	private:
-		LevelToolWindowDesc m_levelToolWindowDesc;
-
 		int getItemID(const std::string& itemName) const;
 	};
 }

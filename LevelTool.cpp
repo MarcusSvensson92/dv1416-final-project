@@ -9,6 +9,8 @@ LevelTool::LevelTool(void)
 	m_brushDiameter = 10.f;
 	m_brushHardness = 0.5f;
 	m_brushStrength = 5.f;
+
+	m_state = Raising;
 }
 
 LevelTool::~LevelTool(void)
@@ -33,7 +35,7 @@ void LevelTool::update(const float dt)
 
 			computeTargetPosition(cursorPosition);
 
-			updateTerrainAltitude(dt);
+			updateTerrainHeightmap(dt);
 		}
 	}
 }
@@ -62,7 +64,7 @@ void LevelTool::computeTargetPosition(POINT cursorPosition)
 		XMStoreFloat3(&m_targetPosition, ray.origin + (t * ray.direction));
 }
 
-void LevelTool::updateTerrainAltitude(const float dt)
+void LevelTool::updateTerrainHeightmap(const float dt)
 {
 	const UINT brushRadius = (UINT)ceil(m_brushDiameter / 2.f);
 	XMVECTOR targetPosition = XMVectorSet(m_targetPosition.x, m_targetPosition.z, 0.f, 0.f);
@@ -73,9 +75,11 @@ void LevelTool::updateTerrainAltitude(const float dt)
 		const float length = XMVectorGetX(XMVector2Length(vertexPosition - targetPosition)) / brushRadius;
 		if (length <= 1.f)
 		{
-			const float dy = (m_brushHardness < 0.99f) ? 1 - pow(length, 1.f / (1.f - m_brushHardness)) : 1.f;
-			if (dy > 0.f)
+			float dy = (m_brushHardness < 0.99f) ? 1 - pow(length, 1.f / (1.f - m_brushHardness)) : 1.f;
+			if (dy > 0.f && m_state == Raising)
 				*it->second += dy * dt * m_brushStrength;
+			if (dy > 0.f && m_state == Lowering)
+				*it->second -= dy * dt * m_brushStrength;
 		}
 	}
 	m_terrain->updateHeightmapTexture(m_deviceContext);
