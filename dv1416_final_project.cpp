@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "dv1416_final_project.h"
+#include "TextureToolWindow.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -27,6 +28,14 @@ bool dv1416_final_project::init(void)
 	m_camera.setPosition(0.f, 50.f, 0.f);
 	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
 
+	m_levelTool.init(m_hWnd, m_deviceContext, &m_camera);
+	m_levelTool.setTerrain(&m_terrain);
+
+	m_textureTool.init(m_hWnd, m_device, m_deviceContext, &m_camera);
+	m_textureTool.setTerrain(&m_terrain);
+
+	m_currentActivity = RaisingLevel;
+
 	return true;
 }
 
@@ -38,47 +47,8 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	switch (msg)
 	{
 	case WM_CREATE:
-	{
-		menu.addItem("File", "Exit", this);
-		menu.addItem("View", "Tools", this);
-		menu.assignToWindow(hWnd);
-
-		GUI::ToolbarDesc tbd;
-		tbd.caption		  = "Toolbar";
-		tbd.x			  = CW_USEDEFAULT;
-		tbd.y			  = CW_USEDEFAULT;
-		tbd.buttonsPerRow = 2;
-		tbd.buttonSize	  = 32;
-		tbd.buttonMargin  = 4;
-		GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
-		toolbar.init(m_hInstance, hWnd, tbd);
-		toolbar.addButton("1", this, "life.bmp");
-		toolbar.addButton("2", this, "life.bmp");
-		toolbar.addButton("3", this, "life.bmp");
-		toolbar.addButton("4", this, "life.bmp");
-		toolbar.addButton("5", this, "life.bmp");
-		toolbar.addButton("6", this, "life.bmp");
-		toolbar.addButton("7", this, "life.bmp");
-		toolbar.addButton("8", this, "life.bmp");
-		toolbar.addButton("9", this, "life.bmp");
-
-		GUI::LevelToolWindowDesc ltwd;
-		ltwd.caption	= "Level Tool";
-		ltwd.x				= 0;
-		ltwd.y				= 0;
-		ltwd.width			= 150;
-		ltwd.height			= 300;
-		ltwd.margin			= 5;
-		ltwd.trackbarHeight = 30;
-		GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
-		levelToolWindow.init(m_hInstance, hWnd, ltwd);
-		levelToolWindow.addTrackbar("1", this, 1, 10, 5);
-		levelToolWindow.addTrackbar("2", this, 1, 10, 2);
-		levelToolWindow.addTrackbar("3", this, 1, 10, 8);
-		levelToolWindow.show(true);
-
+		initGUI(hWnd);
 		break;
-	}
 	}
 	
 	return D3DApp::wndProc(hWnd, msg, wParam, lParam);
@@ -98,6 +68,22 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 		menu.checkItem(eventName, !check);
 		GUI::Toolbar::getInstance().show(!check);
 	}
+
+	if (sender == "Toolbar")
+	{
+		if (eventName == "Raise Level")
+		{
+			m_currentActivity = RaisingLevel;
+			m_levelTool.setState(LevelTool::State::Raising);
+		}
+		else if (eventName == "Lower Level")
+		{
+			m_currentActivity = LoweringLevel;
+			m_levelTool.setState(LevelTool::State::Lowering);
+		}
+		else if (eventName == "Texturing")
+			m_currentActivity = Texturing;
+	}
 }
 
 void dv1416_final_project::update(void)
@@ -115,6 +101,19 @@ void dv1416_final_project::update(void)
 
 	m_camera.updateViewMatrix();
 
+	switch (m_currentActivity)
+	{
+	case RaisingLevel:
+		m_levelTool.update(dt);
+		break;
+	case LoweringLevel:
+		m_levelTool.update(dt);
+		break;
+	case Texturing:
+		m_textureTool.update(dt);
+		break;
+	}
+
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
 		POINT cursorPosition;
@@ -123,7 +122,6 @@ void dv1416_final_project::update(void)
 			ScreenToClient(m_hWnd, &cursorPosition);
 
 			Ray ray = m_camera.computeRay(cursorPosition);
-			m_terrain.computeIntersection(ray);
 
 			// Click to turn the lights red
 			PointLight* selected_light = m_LightManager.computeIntersection(ray);
@@ -183,7 +181,11 @@ void dv1416_final_project::initShaders(void)
 		{ "NORMAL",	  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEX",	  0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", basicInputDesc, 3);
+	D3D11_INPUT_ELEMENT_DESC terrainInputDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEX",	  0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", terrainInputDesc, 2);
 	m_shaderManager.add("Light", "Shaders/LightShader.fxo", NULL, 0);
 }
 
@@ -204,14 +206,59 @@ void dv1416_final_project::initLights(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width			= 257;
-	td.depth			= 257;
+	td.width = 256;
+	td.depth = 256;
 	m_terrain.init(m_device, td);
-	m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
+	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
-	layermapFilenames.push_back("temp-textures/sandripple.png");
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
 	layermapFilenames.push_back("temp-textures/grayRock.png");
+	layermapFilenames.push_back("temp-textures/sandripple.png");
+	for (UINT i = 0; i < 4; i++)
+		m_terrain.loadLayermap(m_device, i, layermapFilenames[i]);
 	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
+}
+
+void dv1416_final_project::initGUI(HWND hWnd)
+{
+	GUI::Menu& menu = GUI::Menu::getInstance();
+	menu.addItem("File", "Exit", this);
+	menu.addItem("View", "Tools", this);
+	menu.assignToWindow(hWnd);
+
+	GUI::SubwindowDesc sd;
+	sd.caption = "Toolbar";
+	sd.x	   = 50;
+	sd.y	   = 100;
+	GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
+	toolbar.init(m_hInstance, hWnd, sd);
+	toolbar.addButton("Raise Level", this, "Content/img/raise_level.bmp");
+	toolbar.addButton("Lower Level", this, "Content/img/lower_level.bmp");
+	toolbar.addButton("Texturing", this, "Content/img/texturing.bmp");
+	toolbar.show(true);
+
+	sd.caption = "Level Tool";
+	sd.x	   = 700;
+	sd.y	   = 100;
+	GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
+	levelToolWindow.init(m_hInstance, hWnd, sd);
+	levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
+	levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
+	levelToolWindow.addTrackbar("Brush Strength", &m_levelTool, 1, 100, 5);
+	levelToolWindow.show(true);
+
+	sd.caption = "Texture Tool";
+	sd.x	   = 700;
+	sd.y	   = 300;
+	GUI::TextureToolWindow& textureToolWindow = GUI::TextureToolWindow::getInstance();
+	textureToolWindow.init(m_hInstance, hWnd, sd);
+	textureToolWindow.addTextureButton("Texture R", &m_textureTool, "Content/img/texture_r.bmp");
+	textureToolWindow.addTextureButton("Texture G", &m_textureTool, "Content/img/texture_g.bmp");
+	textureToolWindow.addTextureButton("Texture B", &m_textureTool, "Content/img/texture_b.bmp");
+	textureToolWindow.addTextureButton("Texture A", &m_textureTool, "Content/img/texture_a.bmp");
+	textureToolWindow.addLoadFileButton("Load Texture", &m_textureTool);
+	textureToolWindow.addTrackbar("Brush Diameter", &m_textureTool, 1, 100, 10);
+	textureToolWindow.addTrackbar("Brush Strength", &m_textureTool, 1, 100, 50);
+	textureToolWindow.show(true);
 }

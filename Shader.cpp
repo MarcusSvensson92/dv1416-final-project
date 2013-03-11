@@ -30,36 +30,6 @@ void Shader::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, LPCS
 
 	HRESULT hr = S_OK;
 
-	/*ID3DBlob*		compShader = 0;
-	ID3DBlob*		compMsgs = 0;
-
-	DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
-#if defined(DEBUG) || defined(_DEBUG)
-	dwShaderFlags |= D3D10_SHADER_DEBUG;
-#endif
-
-	hr = D3DX11CompileFromFile(
-		filename,
-		0,
-		0,
-		0,
-		"fx_5_0",
-		dwShaderFlags,
-		0,
-		0,
-		&compShader,
-		&compMsgs,
-		0
-	);
-	// any error with shader?
-	if ( compMsgs != 0 )
-	{
-		MessageBoxA(0, (char*)compMsgs->GetBufferPointer(), 0, 0);
-	}
-	//other erros?
-	if ( FAILED(hr) )
-		MessageBoxA(0, "FX error 1", 0, 0);*/
-
 	std::ifstream file(filename, std::ios::binary);
 	if (!file) return;
 
@@ -127,6 +97,11 @@ void Shader::setInt(const std::string& variable, const int value)
 void Shader::setFloat(const std::string& variable, const float value)
 {
 	m_pEffect->GetVariableByName(variable.c_str())->AsScalar()->SetFloat(value);
+}
+
+void Shader::setFloat2(const std::string& variable, const XMFLOAT2 value)
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);
 }
 
 void Shader::setFloat3(const std::string& variable, const XMFLOAT3 value)

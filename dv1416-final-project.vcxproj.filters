@@ -15,7 +15,7 @@
       <Filter>GUI\Menu</Filter>
     </ClCompile>
     <ClCompile Include="Toolbar.cpp">
-      <Filter>GUI\Subwindow\Toolbar</Filter>
+      <Filter>GUI\Subwindows\Toolbar</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
@@ -46,13 +46,28 @@
       <Filter>Light</Filter>
     </ClCompile>
     <ClCompile Include="Subwindow.cpp">
-      <Filter>GUI\Subwindow</Filter>
+      <Filter>GUI\Subwindows</Filter>
     </ClCompile>
     <ClCompile Include="LevelToolWindow.cpp">
-      <Filter>GUI\Subwindow\Tools</Filter>
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelTool.cpp">
+      <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="ShadowManager.cpp">
       <Filter>Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureToolWindow.cpp">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTool.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,13 +101,16 @@
     <Filter Include="Light">
       <UniqueIdentifier>{5918e944-bff7-471d-b9b6-fd56e308fb33}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GUI\Subwindow">
+    <Filter Include="Tools">
+      <UniqueIdentifier>{833e0720-480f-49b9-9c19-0228c36d9aa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindows">
       <UniqueIdentifier>{6801a670-3de2-44f5-9305-a3e3c74a863e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GUI\Subwindow\Toolbar">
+    <Filter Include="GUI\Subwindows\Toolbar">
       <UniqueIdentifier>{2f5f839e-8552-4026-8836-f96330e4d910}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GUI\Subwindow\Tools">
+    <Filter Include="GUI\Subwindows\Tools">
       <UniqueIdentifier>{f91a82e1-a95a-40e7-bd8c-db6caa453fca}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shadow">
@@ -117,7 +135,7 @@
       <Filter>GUI\Menu</Filter>
     </ClInclude>
     <ClInclude Include="Toolbar.h">
-      <Filter>GUI\Subwindow\Toolbar</Filter>
+      <Filter>GUI\Subwindows\Toolbar</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
@@ -148,13 +166,28 @@
       <Filter>Light</Filter>
     </ClInclude>
     <ClInclude Include="Subwindow.h">
-      <Filter>GUI\Subwindow</Filter>
+      <Filter>GUI\Subwindows</Filter>
     </ClInclude>
     <ClInclude Include="LevelToolWindow.h">
-      <Filter>GUI\Subwindow\Tools</Filter>
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelTool.h">
+      <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="ShadowManager.h">
       <Filter>Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureToolWindow.h">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTool.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

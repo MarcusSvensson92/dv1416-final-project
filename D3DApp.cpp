@@ -44,10 +44,9 @@ D3DApp::~D3DApp(void)
 	RELEASE(m_depthStencilView);
 	RELEASE(m_swapChain);
 	RELEASE(m_depthStencilBuffer);
-	if (m_deviceContext)
-		m_deviceContext->ClearState();
+	if (m_deviceContext) m_deviceContext->ClearState();
 	RELEASE(m_deviceContext);
-	RELEASE(m_device);
+	if (m_device) { while(m_device->Release()); m_device = NULL; }
 }
 
 int D3DApp::run(void)

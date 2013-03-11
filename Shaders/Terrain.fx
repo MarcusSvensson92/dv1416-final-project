@@ -4,10 +4,15 @@
 cbuffer cbPerFrame
 {
 	matrix gWorld;
-	matrix gWorldViewProj;
+	matrix gViewProj;
 	float3 gCameraPosition;
 
-	float3 gTargetPosition;
+	float gMinDistance;
+	float gMaxDistance;
+	float gMinTessellation;
+	float gMaxTessellation;
+
+	float2 gTexelSize;
 
 	bool gUseBlendmap;
 };
@@ -22,12 +27,17 @@ cbuffer cbConstant
 	float gTextureScale = 5.f;
 };
 
-Texture2D	   gBlendmap;
-Texture2DArray gLayermapArray;
+Texture2D gHeightmap;
+Texture2D gBlendmap;
+//Texture2DArray gLayermapArray;
+Texture2D gLayermap0;
+Texture2D gLayermap1;
+Texture2D gLayermap2;
+Texture2D gLayermap3;
 
 RasterizerState wireframeRS
 {
-	FillMode = Solid;
+	FillMode = Wireframe;
 };
 
 SamplerState linearSampler
@@ -37,63 +47,159 @@ SamplerState linearSampler
 	AddressV = Wrap;
 };
 
+SamplerState heightmapSampler
+{
+	Filter   = MIN_MAG_LINEAR_MIP_POINT;
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+};
+
 struct VSIn
 {
 	float3 position : POSITION;
-	float3 normal   : NORMAL;
 	float2 tex0     : TEX0;
 };
+
+struct HSIn
+{
+	float3 positionW : POSITION;
+	float2 tex0		 : TEX0;
+};
+
+
+HSIn VS(VSIn input)
+{
+	HSIn output;
+
+	output.positionW   = input.position;
+	output.positionW.y = gHeightmap.SampleLevel(heightmapSampler, input.tex0, 0).r;
+	output.positionW   = mul(output.positionW, (float3x3)gWorld);
+
+	output.tex0		 = input.tex0;
+
+	return output;
+}
+
+float computeTessellationFactor(float3 p)
+{
+	float d = distance(p, gCameraPosition);
+	float s = saturate((d - gMinDistance) / (gMaxDistance - gMinDistance));
+	return pow(2, lerp(gMaxTessellation, gMinTessellation, s));
+}
+
+struct TessellationPatch
+{
+	float edges[4]	 : SV_TessFactor;
+	float insides[2] : SV_InsideTessFactor;
+};
+
+TessellationPatch ConstantHS(InputPatch<HSIn, 4> patch, uint patchID : SV_PrimitiveID)
+{
+	float3 edge0  = 0.5f  * (patch[0].positionW + patch[2].positionW);
+	float3 edge1  = 0.5f  * (patch[0].positionW + patch[1].positionW);
+	float3 edge2  = 0.5f  * (patch[1].positionW + patch[3].positionW);
+	float3 edge3  = 0.5f  * (patch[2].positionW + patch[3].positionW);
+	float3 center = 0.25f * (patch[0].positionW + patch[1].positionW + patch[2].positionW + patch[3].positionW);
+
+	TessellationPatch output;
+	output.edges[0]   = computeTessellationFactor(edge0);
+	output.edges[1]   = computeTessellationFactor(edge1);
+	output.edges[2]   = computeTessellationFactor(edge2);
+	output.edges[3]	  = computeTessellationFactor(edge3);
+	output.insides[0] = computeTessellationFactor(center);
+	output.insides[1] = output.insides[0];
+	return output;
+}
+
+struct DSIn
+{
+	float3 positionW : POSITION;
+	float2 tex0		 : TEX0;
+};
+
+[domain("quad")]
+[partitioning("fractional_even")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(4)]
+[patchconstantfunc("ConstantHS")]
+[maxtessfactor(64.f)]
+DSIn HS(InputPatch<HSIn, 4> patch, uint i : SV_OutputControlPointID, uint patchID : SV_PrimitiveID)
+{
+	DSIn output;
+
+	output.positionW = patch[i].positionW;
+	output.tex0		 = patch[i].tex0;
+
+	return output;
+}
 
 struct PSIn
 {
 	float4 positionH : SV_POSITION;
 	float3 positionW : POSITION;
-	float3 normalW   : NORMAL;
+	float3 normalW	 : NORMAL;
 	float2 tex0		 : TEX0;
 	float2 tiledTex0 : TEX1;
 };
 
-PSIn VS(VSIn input)
+[domain("quad")]
+PSIn DS(TessellationPatch tp, float2 uv : SV_DomainLocation, const OutputPatch<DSIn, 4> patch)
 {
-	PSIn output = (PSIn)0;
-	output.positionH = mul(float4(input.position, 1.f), gWorldViewProj);
-	output.positionW = mul(input.position, (float3x3)gWorld);
-	output.normalW	 = mul(input.normal, (float3x3)gWorld);
-	output.tex0		 = input.tex0;
-	output.tiledTex0 = input.tex0 * gTextureScale;
+	PSIn output;
+
+	output.positionW = lerp(lerp(patch[0].positionW, patch[1].positionW, uv.x),
+							lerp(patch[2].positionW, patch[3].positionW, uv.x),
+							uv.y);
+	output.tex0		 = lerp(lerp(patch[0].tex0, patch[1].tex0, uv.x),
+							lerp(patch[2].tex0, patch[3].tex0, uv.x),
+							uv.y);
+	output.tiledTex0 = output.tex0 * gTextureScale;
+
+	output.positionW.y = gHeightmap.SampleLevel(heightmapSampler, output.tex0, 0).r;
+
+	output.positionH = mul(float4(output.positionW, 1.f), gViewProj);
+
+	// Estimate normal
+	float2 leftTex0   = output.tex0 + float2(-gTexelSize.x, 0.f);
+	float2 rightTex0  = output.tex0 + float2( gTexelSize.x, 0.f);
+	float2 bottomTex0 = output.tex0 + float2(0.f,  gTexelSize.y);
+	float2 topTex0	  = output.tex0 + float2(0.f, -gTexelSize.y);
+
+	float leftY   = gHeightmap.SampleLevel(heightmapSampler, leftTex0,	 0).r;
+	float rightY  = gHeightmap.SampleLevel(heightmapSampler, rightTex0,  0).r;
+	float bottomY = gHeightmap.SampleLevel(heightmapSampler, bottomTex0, 0).r;
+	float topY	  = gHeightmap.SampleLevel(heightmapSampler, topTex0,	 0).r;
+
+	float3 tangent = normalize(float3(2.f, rightY - leftY, 0.f));
+	float3 bitan   = normalize(float3(0.f, bottomY - topY, -2.f));
+
+	output.normalW = cross(tangent, bitan);
+
 	return output;
 }
 
 float4 PS(PSIn input) : SV_TARGET
 {
-	float offset = 1.f;
-	
-	if (input.positionW.x <= gTargetPosition.x + offset &&
-		input.positionW.x >= gTargetPosition.x - offset &&
-		input.positionW.z <= gTargetPosition.z + offset &&
-		input.positionW.z >= gTargetPosition.z - offset)
-		return float4(1.f, 0.f, 0.f, 1.f);
-
-	/*float3 distanceVector = gTargetPosition - input.positionW;
-	float d = length(distanceVector);
-	if( d < offset )
-		return float4(1.f, 0.f, 0.f, 1.f);*/
-
 	if (gUseBlendmap)
 	{
-		float4 c0 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 0.f));
-		float4 c1 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 1.f));
-		float4 c2 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 2.f));
-		float4 c3 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 3.f));
-		float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
-
+		float4 c0 = gLayermap0.Sample(linearSampler, input.tiledTex0);
+		float4 c1 = gLayermap1.Sample(linearSampler, input.tiledTex0);
+		float4 c2 = gLayermap2.Sample(linearSampler, input.tiledTex0);
+		float4 c3 = gLayermap3.Sample(linearSampler, input.tiledTex0);
+		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
+		
 		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
 
-		float4 texColor = c0;
+		/*float4 texColor = c0;
 		texColor = lerp(texColor, c1, t.r);
 		texColor = lerp(texColor, c2, t.g);
-		texColor = lerp(texColor, c3, t.b);
-		texColor = lerp(texColor, c4, t.a);
+		texColor = lerp(texColor, c3, t.b);*/
+		//texColor = lerp(texColor, c4, t.a);
+		float4 texColor = float4(1.f, 1.f, 1.f, 1.f);
+		texColor = lerp(texColor, c0, t.r);
+		texColor = lerp(texColor, c1, t.g);
+		texColor = lerp(texColor, c2, t.b);
+		texColor = lerp(texColor, c3, t.a);
 
 
 		float3 toEye = gCameraPosition - input.positionW;
@@ -152,7 +258,7 @@ float4 PS(PSIn input) : SV_TARGET
 		return litColor;
 	}
 
-	return float4(0.f, 0.f, 0.f, 1.f);
+	return float4(1.f, 1.f, 1.f, 1.f);
 }
 
 technique11 RenderTech
@@ -160,6 +266,8 @@ technique11 RenderTech
 	pass p0
 	{
 		SetVertexShader(CompileShader(vs_4_0, VS()));
+		SetHullShader(CompileShader(hs_5_0, HS()));
+		SetDomainShader(CompileShader(ds_5_0, DS()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS()));
 

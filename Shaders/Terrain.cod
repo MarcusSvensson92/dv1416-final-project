@@ -24,10 +24,14 @@ cbuffer Shadows
 cbuffer cbPerFrame
 {
     float4x4 gWorld;                    // Offset:    0, size:   64
-    float4x4 gWorldViewProj;            // Offset:   64, size:   64
+    float4x4 gViewProj;                 // Offset:   64, size:   64
     float3  gCameraPosition;            // Offset:  128, size:   12
-    float3  gTargetPosition;            // Offset:  144, size:   12
-    bool    gUseBlendmap;               // Offset:  156, size:    4
+    float   gMinDistance;               // Offset:  140, size:    4
+    float   gMaxDistance;               // Offset:  144, size:    4
+    float   gMinTessellation;           // Offset:  148, size:    4
+    float   gMaxTessellation;           // Offset:  152, size:    4
+    float2  gTexelSize;                 // Offset:  160, size:    8
+    bool    gUseBlendmap;               // Offset:  168, size:    4
 }
 
 cbuffer cbPerObject
@@ -41,7 +45,7 @@ cbuffer cbConstant
 }
 
 //
-// 8 local object(s)
+// 13 local object(s)
 //
 Texture2D gDLightShadow0;
 Texture2D gDLightShadow1;
@@ -59,17 +63,27 @@ SamplerComparisonState shadSampler2
     AddressW = uint(CLAMP /* 3 */);
     ComparisonFunc = uint(LESS /* 2 */);
 };
+Texture2D gHeightmap;
 Texture2D gBlendmap;
-Texture2DArray gLayermapArray;
+Texture2D gLayermap0;
+Texture2D gLayermap1;
+Texture2D gLayermap2;
+Texture2D gLayermap3;
 RasterizerState wireframeRS
 {
-    FillMode = uint(SOLID /* 3 */);
+    FillMode = uint(WIREFRAME /* 2 */);
 };
 SamplerState linearSampler
 {
     Filter   = uint(MIN_MAG_MIP_LINEAR /* 21 */);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
+};
+SamplerState heightmapSampler
+{
+    Filter   = uint(MIN_MAG_LINEAR_MIP_POINT /* 20 */);
+    AddressU = uint(CLAMP /* 3 */);
+    AddressV = uint(CLAMP /* 3 */);
 };
 
 //
@@ -95,10 +109,320 @@ fxgroup
                 // {
                 //
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
-                //   float4x4 gWorldViewProj;           // Offset:   64 Size:    64
+                //   float4x4 gViewProj;                // Offset:   64 Size:    64 [unused]
                 //   float3 gCameraPosition;            // Offset:  128 Size:    12 [unused]
-                //   float3 gTargetPosition;            // Offset:  144 Size:    12 [unused]
-                //   bool gUseBlendmap;                 // Offset:  156 Size:     4 [unused]
+                //   float gMinDistance;                // Offset:  140 Size:     4 [unused]
+                //   float gMaxDistance;                // Offset:  144 Size:     4 [unused]
+                //   float gMinTessellation;            // Offset:  148 Size:     4 [unused]
+                //   float gMaxTessellation;            // Offset:  152 Size:     4 [unused]
+                //   float2 gTexelSize;                 // Offset:  160 Size:     8 [unused]
+                //   bool gUseBlendmap;                 // Offset:  168 Size:     4 [unused]
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // heightmapSampler                  sampler      NA          NA    0        1
+                // gHeightmap                        texture  float4          2d    2        1
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   x z 
+                // TEX                      0   xy          1     NONE  float   xy  
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // TEX                      0   xy          1     NONE  float   xy  
+                //
+                vs_4_0
+                dcl_constantbuffer cb0[3], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture2d (float,float,float,float) t2
+                dcl_input v0.xz
+                dcl_input v1.xy
+                dcl_output o0.xyz
+                dcl_output o1.xy
+                dcl_temps 2
+                
+                #line 75 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
+                sample_l r0.xyzw, v1.xyxx, t2.yxzw, s0, l(0.000000)  // output<1:Inf>
+                mov r0.xz, v0.xxzx
+                dp3 r1.x, r0.xyzx, cb0[0].xyzx  // output<0:NaN:Inf>
+                dp3 r1.y, r0.xyzx, cb0[1].xyzx  // output<1:NaN:Inf>
+                dp3 r1.z, r0.xyzx, cb0[2].xyzx  // output<2:NaN:Inf>
+                mov r0.xy, v1.xyxx  // output<3,4>
+                mov o0.xyz, r1.xyzx  // VS<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                mov o1.xy, r0.xyxx  // VS<3,4>
+                ret 
+                // Approximately 9 instruction slots used
+                            
+            };
+            HullShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 9.29.952.3111
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
+                //   float4x4 gViewProj;                // Offset:   64 Size:    64 [unused]
+                //   float3 gCameraPosition;            // Offset:  128 Size:    12
+                //   float gMinDistance;                // Offset:  140 Size:     4
+                //   float gMaxDistance;                // Offset:  144 Size:     4
+                //   float gMinTessellation;            // Offset:  148 Size:     4
+                //   float gMaxTessellation;            // Offset:  152 Size:     4
+                //   float2 gTexelSize;                 // Offset:  160 Size:     8 [unused]
+                //   bool gUseBlendmap;                 // Offset:  168 Size:     4 [unused]
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                //
+                //
+                //
+                // Patch Constant signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // SV_TessFactor            0   x           0 QUADEDGE  float   x   
+                // SV_TessFactor            1   x           1 QUADEDGE  float   x   
+                // SV_TessFactor            2   x           2 QUADEDGE  float   x   
+                // SV_TessFactor            3   x           3 QUADEDGE  float   x   
+                // SV_InsideTessFactor      0   x           4  QUADINT  float   x   
+                // SV_InsideTessFactor      1   x           5  QUADINT  float   x   
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // TEX                      0   xy          1     NONE  float   xy  
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // TEX                      0   xy          1     NONE  float   xy  
+                //
+                // Tessellation Domain   # of control points
+                // -------------------- --------------------
+                // Quadrilateral                           4
+                //
+                // Tessellation Output Primitive  Partitioning Type 
+                // ------------------------------ ------------------
+                // Clockwise Triangles            Even Fractional   
+                //
+                hs_5_0
+                hs_decls 
+                dcl_input_control_point_count 4
+                dcl_output_control_point_count 4
+                dcl_tessellator_domain domain_quad
+                dcl_tessellator_partitioning partitioning_fractional_even
+                dcl_tessellator_output_primitive output_triangle_cw
+                dcl_hs_max_tessfactor l(64.000000)
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[10], immediateIndexed
+                
+                #line 130 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
+                hs_control_point_phase 
+                dcl_input vOutputControlPointID
+                dcl_input v[4][0].xyz
+                dcl_input v[4][1].xy
+                dcl_output o0.xyz
+                dcl_output o1.xy
+                dcl_temps 2
+                mov r0.x, vOutputControlPointID  // output<0,1,2>
+                mov r0.yzw, v[r0.x + 0][0].xxyz  // output<3,4>
+                mov r1.xy, v[r0.x + 0][1].xyxx  // HS<0,1,2>
+                mov o0.xyz, r0.yzwy  // HS<3,4>
+                mov o1.xy, r1.xyxx
+                
+                #line 98
+                ret 
+                hs_join_phase   // edge0<0,1,2>
+                dcl_input vicp[4][0].xyz
+                dcl_output_siv o0.x, finalQuadUeq0EdgeTessFactor
+                dcl_output_siv o1.x, finalQuadVeq0EdgeTessFactor
+                dcl_output_siv o2.x, finalQuadUeq1EdgeTessFactor
+                dcl_output_siv o3.x, finalQuadVeq1EdgeTessFactor
+                dcl_output_siv o4.x, finalQuadUInsideTessFactor
+                dcl_output_siv o5.x, finalQuadVInsideTessFactor
+                dcl_temps 6
+                add r0.xyz, vicp[2][0].xyzx, vicp[0][0].xyzx
+                mul r0.xyz, r0.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)  // edge1<0,1,2>
+                add r1.xyz, vicp[1][0].xyzx, vicp[0][0].xyzx
+                mul r2.xyz, r1.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)  // edge2<0,1,2>
+                add r3.xyz, vicp[3][0].xyzx, vicp[1][0].xyzx
+                mul r3.xyz, r3.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)  // edge3<0,1,2>
+                add r4.xyz, vicp[3][0].xyzx, vicp[2][0].xyzx
+                mul r4.xyz, r4.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)
+                add r1.xyz, r1.xyzx, vicp[2][0].xyzx  // center<0,1,2>
+                
+                #line 105
+                add r1.xyz, r1.xyzx, vicp[3][0].xyzx
+                mul r1.xyz, r1.xyzx, l(0.250000, 0.250000, 0.250000, 0.000000)  // p<0,1,2>
+                
+                #line 85
+                nop 
+                mov r0.xyz, r0.xyzx
+                mov r5.xyz, -cb0[8].xyzx
+                add r0.xyz, r0.xyzx, r5.xyzx  // d<0:NaN:Inf>
+                dp3 r0.x, r0.xyzx, r0.xyzx
+                sqrt r0.x, r0.x
+                mov r0.y, -cb0[8].w
+                add r0.x, r0.y, r0.x
+                add r0.z, r0.y, cb0[9].x
+                div r0.x, r0.x, r0.z  // s<0:[0f,1f]>
+                max r0.x, r0.x, l(0.000000)
+                min r0.x, r0.x, l(1.000000)
+                mov r0.w, -cb0[9].z
+                add r0.w, r0.w, cb0[9].y
+                mul r0.x, r0.w, r0.x
+                add r0.x, r0.x, cb0[9].z  // computeTessellationFactor<0:NaN:Inf>
+                
+                #line 105
+                mul r0.x, r0.x, l(1.000000)  // output<0:NaN:Inf>
+                exp r0.x, r0.x
+                mov r0.x, r0.x  // p<0,1,2>
+                
+                #line 85
+                nop 
+                mov r2.xyz, r2.xyzx
+                add r2.xyz, r5.xyzx, r2.xyzx  // d<0:NaN:Inf>
+                dp3 r1.w, r2.xyzx, r2.xyzx
+                sqrt r1.w, r1.w
+                add r1.w, r0.y, r1.w
+                div r1.w, r1.w, r0.z  // s<0:[0f,1f]>
+                max r1.w, r1.w, l(0.000000)
+                min r1.w, r1.w, l(1.000000)
+                mul r1.w, r0.w, r1.w
+                add r1.w, r1.w, cb0[9].z  // computeTessellationFactor<0:NaN:Inf>
+                
+                #line 106
+                mul r1.w, r1.w, l(1.000000)  // output<1:NaN:Inf>
+                exp r1.w, r1.w
+                mov r1.w, r1.w  // p<0,1,2>
+                
+                #line 85
+                nop 
+                mov r3.xyz, r3.xyzx
+                add r2.xyz, r5.xyzx, r3.xyzx  // d<0:NaN:Inf>
+                dp3 r2.x, r2.xyzx, r2.xyzx
+                sqrt r2.x, r2.x
+                add r2.x, r0.y, r2.x
+                div r2.x, r2.x, r0.z  // s<0:[0f,1f]>
+                max r2.x, r2.x, l(0.000000)
+                min r2.x, r2.x, l(1.000000)
+                mul r2.x, r0.w, r2.x
+                add r2.x, r2.x, cb0[9].z  // computeTessellationFactor<0:NaN:Inf>
+                
+                #line 107
+                mul r2.x, r2.x, l(1.000000)  // output<2:NaN:Inf>
+                exp r2.x, r2.x
+                mov r2.x, r2.x  // p<0,1,2>
+                
+                #line 85
+                nop 
+                mov r4.xyz, r4.xyzx
+                add r3.xyz, r5.xyzx, r4.xyzx  // d<0:NaN:Inf>
+                dp3 r3.x, r3.xyzx, r3.xyzx
+                sqrt r3.x, r3.x
+                add r3.x, r0.y, r3.x
+                div r3.x, r3.x, r0.z  // s<0:[0f,1f]>
+                max r3.x, r3.x, l(0.000000)
+                min r3.x, r3.x, l(1.000000)
+                mul r3.x, r0.w, r3.x
+                add r3.x, r3.x, cb0[9].z  // computeTessellationFactor<0:NaN:Inf>
+                
+                #line 108
+                mul r3.x, r3.x, l(1.000000)  // output<3:NaN:Inf>
+                exp r2.y, r3.x
+                mov r2.y, r2.y  // p<0,1,2>
+                
+                #line 85
+                nop 
+                mov r1.xyz, r1.xyzx
+                add r1.xyz, r5.xyzx, r1.xyzx  // d<0:NaN:Inf>
+                dp3 r1.x, r1.xyzx, r1.xyzx
+                sqrt r1.x, r1.x
+                add r0.y, r0.y, r1.x
+                div r0.y, r0.y, r0.z  // s<0:[0f,1f]>
+                max r0.y, r0.y, l(0.000000)
+                min r0.y, r0.y, l(1.000000)
+                mul r0.y, r0.w, r0.y
+                add r0.y, r0.y, cb0[9].z  // computeTessellationFactor<0:NaN:Inf>
+                
+                #line 109
+                mul r0.y, r0.y, l(1.000000)  // output<4:NaN:Inf>
+                exp r2.w, r0.y  // ConstantHS<2:NaN:Inf>
+                mov r2.z, r2.w  // ConstantHS<3:NaN:Inf>
+                mov r2.x, r2.x  // ConstantHS<4:NaN:Inf>
+                mov r2.y, r2.y  // ConstantHS<5:NaN:Inf>
+                mov r2.z, r2.z  // ConstantHS<0:NaN:Inf>
+                mov r2.w, r2.w  // ConstantHS<1:NaN:Inf>
+                mov r0.x, r0.x  // ConstantHS<0:[0f,64f]>
+                mov r1.w, r1.w  // ConstantHS<1:[0f,64f]>
+                min o0.x, r0.x, l(64.000000)  // ConstantHS<2:[0f,64f],3:[0f,64f],4:[0f,64f],5:[0f,64f]>
+                min o1.x, r1.w, l(64.000000)  // ConstantHS<2:[0f,64f]>
+                min r0.xyzw, r2.xyzw, l(64.000000, 64.000000, 64.000000, 64.000000)  // ConstantHS<3:[0f,64f]>
+                mov o2.x, r0.x  // ConstantHS<4:[0f,64f]>
+                mov o3.x, r0.y  // ConstantHS<5:[0f,64f]>
+                mov o4.x, r0.z
+                
+                // incorrect instruction offset in debug info
+                mov o5.x, r0.w
+                // incorrect instruction offset in debug info
+                
+                
+                // incorrect instruction offset in debug info
+                ret 
+                // incorrect instruction offset in debug info
+                
+                // Approximately 106 instruction slots used
+                            
+            };
+            DomainShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 9.29.952.3111
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
+                //   float4x4 gViewProj;                // Offset:   64 Size:    64
+                //   float3 gCameraPosition;            // Offset:  128 Size:    12 [unused]
+                //   float gMinDistance;                // Offset:  140 Size:     4 [unused]
+                //   float gMaxDistance;                // Offset:  144 Size:     4 [unused]
+                //   float gMinTessellation;            // Offset:  148 Size:     4 [unused]
+                //   float gMaxTessellation;            // Offset:  152 Size:     4 [unused]
+                //   float2 gTexelSize;                 // Offset:  160 Size:     8
+                //   bool gUseBlendmap;                 // Offset:  168 Size:     4 [unused]
                 //
                 // }
                 //
@@ -115,18 +439,31 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
+                // heightmapSampler                  sampler      NA          NA    0        1
+                // gHeightmap                        texture  float4          2d    2        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 // cbConstant                        cbuffer      NA          NA    1        1
                 //
+                //
+                //
+                // Patch Constant signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // SV_TessFactor            0   x           0 QUADEDGE  float       
+                // SV_TessFactor            1   x           1 QUADEDGE  float       
+                // SV_TessFactor            2   x           2 QUADEDGE  float       
+                // SV_TessFactor            3   x           3 QUADEDGE  float       
+                // SV_InsideTessFactor      0   x           4  QUADINT  float       
+                // SV_InsideTessFactor      1   x           5  QUADINT  float       
                 //
                 //
                 // Input signature:
                 //
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
-                // POSITION                 0   xyz         0     NONE  float   xyz 
-                // NORMAL                   0   xyz         1     NONE  float   xyz 
-                // TEX                      0   xy          2     NONE  float   xy  
+                // POSITION                 0   xyz         0     NONE  float   x z 
+                // TEX                      0   xy          1     NONE  float   xy  
                 //
                 //
                 // Output signature:
@@ -139,41 +476,112 @@ fxgroup
                 // TEX                      0   xy          3     NONE  float   xy  
                 // TEX                      1     zw        3     NONE  float     zw
                 //
-                vs_4_0
-                dcl_constantbuffer cb0[8], immediateIndexed
+                // Tessellation Domain   # of control points
+                // -------------------- --------------------
+                // Quadrilateral                           4
+                //
+                ds_5_0
+                dcl_input_control_point_count 4
+                dcl_tessellator_domain domain_quad
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[11], immediateIndexed
                 dcl_constantbuffer cb1[1], immediateIndexed
-                dcl_input v0.xyz
-                dcl_input v1.xyz
-                dcl_input v2.xy
+                dcl_sampler s0, mode_default
+                dcl_resource_texture2d (float,float,float,float) t2
+                dcl_input vDomain.xy
+                dcl_input vicp[4][0].xz
+                dcl_input vicp[4][1].xy
                 dcl_output_siv o0.xyzw, position
                 dcl_output o1.xyz
                 dcl_output o2.xyz
                 dcl_output o3.xy
                 dcl_output o3.zw
-                dcl_temps 4
+                dcl_temps 6
                 
-                #line 59 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
-                mov r0.xyz, v0.xyzx
+                #line 151 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
+                mov r0.xy, -vicp[0][0].xzxx
+                add r0.xy, r0.xyxx, vicp[1][0].xzxx
+                mul r0.xy, r0.xyxx, vDomain.xxxx
+                add r0.xy, r0.xyxx, vicp[0][0].xzxx
+                mov r0.zw, -vicp[2][0].xxxz
+                add r0.zw, r0.zzzw, vicp[3][0].xxxz
+                mul r0.zw, r0.zzzw, vDomain.xxxx
+                add r0.zw, r0.zzzw, vicp[2][0].xxxz
+                mov r1.xy, -r0.xyxx
+                add r0.zw, r0.zzzw, r1.xxxy
+                mul r0.zw, r0.zzzw, vDomain.yyyy
+                add r0.xz, r0.zzwz, r0.xxyx  // output<4:NaN:Inf,6:NaN:Inf>
+                mov r1.xy, r0.xzxx  // output<4:NaN:Inf,6:NaN:Inf>
+                
+                #line 154
+                mov r1.zw, -vicp[0][1].xxxy
+                add r1.zw, r1.zzzw, vicp[1][1].xxxy
+                mul r1.zw, r1.zzzw, vDomain.xxxx
+                add r1.zw, r1.zzzw, vicp[0][1].xxxy
+                mov r2.xy, -vicp[2][1].xyxx
+                add r2.xy, r2.xyxx, vicp[3][1].xyxx
+                mul r2.xy, r2.xyxx, vDomain.xxxx
+                add r2.xy, r2.xyxx, vicp[2][1].xyxx
+                mov r2.zw, -r1.zzzw
+                add r2.xy, r2.zwzz, r2.xyxx
+                mul r2.xy, r2.xyxx, vDomain.yyyy
+                add r1.zw, r1.zzzw, r2.xxxy  // output<10:NaN:Inf,11:NaN:Inf>
+                mul r2.xy, r1.zwzz, cb1[0].xxxx  // output<12:NaN:Inf,13:NaN:Inf>
+                sample_l_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.yxzw, s0, l(0.000000)  // output<5:Inf>
+                mov r2.z, r0.y  // output<5:Inf>
                 mov r0.w, l(1.000000)
-                dp4 r1.x, r0.xyzw, cb0[4].xyzw  // output<0:NaN:Inf>
-                dp4 r1.y, r0.xyzw, cb0[5].xyzw  // output<1:NaN:Inf>
-                dp4 r1.z, r0.xyzw, cb0[6].xyzw  // output<2:NaN:Inf>
-                dp4 r1.w, r0.xyzw, cb0[7].xyzw  // output<3:NaN:Inf>
-                dp3 r0.x, v0.xyzx, cb0[0].xyzx  // output<4:NaN:Inf>
-                dp3 r0.y, v0.xyzx, cb0[1].xyzx  // output<5:NaN:Inf>
-                dp3 r0.z, v0.xyzx, cb0[2].xyzx  // output<6:NaN:Inf>
-                dp3 r2.x, v1.xyzx, cb0[0].xyzx  // output<7:NaN:Inf>
-                dp3 r2.y, v1.xyzx, cb0[1].xyzx  // output<8:NaN:Inf>
-                dp3 r2.z, v1.xyzx, cb0[2].xyzx  // output<9:NaN:Inf>
-                mov r3.xy, v2.xyxx  // output<10,11>
-                mul r3.zw, v2.xxxy, cb1[0].xxxx  // output<12:Inf,13:Inf>
-                mov o0.xyzw, r1.xyzw  // VS<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                mov o3.xy, r3.xyxx  // VS<10,11>
-                mov o3.zw, r3.zzzw  // VS<12:Inf,13:Inf>
-                mov o1.xyz, r0.xyzx  // VS<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
-                mov o2.xyz, r2.xyzx  // VS<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp4 r3.x, r0.xyzw, cb0[4].xyzw  // output<0:NaN:Inf>
+                dp4 r3.y, r0.xyzw, cb0[5].xyzw  // output<1:NaN:Inf>
+                dp4 r3.z, r0.xyzw, cb0[6].xyzw  // output<2:NaN:Inf>
+                dp4 r3.w, r0.xyzw, cb0[7].xyzw  // output<3:NaN:Inf>
+                
+                #line 163
+                mov r0.x, -cb0[10].x
+                mov r0.y, l(0)
+                add r0.xy, r0.xyxx, r1.zwzz  // leftTex0<0:NaN:Inf,1:NaN:Inf>
+                mov r4.x, cb0[10].x
+                mov r4.y, l(0)
+                add r0.zw, r1.zzzw, r4.xxxy  // rightTex0<0:NaN:Inf,1:NaN:Inf>
+                mov r4.x, l(0)
+                mov r4.y, cb0[10].y
+                add r4.xy, r1.zwzz, r4.xyxx  // bottomTex0<0:NaN:Inf,1:NaN:Inf>
+                mov r5.x, l(0)
+                mov r5.y, -cb0[10].y
+                add r4.zw, r1.zzzw, r5.xxxy  // topTex0<0:NaN:Inf,1:NaN:Inf>
+                sample_l_indexable(texture2d)(float,float,float,float) r0.x, r0.xyxx, t2.xyzw, s0, l(0.000000)
+                mov r0.x, r0.x  // leftY<0:Inf>
+                sample_l_indexable(texture2d)(float,float,float,float) r0.y, r0.zwzz, t2.yxzw, s0, l(0.000000)
+                mov r0.y, r0.y  // rightY<0:Inf>
+                sample_l_indexable(texture2d)(float,float,float,float) r0.z, r4.xyxx, t2.yzxw, s0, l(0.000000)
+                mov r0.z, r0.z  // bottomY<0:Inf>
+                sample_l_indexable(texture2d)(float,float,float,float) r0.w, r4.zwzz, t2.yzwx, s0, l(0.000000)
+                mov r0.w, r0.w  // topY<0:Inf>
+                mov r0.x, -r0.x
+                add r4.z, r0.x, r0.y
+                mov r4.xy, l(0,2.000000,0,0)
+                dp3 r0.x, r4.xyzx, r4.xyzx
+                rsq r0.x, r0.x
+                mul r4.xyz, r0.xxxx, r4.xyzx  // tangent<2: 0f,0:NaN,1:NaN:Inf>
+                
+                #line 174
+                mov r0.x, -r0.w
+                add r0.x, r0.x, r0.z
+                mov r0.yz, l(0,-2.000000,0,0)
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul r0.xyz, r0.wwww, r0.xyzx  // bitan<1:NaN:Inf,2:NaN,0: 0f>
+                mul r5.xyz, r0.yzxy, r4.zxyz
+                mul r0.xyz, r0.xyzx, r4.xyzx
+                mov r0.xyz, -r0.xyzx
+                add r0.xyz, r0.xyzx, r5.xyzx  // output<7:NaN:Inf,8:NaN,9:NaN:Inf>
+                mov o0.xyzw, r3.xyzw  // DS<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                mov o3.xy, r1.zwzz  // DS<10:NaN:Inf,11:NaN:Inf>
+                mov o3.zw, r2.xxxy  // DS<12:NaN:Inf,13:NaN:Inf>
+                mov o1.xz, r1.xxyx  // DS<4:NaN:Inf,6:NaN:Inf>
+                mov o1.y, r2.z  // DS<5:Inf>
+                mov o2.xyz, r0.xyzx  // DS<7:NaN:Inf,8:NaN,9:NaN:Inf>
                 ret 
-                // Approximately 20 instruction slots used
+                // Approximately 76 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -233,10 +641,14 @@ fxgroup
                 // {
                 //
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
-                //   float4x4 gWorldViewProj;           // Offset:   64 Size:    64 [unused]
+                //   float4x4 gViewProj;                // Offset:   64 Size:    64 [unused]
                 //   float3 gCameraPosition;            // Offset:  128 Size:    12
-                //   float3 gTargetPosition;            // Offset:  144 Size:    12
-                //   bool gUseBlendmap;                 // Offset:  156 Size:     4
+                //   float gMinDistance;                // Offset:  140 Size:     4 [unused]
+                //   float gMaxDistance;                // Offset:  144 Size:     4 [unused]
+                //   float gMinTessellation;            // Offset:  148 Size:     4 [unused]
+                //   float gMaxTessellation;            // Offset:  152 Size:     4 [unused]
+                //   float2 gTexelSize;                 // Offset:  160 Size:     8 [unused]
+                //   bool gUseBlendmap;                 // Offset:  168 Size:     4
                 //
                 // }
                 //
@@ -265,7 +677,10 @@ fxgroup
                 // gDLightShadow0                    texture  float4          2d    0        1
                 // gDLightShadow1                    texture  float4          2d    1        1
                 // gBlendmap                         texture  float4          2d    2        1
-                // gLayermapArray                    texture  float4     2darray    3        1
+                // gLayermap0                        texture  float4          2d    3        1
+                // gLayermap1                        texture  float4          2d    4        1
+                // gLayermap2                        texture  float4          2d    5        1
+                // gLayermap3                        texture  float4          2d    6        1
                 // $Globals                          cbuffer      NA          NA    0        1
                 // Lights                            cbuffer      NA          NA    1        1
                 // Shadows                           cbuffer      NA          NA    2        1
@@ -295,14 +710,17 @@ fxgroup
                 dcl_constantbuffer cb0[1], immediateIndexed
                 dcl_constantbuffer cb1[58], dynamicIndexed
                 dcl_constantbuffer cb2[248], immediateIndexed
-                dcl_constantbuffer cb3[10], immediateIndexed
+                dcl_constantbuffer cb3[11], immediateIndexed
                 dcl_constantbuffer cb4[3], immediateIndexed
                 dcl_sampler s0, mode_comparison
                 dcl_sampler s1, mode_default
                 dcl_resource_texture2d (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
                 dcl_resource_texture2d (float,float,float,float) t2
-                dcl_resource_texture2darray (float,float,float,float) t3
+                dcl_resource_texture2d (float,float,float,float) t3
+                dcl_resource_texture2d (float,float,float,float) t4
+                dcl_resource_texture2d (float,float,float,float) t5
+                dcl_resource_texture2d (float,float,float,float) t6
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
@@ -310,81 +728,45 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 17
                 
-                #line 71 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
-                add r0.x, cb3[9].x, l(1.000000)
-                ge r0.x, r0.x, v1.x
-                add r0.y, cb3[9].x, l(-1.000000)
-                ge r0.y, v1.x, r0.y
-                and r0.x, r0.y, r0.x
-                add r0.y, cb3[9].z, l(1.000000)
-                ge r0.y, r0.y, v1.z
-                and r0.x, r0.y, r0.x
-                add r0.y, cb3[9].z, l(-1.000000)
-                ge r0.y, v1.z, r0.y
-                and r0.x, r0.y, r0.x
-                
-                #line 84
-                mov r1.xy, v3.zwzz
-                mov r1.z, l(0)
-                sample r1.xyzw, r1.xyzx, t3.xyzw, s1  // c0<0:Inf,1:Inf,2:Inf,3:Inf>
-                mov r2.xy, v3.zwzz
-                mov r2.z, l(1.000000)
-                sample r2.xyzw, r2.xyzx, t3.xyzw, s1  // c1<0:Inf,1:Inf,2:Inf,3:Inf>
-                mov r3.xy, v3.zwzz
-                mov r3.z, l(2.000000)
-                sample r3.xyzw, r3.xyzx, t3.xyzw, s1  // c2<0:Inf,1:Inf,2:Inf,3:Inf>
-                mov r4.xy, v3.zwzz
-                mov r4.z, l(3.000000)
-                sample r4.xyzw, r4.xyzx, t3.xyzw, s1  // c3<0:Inf,1:Inf,2:Inf,3:Inf>
-                mov r5.xy, v3.zwzz
-                mov r5.z, l(4.000000)
-                sample r5.xyzw, r5.xyzx, t3.xyzw, s1  // c4<0:Inf,1:Inf,2:Inf,3:Inf>
-                
-                #line 71
+                #line 183 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
+                ine r0.x, l(0, 0, 0, 0), cb3[10].z
                 if_nz r0.x
+                  sample r0.xyzw, v3.zwzz, t3.xyzw, s1  // c0<0:Inf,1:Inf,2:Inf,3:Inf>
+                  sample r1.xyzw, v3.zwzz, t4.xyzw, s1  // c1<0:Inf,1:Inf,2:Inf,3:Inf>
+                  sample r2.xyzw, v3.zwzz, t5.xyzw, s1  // c2<0:Inf,1:Inf,2:Inf,3:Inf>
+                  sample r3.xyzw, v3.zwzz, t6.xyzw, s1  // c3<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 75
-                  mov o0.xyzw, l(1.000000,0,0,1.000000)  // PS<0: 1f,1: 0f,2: 0f,3: 1f>
-                  ret 
+                #line 191
+                  sample r4.xyzw, v3.xyxx, t2.xyzw, s1  // t<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 71
-                endif 
-                
-                #line 82
-                ine r0.x, l(0, 0, 0, 0), cb3[9].w
-                if_nz r0.x
-                
-                #line 90
-                  sample r0.xyzw, v3.xyxx, t2.xyzw, s1  // t<0:Inf,1:Inf,2:Inf,3:Inf>
-                  mov r1.xyzw, r1.xyzw  // texColor<0:Inf,1:Inf,2:Inf,3:Inf>
-                  mov r6.xyzw, -r1.xyzw
-                  add r2.xyzw, r2.xyzw, r6.xyzw
-                  mul r2.xyzw, r0.xxxx, r2.xyzw
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                  mov r2.xyzw, -r1.xyzw
-                  add r2.xyzw, r2.xyzw, r3.xyzw
-                  mul r2.xyzw, r0.yyyy, r2.xyzw
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                  mov r2.xyzw, -r1.xyzw
-                  add r2.xyzw, r2.xyzw, r4.xyzw
-                  mul r2.xyzw, r0.zzzz, r2.xyzw
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                  mov r2.xyzw, -r1.xyzw
-                  add r2.xyzw, r2.xyzw, r5.xyzw
-                  mul r0.xyzw, r0.wwww, r2.xyzw
+                #line 199
+                  add r0.xyzw, r0.xyzw, l(-1.000000, -1.000000, -1.000000, -1.000000)
+                  mul r0.xyzw, r0.xyzw, r4.xxxx
+                  add r0.xyzw, r0.xyzw, l(1.000000, 1.000000, 1.000000, 1.000000)  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                  mov r5.xyzw, -r0.xyzw
+                  add r1.xyzw, r1.xyzw, r5.xyzw
+                  mul r1.xyzw, r1.xyzw, r4.yyyy
+                  add r0.xyzw, r0.xyzw, r1.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                  mov r1.xyzw, -r0.xyzw
+                  add r1.xyzw, r1.xyzw, r2.xyzw
+                  mul r1.xyzw, r1.xyzw, r4.zzzz
+                  add r0.xyzw, r0.xyzw, r1.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                  mov r1.xyzw, -r0.xyzw
+                  add r1.xyzw, r1.xyzw, r3.xyzw
+                  mul r1.xyzw, r1.xyzw, r4.wwww
                   add r0.xyzw, r0.xyzw, r1.xyzw  // texColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 99
+                #line 205
                   mov r1.xyz, -v1.xyzx
                   add r1.xyz, r1.xyzx, cb3[8].xyzx  // toEye<0:Inf,1:Inf,2:Inf>
                   dp3 r1.w, r1.xyzx, r1.xyzx
                   sqrt r1.w, r1.w  // distToEye<0:NaN:Inf>
                   div r1.xyz, r1.xyzx, r1.wwww  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 104
+                #line 210
                   mov r2.xyz, l(0,0,0,0)  // ambient<0: -0f,1: -0f,2: -0f>
                 
-                #line 109
+                #line 215
                   mov r1.w, l(0)  // i<0: 0u>
                   mov r3.xyz, r2.xyzx  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mov r4.xyz, r2.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -394,7 +776,7 @@ fxgroup
                     ult r3.w, r2.w, l(10)
                     breakc_z r3.w
                 
-                #line 126
+                #line 232
                     nop 
                     mov r6.xyz, cb4[0].xyzx  // mat<0,1,2>
                     mov r7.xyz, cb4[1].xyzx  // mat<4,5,6>
@@ -458,7 +840,7 @@ fxgroup
                       mov r8.xyz, l(0,0,0,0)  // spec<0: 0f,1: 0f,2: 0f>
                     endif 
                 
-                #line 126 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 232 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                     mov r6.xyz, r6.xyzx  // A<0:Inf,1:Inf,2:Inf>
                     mov r7.xyz, r7.xyzx  // D<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     mov r8.xyz, r8.xyzx  // S<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -468,11 +850,11 @@ fxgroup
                     mul r6.xyz, r8.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)
                     add r5.xyz, r5.xyzx, r6.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 109
+                #line 215
                     iadd r2.w, r2.w, l(1)  // i<0>
                   endloop 
                 
-                #line 132
+                #line 238
                   mov r2.xyz, r3.xyzx  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mov r6.xyz, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mov r7.xyz, r5.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -481,7 +863,7 @@ fxgroup
                     ult r3.w, r2.w, l(2)
                     breakc_z r3.w
                 
-                #line 135
+                #line 241
                     imul null, r3.w, r2.w, l(4)
                     eq r4.w, cb1[r3.w + 53].w, l(1.000000)
                     if_nz r4.w
@@ -571,7 +953,7 @@ fxgroup
                 #line 35
                       endif 
                 
-                #line 136 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 242 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                       mov r5.w, r5.w  // shadow<0:Inf>
                     else 
                       eq r4.w, cb1[r3.w + 53].w, l(2.000000)
@@ -662,18 +1044,18 @@ fxgroup
                 #line 35
                         endif 
                 
-                #line 138 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 244 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                         mov r5.w, r5.w  // shadow<0:Inf>
                       else 
                 
-                #line 140
+                #line 246
                         mov r5.w, l(1.000000)  // shadow<0: 1f>
                 
-                #line 137
+                #line 243
                       endif 
                     endif 
                 
-                #line 143
+                #line 249
                     nop 
                     mov r8.xyz, cb4[0].xyzx  // mat<0,1,2>
                     mov r9.xyz, cb4[1].xyzx  // mat<4,5,6>
@@ -716,7 +1098,7 @@ fxgroup
                     movc r9.xyz, r4.wwww, r9.xyzx, l(0,0,0,0)  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     movc r10.xyz, r4.wwww, r10.xyzx, l(0,0,0,0)  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 143 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                #line 249 "C:\Users\Marcus\Desktop\dv1416-final-project\Shaders\Terrain.fx"
                     mov r8.xyz, r8.xyzx  // A<0:Inf,1:Inf,2:Inf>
                     mov r9.xyz, r9.xyzx  // D<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     mov r10.xyz, r10.xyzx  // S<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -726,11 +1108,11 @@ fxgroup
                     mul r8.xyz, r5.wwww, r10.xyzx
                     add r7.xyz, r7.xyzx, r8.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 132
+                #line 238
                     iadd r2.w, r2.w, l(1)  // i<0:[1u,3u]>
                   endloop 
                 
-                #line 150
+                #line 256
                   add r1.xyz, r2.xyzx, r6.xyzx
                   mul r0.xyz, r0.xyzx, r1.xyzx
                   add r0.xyz, r7.xyzx, r0.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -739,13 +1121,13 @@ fxgroup
                   mov o0.w, r0.w  // PS<3:NaN:Inf>
                   ret 
                 
-                #line 82
+                #line 183
                 endif 
                 
-                #line 155
-                mov o0.xyzw, l(0,0,0,1.000000)  // PS<0: 0f,1: 0f,2: 0f,3: 1f>
+                #line 261
+                mov o0.xyzw, l(1.000000,1.000000,1.000000,1.000000)  // PS<0: 1f,1: 1f,2: 1f,3: 1f>
                 ret 
-                // Approximately 334 instruction slots used
+                // Approximately 306 instruction slots used
                             
             };
         }

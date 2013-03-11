@@ -1,6 +1,10 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
+#include <vld.h>
+
+#include <png.h>
+
 #include <D3D11.h>
 #include <D3DX11.h>
 #include <xnamath.h>
@@ -19,7 +23,10 @@
 #include <fstream>
 #include <ostream>
 #include <map>
+#include <algorithm>
+#include <math.h>
 #include <assert.h>
+#include <stdint.h>
 
 #define RELEASE(x) { if (x) { x->Release(); x = NULL; } }
 #define DOUT(s) { std::ostringstream oss; oss << s; OutputDebugString(oss.str().c_str()); }

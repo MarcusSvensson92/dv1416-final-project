@@ -31,3 +31,5 @@ External/
 ipch/
 *.opensds
 *.sdf
+*.cod
+*.fxo

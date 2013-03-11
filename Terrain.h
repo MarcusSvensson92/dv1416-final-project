@@ -6,6 +6,7 @@
 #include "Buffer.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Utilities.h"
 
 struct TerrainDesc
 {
@@ -25,27 +26,46 @@ public:
 	void loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
+	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
-	void computeIntersection(const Ray& ray);
+	std::vector<std::pair<XMFLOAT2, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+	std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+
+	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
+	void updateBlendmapTexture(ID3D11DeviceContext* deviceContext);
 private:
 	TerrainDesc m_terrainDesc;
 
-	std::vector<Vertex::Basic> m_vertices;
+	std::vector<Vertex::Terrain> m_vertices;
 	UINT m_indexCount;
 
 	Buffer m_vertexBuffer;
 	Buffer m_indexBuffer;
 
+	UINT m_patchVertexCount;
+	UINT m_patchQuadFaceCount;
+	UINT m_patchVertexRowCount;
+	UINT m_patchVertexColCount;
+
+	std::vector<float> m_heightmap;
+	Utilities::PNGData m_blendmap;
+
+	ID3D11Texture2D* m_heightmapTexture;
+	ID3D11Texture2D* m_blendmapTexture;
+
+	ID3D11ShaderResourceView* m_heightmapSRV;
 	ID3D11ShaderResourceView* m_blendmapSRV;
-	ID3D11ShaderResourceView* m_layermapArraySRV;
+	ID3D11ShaderResourceView* m_layermapArraySRV[4];
+	//ID3D11ShaderResourceView* m_layermapArraySRV;
 
 	bool m_useBlendmap;
 
-	XMFLOAT3 m_targetPosition;
+	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 
-	void createGrid(std::vector<Vertex::Basic>& vertices, std::vector<UINT>& indices);
+	void buildHeightmapSRV(ID3D11Device* device);
+	void buildBlendmapSRV(ID3D11Device* device);
 };
 
 #endif

@@ -24,6 +24,7 @@ public:
 	void setBool(const std::string& variable, const bool value);
 	void setInt(const std::string& variable, const int value);
 	void setFloat(const std::string& variable, const float value);
+	void setFloat2(const std::string& variable, const XMFLOAT2 value);
 	void setFloat3(const std::string& variable, const XMFLOAT3 value);
 	void setFloat4(const std::string& variable, const XMFLOAT4 value);
 	void setMatrix(const std::string& variable, const XMMATRIX& value);
