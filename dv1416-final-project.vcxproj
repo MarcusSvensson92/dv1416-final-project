@@ -150,6 +150,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Shaders/%(Filename).fxo;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Shadow.fx" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

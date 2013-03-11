@@ -171,4 +171,9 @@
       <Filter>Shaders</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Shadow.fx">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>

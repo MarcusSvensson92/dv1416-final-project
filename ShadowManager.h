@@ -11,9 +11,11 @@
 
 struct PLightShadowMap
 {
+	PLightShadowMap() { ZeroMemory(this, sizeof(this)); }
+
 	int							id;
-	std::string					ShaderName [6];
-	std::string					MatrixName [6];
+	std::string					ShaderNames [6];
+	std::string					MatrixNames [6];
 	renderTarget				ShadowMaps [6];
 	Light::PointLight*			Light;
 };
@@ -43,6 +45,10 @@ public:
 private:
 	std::vector<PLightShadowMap>		m_PLightShadowMaps;
 	std::vector<DLightShadowMap>		m_DLightShadowMaps;
+
+	void		CreatePLightShadowMap(int,
+										std::string, std::string, std::string, std::string, std::string, std::string,
+										std::string, std::string, std::string, std::string, std::string, std::string);
 };
 
 #endif

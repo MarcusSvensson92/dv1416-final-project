@@ -6,10 +6,11 @@ ShadowManager::ShadowManager(void)
 	// Should be same as in Light.fx
 	int POINTLIGHTS = 10;
 
+	std::string Names [6] = { "ShadowMap0", "ShadowMap1", "ShadowMap0", "ShadowMap1", "ShadowMap0", "ShadowMap1" };
+
 	PLightShadowMap standardMap;
-	standardMap.ShaderName;
-	standardMap.MatrixName;
-	standardMap.ShadowMaps [6];
+	standardMap.ShaderNames;
+	standardMap.MatrixNames;
 	standardMap.Light;
 }
 
@@ -58,8 +59,14 @@ void ShadowManager::SetupShadowMaps(Shader* shader)
 			for (int j = 0; j < 6; j++)
 			{
 				//shader->setMatrix(m_PLightShadowMaps[i].MatrixName[j], /* calc for view proj here */);
-				shader->setResource(m_PLightShadowMaps[i].ShaderName[j], m_PLightShadowMaps[i].ShadowMaps[j].GetShaderResourceView());
+				shader->setResource(m_PLightShadowMaps[i].ShaderNames[j], m_PLightShadowMaps[i].ShadowMaps[j].GetShaderResourceView());
 			}
 		}
 	}
+}
+void ShadowManager::CreatePLightShadowMap(int id,
+										std::string t1, std::string t2, std::string t3, std::string t4, std::string t5, std::string t6,
+										std::string m1, std::string m2, std::string m3, std::string m4, std::string m5, std::string m6)
+{
+
 }
