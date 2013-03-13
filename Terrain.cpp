@@ -60,6 +60,14 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 
 	m_heightmap.resize((m_terrainDesc.width + 1) * (m_terrainDesc.depth + 1), 0);
 	buildHeightmapSRV(device);
+
+	m_minDistance     = 20.f;
+	m_maxDistance	  = 500.f;
+	m_minTessellation = 0.f;
+	m_maxTessellation = 6.f;
+	m_textureScale	  = 5.f;
+	m_targetPosition  = XMFLOAT3(0.f, 0.f, 0.f);
+	m_targetDiameter  = 10.f;
 }
 
 void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext,
@@ -90,7 +98,6 @@ void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 {
 	Utilities::loadPNG(blendmapFilename, m_blendmap);
 	buildBlendmapSRV(device);
-	//m_layermapArraySRV = Utilities::createTexture2DArraySRV(device, deviceContext, layermapFilenames);
 
 	m_useBlendmap = true;
 }
@@ -112,23 +119,27 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	shader->setMatrix("gViewProj", viewProj);
 	shader->setFloat3("gCameraPosition", cameraPosition);
 
-	shader->setFloat("gMinDistance", 20.f);
-	shader->setFloat("gMaxDistance", 500.f);
-	shader->setFloat("gMinTessellation", 0.f);
-	shader->setFloat("gMaxTessellation", 6.f);
+	shader->setFloat("gTextureScale", m_textureScale);
+
+	shader->setFloat("gMinDistance", m_minDistance);
+	shader->setFloat("gMaxDistance", m_maxDistance);
+	shader->setFloat("gMinTessellation", m_minTessellation);
+	shader->setFloat("gMaxTessellation", m_maxTessellation);
 
 	shader->setFloat2("gTexelSize", XMFLOAT2(1.f / (m_terrainDesc.width + 1),
 											 1.f / (m_terrainDesc.depth + 1)));
 
 	shader->setResource("gHeightmap", m_heightmapSRV);
 	shader->setResource("gBlendmap", m_blendmapSRV);
-	//shader->setResource("gLayermapArray", m_layermapArraySRV);
 	shader->setResource("gLayermap0", m_layermapArraySRV[0]);
 	shader->setResource("gLayermap1", m_layermapArraySRV[1]);
 	shader->setResource("gLayermap2", m_layermapArraySRV[2]);
 	shader->setResource("gLayermap3", m_layermapArraySRV[3]);
 
 	shader->setBool("gUseBlendmap", m_useBlendmap);
+
+	shader->setFloat3("gTargetPosition", m_targetPosition);
+	shader->setFloat("gTargetDiameter", m_targetDiameter);
 
 	m_vertexBuffer.apply(deviceContext);
 	m_indexBuffer.apply(deviceContext);
@@ -141,7 +152,126 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 	deviceContext->DSSetShader(NULL, NULL, 0);
 }
 
-std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
+float Terrain::getHeight(const XMFLOAT2 position)
+{
+	const float c =  position.x + 0.5f * (m_terrainDesc.width + 1);
+	const float d = -position.y + 0.5f * (m_terrainDesc.depth + 1);
+
+	const int row = (int)floorf(d);
+	const int col = (int)floorf(c);
+
+	const float A = m_heightmap[ row	  * m_terrainDesc.width + col];
+	const float B = m_heightmap[ row	  * m_terrainDesc.width + col + 1];
+	const float C = m_heightmap[(row + 1) * m_terrainDesc.width + col];
+	const float D = m_heightmap[(row + 1) * m_terrainDesc.width + col + 1];
+
+	const float s = c - (float)col;
+	const float t = d - (float)row;
+
+	if (s + t <= 1.f)
+		return A + s * (B - A) + t * (C - A);
+	else
+		return D + (1.f - s) * (C - D) + (1.f - t) * (B - D);
+}
+
+bool Terrain::computeIntersection(const Ray& ray)
+{
+	const UINT width = m_terrainDesc.width;
+	const UINT depth = m_terrainDesc.depth;
+
+	const float halfWidth = 0.5f * (float)width;
+	const float halfDepth = 0.5f * (float)depth;
+
+	const UINT heightmapWidth = width + 1;
+	const UINT heightmapDepth = depth + 1;
+
+	const float halfHeightmapWidth = 0.5f * (float)heightmapWidth;
+	const float halfHeightmapDepth = 0.5f * (float)heightmapDepth;
+
+	const float heightmapDx = (float)heightmapWidth / ((float)heightmapWidth - 1.f);
+	const float heightmapDz = (float)heightmapDepth / ((float)heightmapDepth - 1.f);
+
+	XMVECTOR origin = XMVectorSet(XMVectorGetX(ray.origin), XMVectorGetZ(ray.origin), 0.f, 0.f);
+
+	const float directionX = XMVectorGetX(ray.direction);
+	const float directionZ = XMVectorGetZ(ray.direction);
+
+	XMVECTOR direction = XMVectorSet(directionX, directionZ, 0.f, 0.f);
+	if (directionX != 0.f && directionZ != 0.f)
+	{
+		const float absDirectionX = abs(directionX);
+		const float absDirectionZ = abs(directionZ);
+		direction /= (absDirectionX > absDirectionZ) ? absDirectionX : absDirectionZ;
+	}
+	direction *= 0.1f;
+
+	float t = -1.f;
+
+	XMVECTOR position = origin;
+	
+	const UINT n = 300 / 0.1;
+	for (UINT i = 0; i < n; i++)
+	{
+		if (i > 0)
+			position += direction;
+		XMFLOAT2 p;
+		XMStoreFloat2(&p, position);
+
+		const float c =  p.x + halfWidth;
+		const float d = -p.y + halfDepth;
+
+		const int row = (int)floorf(d);
+		const int col = (int)floorf(c);
+
+		if (inBounds(row, col) && inBounds(row + 1, col + 1))
+		{
+			const float x0 = -halfHeightmapWidth + (float)col * heightmapDx;
+			const float x1 = -halfHeightmapWidth + (float)(col + 1) * heightmapDx;
+			const UINT  y0 = row * heightmapDepth + col;
+			const UINT  y1 = (row + 1) * heightmapDepth + col;
+			const float z0 = halfHeightmapDepth - (float)row * heightmapDz;
+			const float z1 = halfHeightmapDepth - (float)(row + 1) * heightmapDz;
+
+			XMVECTOR A = XMVectorSet(x0, m_heightmap[y0    ], z0, 0.f);
+			XMVECTOR B = XMVectorSet(x1, m_heightmap[y0 + 1], z0, 0.f);
+			XMVECTOR C = XMVectorSet(x0, m_heightmap[y1	   ], z1, 0.f);
+			XMVECTOR D = XMVectorSet(x1, m_heightmap[y1 + 1], z1, 0.f);
+
+			XMVECTOR triangle1[3] = { A, B, C };
+			XMVECTOR triangle2[3] = { D, C, B };
+
+			const float t1 = computeTriangleIntersection(ray, triangle1);
+			const float t2 = computeTriangleIntersection(ray, triangle2);
+
+			if (t1 < 0.f && t2 < 0.f) { }
+			else if (t1 >= 0.f && t2 < 0.f)
+			{
+				t = t1;
+				break;
+			}
+			else if (t1 < 0.f && t2 >= 0.f)
+			{
+				t = t2;
+				break;
+			}
+			else
+			{
+				t = (t1 > t2) ? t2 : t1;
+				break;
+			}
+		}
+	}
+
+	if (t >= 0.f)
+	{
+		XMStoreFloat3(&m_targetPosition, ray.origin + t * ray.direction);
+		return true;
+	}
+	else
+		return false;
+}
+
+std::vector<std::pair<float, float*>> Terrain::getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
 {
 	const int col = (int)floorf( position.x + 0.5f * m_terrainDesc.width);
 	const int row = (int)floorf(-position.z + 0.5f * m_terrainDesc.depth);
@@ -155,19 +285,30 @@ std::vector<std::pair<XMFLOAT2, float*>> Terrain::getHeightmapDataWithinRadius(c
 	const float dx = (float)width / ((float)width - 1);
 	const float dz = (float)depth / ((float)depth - 1);
 
-	std::vector<std::pair<XMFLOAT2, float*>> heightmapData;
+	XMVECTOR p = XMVectorSet(position.x, position.z, 0.f, 0.f);
+
+	std::vector<std::pair<float, float*>> heightmapData;
 	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
-		if (i >= 0 && i < depth)
+	{
+		if (i >= 0 && i < (int)depth)
+		{
 			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
-				if (j >= 0 && j < width)
-					heightmapData.push_back(
-						std::pair<XMFLOAT2, float*>(
-							XMFLOAT2(-halfWidth + j * dx, halfDepth - i * dz),
-							&m_heightmap[i * width + j]));
+			{
+				if (j >= 0 && j < (int)width)
+				{
+					XMVECTOR v = XMVectorSet(-halfWidth + j * dx, halfDepth - i * dz, 0.f, 0.f);
+					const float length = XMVectorGetX(XMVector2Length(v - p)) / radius;
+					if (length <= 1.f)
+						heightmapData.push_back(
+							std::pair<float, float*>(length, &m_heightmap[i * width + j]));
+				}
+			}
+		}
+	}
 	return heightmapData;
 }
 
-std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> Terrain::getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
+std::vector<std::pair<float, XMFLOAT4*>> Terrain::getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius)
 {
 	const int col = (int)floorf( position.x + 0.5f * m_terrainDesc.width);
 	const int row = (int)floorf(-position.z + 0.5f * m_terrainDesc.depth);
@@ -181,15 +322,26 @@ std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> Terrain::getBlendmapDataWithinRadius
 	const float dx = (float)width / ((float)width - 1);
 	const float dz = (float)depth / ((float)depth - 1);
 
-	std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> blendmapData;
+	XMVECTOR p = XMVectorSet(position.x, position.z, 0.f, 0.f);
+
+	std::vector<std::pair<float, XMFLOAT4*>> blendmapData;
 	for (int i = row - (int)radius; i < row + (int)radius + 1; i++)
-		if (i >= 0 && i < depth)
+	{
+		if (i >= 0 && i < (int)depth)
+		{
 			for (int j = col - (int)radius; j < col + (int)radius + 1; j++)
-				if (j >= 0 && j < width)
-					blendmapData.push_back(
-						std::pair<XMFLOAT2, XMFLOAT4*>(
-							XMFLOAT2(-halfWidth + j * dx, halfDepth - i * dz),
-							&m_blendmap.texels[i * width + j]));
+			{
+				if (j >= 0 && j < (int)width)
+				{
+					XMVECTOR v = XMVectorSet(-halfWidth + j * dx, halfDepth - i * dz, 0.f, 0.f);
+					const float length = XMVectorGetX(XMVector2Length(v - p)) / radius;
+					if (length <= 1.f)
+						blendmapData.push_back(
+							std::pair<float, XMFLOAT4*>(length, &m_blendmap.texels[i * width + j]));
+				}
+			}
+		}
+	}
 	return blendmapData;
 }
 
@@ -338,4 +490,36 @@ void Terrain::buildBlendmapSRV(ID3D11Device* device)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels		  = -1;
 	device->CreateShaderResourceView(m_blendmapTexture, &srvDesc, &m_blendmapSRV);
+}
+
+bool Terrain::inBounds(int i, int j)
+{
+	return i >= 0 && i < (int)m_terrainDesc.depth + 1 &&
+		   j >= 0 && j < (int)m_terrainDesc.width + 1;
+}
+
+float Terrain::computeTriangleIntersection(const Ray& ray, const XMVECTOR triangle[3])
+{
+	XMVECTOR	e1 = triangle[1] - triangle[0];
+	XMVECTOR	e2 = triangle[2] - triangle[0];
+	XMVECTOR    q  = XMVector3Cross(ray.direction, e2);
+	const float a  = XMVectorGetX(XMVector3Dot(e1, q));
+
+	if (a > -std::numeric_limits<float>::epsilon() && a < std::numeric_limits<float>::epsilon())
+		return -1.f;
+	
+	const float f = 1.f / a;
+	XMVECTOR    s = ray.origin - triangle[0];
+	const float u = f * XMVectorGetX(XMVector3Dot(s, q));
+
+	if (u < 0.f)
+		return -1.f;
+
+	XMVECTOR	r = XMVector3Cross(s, e1);
+	const float v = f * XMVectorGetX(XMVector3Dot(ray.direction, r));
+
+	if (v < 0.f || u + v > 1.f)
+		return -1.f;
+
+	return f * XMVectorGetX(XMVector3Dot(e2, r));
 }

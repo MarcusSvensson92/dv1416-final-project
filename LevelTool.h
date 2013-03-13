@@ -40,8 +40,6 @@ private:
 
 	State m_state;
 
-	void computeTargetPosition(POINT cursorPosition);
-
 	void updateTerrainHeightmap(const float dt);
 };
 

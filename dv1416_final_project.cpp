@@ -83,6 +83,7 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 		}
 		else if (eventName == "Texturing")
 			m_currentActivity = Texturing;
+		SetFocus(m_hWnd);
 	}
 }
 

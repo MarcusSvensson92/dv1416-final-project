@@ -33,8 +33,6 @@ private:
 	float m_brushDiameter;
 	float m_brushStrength;
 
-	void computeTargetPosition(POINT cursorPosition);
-
 	void updateTerrainBlendmap(const float dt);
 };
 

@@ -7,6 +7,8 @@ cbuffer cbPerFrame
 	matrix gViewProj;
 	float3 gCameraPosition;
 
+	float gTextureScale;
+
 	float gMinDistance;
 	float gMaxDistance;
 	float gMinTessellation;
@@ -15,6 +17,9 @@ cbuffer cbPerFrame
 	float2 gTexelSize;
 
 	bool gUseBlendmap;
+
+	float3 gTargetPosition;
+	float  gTargetDiameter;
 };
 
 cbuffer cbPerObject
@@ -22,14 +27,8 @@ cbuffer cbPerObject
 	Material gMaterial;
 }
 
-cbuffer cbConstant
-{
-	float gTextureScale = 5.f;
-};
-
 Texture2D gHeightmap;
 Texture2D gBlendmap;
-//Texture2DArray gLayermapArray;
 Texture2D gLayermap0;
 Texture2D gLayermap1;
 Texture2D gLayermap2;
@@ -180,6 +179,10 @@ PSIn DS(TessellationPatch tp, float2 uv : SV_DomainLocation, const OutputPatch<D
 
 float4 PS(PSIn input) : SV_TARGET
 {
+	float l = length(input.positionW.xz - gTargetPosition.xz);
+	if (l > gTargetDiameter / 2.f && l < gTargetDiameter / 2.f + 0.5f)
+		return float4(1.f, 0.f, 0.f, 1.f);
+
 	if (gUseBlendmap)
 	{
 		float4 c0 = gLayermap0.Sample(linearSampler, input.tiledTex0);

@@ -20,6 +20,9 @@ public:
 	Terrain(void);
 	~Terrain(void);
 
+	XMFLOAT3 getTargetPosition(void) const { return m_targetPosition; }
+	void setTargetDiameter(const float targetDiameter) { m_targetDiameter = targetDiameter; }
+
 	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
 	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
 					   const float heightmapScale);
@@ -30,8 +33,12 @@ public:
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
-	std::vector<std::pair<XMFLOAT2, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
-	std::vector<std::pair<XMFLOAT2, XMFLOAT4*>> getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+	float getHeight(const XMFLOAT2 position);
+
+	bool computeIntersection(const Ray& ray);
+
+	std::vector<std::pair<float, float*>> getHeightmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
+	std::vector<std::pair<float, XMFLOAT4*>> getBlendmapDataWithinRadius(const XMFLOAT3 position, const UINT radius);
 
 	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
 	void updateBlendmapTexture(ID3D11DeviceContext* deviceContext);
@@ -58,14 +65,25 @@ private:
 	ID3D11ShaderResourceView* m_heightmapSRV;
 	ID3D11ShaderResourceView* m_blendmapSRV;
 	ID3D11ShaderResourceView* m_layermapArraySRV[4];
-	//ID3D11ShaderResourceView* m_layermapArraySRV;
 
 	bool m_useBlendmap;
+
+	float m_minDistance;
+	float m_maxDistance;
+	float m_minTessellation;
+	float m_maxTessellation;
+	float m_textureScale;
+	XMFLOAT3 m_targetPosition;
+	float m_targetDiameter;
 
 	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 
 	void buildHeightmapSRV(ID3D11Device* device);
 	void buildBlendmapSRV(ID3D11Device* device);
+
+	bool inBounds(int i, int j);
+
+	float computeTriangleIntersection(const Ray& ray, const XMVECTOR triangle[3]);
 };
 
 #endif

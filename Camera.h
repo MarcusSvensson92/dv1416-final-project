@@ -9,6 +9,11 @@ struct Ray
 	XMVECTOR direction;
 };
 
+struct Triangle
+{
+	XMVECTOR coordinates[3];
+};
+
 class Camera
 {
 public:

@@ -24,6 +24,7 @@
 #include <ostream>
 #include <map>
 #include <algorithm>
+#include <limits>
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
