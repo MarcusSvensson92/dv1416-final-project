@@ -19,14 +19,18 @@ LightManager::LightManager(void)
 	{
 		m_Lights.push_back(standardLight);
 	}
+
+	m_state = Add;
 }
 
 LightManager::~LightManager(void)
 {
 }
 
-void LightManager::init(ID3D11Device* device)
+void LightManager::init(HWND hWnd, ID3D11Device* device, Camera* camera)
 {
+	m_hWnd			= hWnd;
+	m_camera		= camera;
 	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/light.png", 0, 0, &m_texture, 0 );
 }
 
@@ -59,6 +63,34 @@ void LightManager::ClearLights()
 std::vector<PointLight> LightManager::getLights()
 {
 	return m_Lights;
+}
+
+void LightManager::update(float dt)
+{
+	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+	{
+		POINT cursorPosition;
+		if (GetCursorPos(&cursorPosition))
+		{
+			ScreenToClient(m_hWnd, &cursorPosition);
+
+			Ray ray = m_camera->computeRay(cursorPosition);
+
+			switch (m_state)
+			{
+			case Add:
+
+				break;
+			case Remove:
+				PointLight* selected_light = computeIntersection(ray);
+				if (selected_light != NULL)
+					RemoveLight(selected_light);
+				break;
+			}
+
+
+		}
+	}
 }
 
 void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)

@@ -83,6 +83,11 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 		}
 		else if (eventName == "Texturing")
 			m_currentActivity = Texturing;
+		else if (eventName == "Remove Light")
+		{
+			m_currentActivity = RemoveLight;
+			m_LightManager.setState(LightManager::State::Remove);
+		}
 	}
 }
 
@@ -112,22 +117,9 @@ void dv1416_final_project::update(void)
 	case Texturing:
 		m_textureTool.update(dt);
 		break;
-	}
-
-	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
-	{
-		POINT cursorPosition;
-		if (GetCursorPos(&cursorPosition))
-		{
-			ScreenToClient(m_hWnd, &cursorPosition);
-
-			Ray ray = m_camera.computeRay(cursorPosition);
-
-			// Click to turn the lights red
-			PointLight* selected_light = m_LightManager.computeIntersection(ray);
-			if (selected_light != NULL)
-				m_LightManager.RemoveLight(selected_light);
-		}
+	case RemoveLight:
+		m_LightManager.update(dt);
+		break;
 	}
 }
 
@@ -191,7 +183,7 @@ void dv1416_final_project::initShaders(void)
 
 void dv1416_final_project::initLights(void)
 {
-	m_LightManager.init(m_device);
+	m_LightManager.init(m_hWnd, m_device, &m_camera);
 
 	m_LightManager.AddLight(XMFLOAT3(-80,30,-80),POINT_LIGHT);
 	m_LightManager.AddLight(XMFLOAT3(-80,30, 80),POINT_LIGHT);
@@ -236,6 +228,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	toolbar.addButton("Raise Level", this, "Content/img/raise_level.bmp");
 	toolbar.addButton("Lower Level", this, "Content/img/lower_level.bmp");
 	toolbar.addButton("Texturing", this, "Content/img/texturing.bmp");
+	toolbar.addButton("Remove Light", this, "Content/img/remove_light.bmp");
 	toolbar.show(true);
 
 	sd.caption = "Level Tool";

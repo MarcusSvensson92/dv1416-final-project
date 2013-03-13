@@ -36,7 +36,9 @@ private:
 	{
 		RaisingLevel,
 		LoweringLevel,
-		Texturing
+		Texturing,
+		AddLight,
+		RemoveLight
 	} m_currentActivity;
 
 	Camera m_camera;
