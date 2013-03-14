@@ -53,14 +53,13 @@ void LightManager::RemoveLight( PointLight* light )
 	light->Position		= XMFLOAT3(0.0f, 1.0f, 0.0f);
 	light->Range		= -1.f;
 }
-void LightManager::MoveLightY( PointLight* light )
+void LightManager::MoveLightY( PointLight* light, const Ray& ray )
 {
-	light->Position		= XMFLOAT3(0.0f, 1.0f, 0.0f);
-	light->Range		= -1.f;
+	light->Position.y = computePlaneIntersection(light->Position.x, XMFLOAT3(1,0,0), ray).y;
 }
 void LightManager::MoveLightXZ( PointLight* light, const Ray& ray )
 {
-	light->Position = computePlaneIntersection(light->Position.y, ray);
+	light->Position = computePlaneIntersection(light->Position.y, XMFLOAT3(0,1,0), ray);
 }
 void LightManager::ClearLights()
 {
@@ -89,7 +88,8 @@ void LightManager::update(float dt)
 			{
 			case Add:
 				if (!MouseDown)
-					m_light = AddLight(computePlaneIntersection(0.f, ray), POINT_LIGHT);
+					m_light = AddLight(computePlaneIntersection(0.f, XMFLOAT3(0,1,0), ray), POINT_LIGHT);
+				MoveLightY(m_light, ray);
 				break;
 			case Remove:
 				m_light = computeIntersection(ray);
@@ -100,17 +100,26 @@ void LightManager::update(float dt)
 				if (!MouseDown)
 					m_light = computeIntersection(ray);
 				if (m_light != NULL)
-					MoveLightXZ(m_light, ray);
+				{
+					if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+						MoveLightY(m_light, ray);
+					else
+						MoveLightXZ(m_light, ray);
+				}
 				break;
 			case MoveY:
 				if (!MouseDown)
 					m_light = computeIntersection(ray);
 				if (m_light != NULL)
-					MoveLightY(m_light);
+				{
+					if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)
+						MoveLightXZ(m_light, ray);
+					else
+						MoveLightY(m_light, ray);
+				}
 				break;
 			}
 		}
-
 		MouseDown = true;
 	}
 	else
@@ -210,9 +219,9 @@ PointLight* LightManager::computeIntersection(const Ray& ray)
 	else
 		return NULL;
 }
-XMFLOAT3	LightManager::computePlaneIntersection(float Y, const Ray& ray)
+XMFLOAT3	LightManager::computePlaneIntersection(float Y, XMFLOAT3 normal, const Ray& ray)
 {
-	XMVECTOR pnormal = XMVectorSet(0,1,0,0);
+	XMVECTOR pnormal = XMLoadFloat3(&normal);
 	float t = (Y - XMVectorGetX(XMVector3Dot(ray.origin, pnormal))) / XMVectorGetX(XMVector3Dot(ray.direction, pnormal));
 	XMFLOAT3 m_targetPosition;
 	XMStoreFloat3(&m_targetPosition, ray.origin + t * ray.direction);

@@ -36,13 +36,13 @@ public:
 
 	PointLight*	AddLight(XMFLOAT3, LightType);
 	void		RemoveLight(PointLight*);
-	void		MoveLightY(PointLight*);
+	void		MoveLightY(PointLight*,const Ray&);
 	void		MoveLightXZ(PointLight*,const Ray&);
 	void		ClearLights();
 	void		update(float);
 
 	PointLight*	computeIntersection(const Ray& ray);
-	XMFLOAT3	computePlaneIntersection(float Y, const Ray& ray);
+	XMFLOAT3	computePlaneIntersection(float Y, XMFLOAT3 normal, const Ray& ray);
 
 	std::vector<PointLight> getLights();
 
