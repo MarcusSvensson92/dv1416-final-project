@@ -78,6 +78,9 @@
     <ClCompile Include="TrackbarWindow.cpp">
       <Filter>GUI\Subwindows</Filter>
     </ClCompile>
+    <ClCompile Include="Toolbox.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -209,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="TrackbarWindow.h">
       <Filter>GUI\Subwindows</Filter>
+    </ClInclude>
+    <ClInclude Include="Toolbox.h">
+      <Filter>Tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,28 +12,28 @@ public:
 	TextureTool(void);
 	~TextureTool(void);
 
+	void setHWnd(HWND hWnd) { m_hWnd = hWnd; }
+	void setDevice(ID3D11Device* device) { m_device = device; }
+	void setDeviceContext(ID3D11DeviceContext* deviceContext) { m_deviceContext = deviceContext; }
 	void setTerrain(Terrain* terrain) { m_terrain = terrain; }
+	void setTargetPosition(XMFLOAT3* targetPosition) { m_targetPosition = targetPosition; }
 
-	void init(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext, Camera* camera);
 	void update(const float dt);
-protected:
+
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	HWND m_hWnd;
 	ID3D11Device* m_device;
 	ID3D11DeviceContext* m_deviceContext;
-	Camera* m_camera;
 
 	Terrain* m_terrain;
 
-	XMFLOAT3 m_targetPosition;
+	XMFLOAT3* m_targetPosition;
 	XMVECTOR m_brush;
 	UINT m_brushIndex;
 
 	float m_brushDiameter;
 	float m_brushStrength;
-
-	void updateTerrainBlendmap(const float dt);
 };
 
 #endif

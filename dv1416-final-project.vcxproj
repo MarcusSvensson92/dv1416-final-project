@@ -103,6 +103,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Tool.cpp" />
     <ClCompile Include="Toolbar.cpp" />
+    <ClCompile Include="Toolbox.cpp" />
     <ClCompile Include="TrackbarWindow.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="Vertex.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Tool.h" />
     <ClInclude Include="Toolbar.h" />
+    <ClInclude Include="Toolbox.h" />
     <ClInclude Include="TrackbarWindow.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Vertex.h" />

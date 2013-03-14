@@ -8,9 +8,6 @@
 #include "Terrain.h"
 #include "ShaderManager.h"
 #include "LightManager.h"
-#include "LevelToolWindow.h"
-#include "LevelTool.h"
-#include "TextureTool.h"
 
 class dv1416_final_project : public D3DApp, GUI::EventReceiver
 {
@@ -32,21 +29,10 @@ protected:
 
 	void onResize(void);
 private:
-	enum Activity
-	{
-		RaisingLevel,
-		LoweringLevel,
-		Texturing,
-		AddLight,
-		RemoveLight
-	} m_currentActivity;
-
 	Camera m_camera;
 	ShaderManager m_shaderManager;
 	LightManager m_LightManager;
 	Terrain m_terrain;
-	LevelTool m_levelTool;
-	TextureTool m_textureTool;
 
 	void initShaders(void);
 	void initLights(void);

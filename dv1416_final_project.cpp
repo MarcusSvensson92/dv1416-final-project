@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "dv1416_final_project.h"
-#include "TextureToolWindow.h"
+#include "Toolbox.h"
 #include "TerrainOptions.h"
 #include "SelectionOptions.h"
 
@@ -30,13 +30,9 @@ bool dv1416_final_project::init(void)
 	m_camera.setPosition(0.f, 50.f, 0.f);
 	m_camera.setProj(m_clientWidth, m_clientHeight, PI * 0.25f, 1.f, 1000.f);
 
-	m_levelTool.init(m_hWnd, m_deviceContext, &m_camera);
-	m_levelTool.setTerrain(&m_terrain);
-
-	m_textureTool.init(m_hWnd, m_device, m_deviceContext, &m_camera);
-	m_textureTool.setTerrain(&m_terrain);
-
-	m_currentActivity = RaisingLevel;
+	Toolbox& toolbox = Toolbox::getInstance();
+	toolbox.init(m_hWnd, &m_camera, m_device, m_deviceContext, &m_LightManager);
+	toolbox.setTerrain(&m_terrain);
 
 	return true;
 }
@@ -85,27 +81,6 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			GUI::SelectionOptions::getInstance().show(!check);
 		}
 	}
-
-	if (sender == "Toolbar")
-	{
-		if (eventName == "Raise Level")
-		{
-			m_currentActivity = RaisingLevel;
-			m_levelTool.setState(LevelTool::State::Raising);
-		}
-		else if (eventName == "Lower Level")
-		{
-			m_currentActivity = LoweringLevel;
-			m_levelTool.setState(LevelTool::State::Lowering);
-		}
-		else if (eventName == "Texturing")
-			m_currentActivity = Texturing;
-		else if (eventName == "Remove Light")
-		{
-			m_currentActivity = RemoveLight;
-			m_LightManager.setState(LightManager::State::Remove);
-		}
-	}
 }
 
 void dv1416_final_project::update(void)
@@ -123,21 +98,7 @@ void dv1416_final_project::update(void)
 
 	m_camera.updateViewMatrix();
 
-	switch (m_currentActivity)
-	{
-	case RaisingLevel:
-		m_levelTool.update(dt);
-		break;
-	case LoweringLevel:
-		m_levelTool.update(dt);
-		break;
-	case Texturing:
-		m_textureTool.update(dt);
-		break;
-	case RemoveLight:
-		m_LightManager.update(dt);
-		break;
-	}
+	Toolbox::getInstance().update(dt);
 }
 
 void dv1416_final_project::render(void)
@@ -239,41 +200,6 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	menu.assignToWindow(hWnd);
 
 	GUI::SubwindowDesc sd;
-	sd.caption = "Toolbar";
-	sd.x	   = 50;
-	sd.y	   = 100;
-	GUI::Toolbar& toolbar = GUI::Toolbar::getInstance();
-	toolbar.init(m_hInstance, hWnd, sd);
-	toolbar.addButton("Raise Level", this, "Content/img/raise_level.bmp");
-	toolbar.addButton("Lower Level", this, "Content/img/lower_level.bmp");
-	toolbar.addButton("Texturing", this, "Content/img/texturing.bmp");
-	toolbar.addButton("Remove Light", this, "Content/img/remove_light.bmp");
-	toolbar.show(true);
-
-	sd.caption = "Level Tool";
-	sd.x	   = 700;
-	sd.y	   = 100;
-	GUI::LevelToolWindow& levelToolWindow = GUI::LevelToolWindow::getInstance();
-	levelToolWindow.init(m_hInstance, hWnd, sd);
-	levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
-	levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
-	levelToolWindow.addTrackbar("Brush Strength", &m_levelTool, 1, 100, 5);
-	levelToolWindow.show(true);
-
-	sd.caption = "Texture Tool";
-	sd.x	   = 700;
-	sd.y	   = 300;
-	GUI::TextureToolWindow& textureToolWindow = GUI::TextureToolWindow::getInstance();
-	textureToolWindow.init(m_hInstance, hWnd, sd);
-	textureToolWindow.addTextureButton("Texture R", &m_textureTool, "Content/img/texture_r.bmp");
-	textureToolWindow.addTextureButton("Texture G", &m_textureTool, "Content/img/texture_g.bmp");
-	textureToolWindow.addTextureButton("Texture B", &m_textureTool, "Content/img/texture_b.bmp");
-	textureToolWindow.addTextureButton("Texture A", &m_textureTool, "Content/img/texture_a.bmp");
-	textureToolWindow.addLoadFileButton("Load Texture", &m_textureTool);
-	textureToolWindow.addTrackbar("Brush Diameter", &m_textureTool, 1, 100, 10);
-	textureToolWindow.addTrackbar("Brush Strength", &m_textureTool, 1, 100, 50);
-	textureToolWindow.show(true);
-
 	sd.caption = "Terrain Options";
 	sd.x	   = 500;
 	sd.y	   = 400;
@@ -292,4 +218,6 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	selectionOptions.init(m_hInstance, hWnd, sd);
 	selectionOptions.addTrackbar("Interval Sample", &m_terrain, 1, 100, 10);
 	selectionOptions.addTrackbar("Distance", &m_terrain, 1, 1000, 500);
+
+	Toolbox::getInstance().initGUI(m_hInstance, hWnd);
 }
