@@ -25,9 +25,11 @@ namespace GUI
 					   const std::string& bitmapFilename);
 
 		LRESULT subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	protected:
-		int getItemID(const UINT i) const;
 	private:
+		UINT m_buttonsPerRow;
+		UINT m_buttonSize;
+		UINT m_buttonMargin;
+
 		void resetButtonHighlights(void);
 	};
 }

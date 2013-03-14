@@ -73,7 +73,8 @@ namespace GUI
 	}
 
 	void Subwindow::initWindow(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc,
-							   const DWORD style, const UINT clientWidth, const UINT clientHeight)
+							   const DWORD style, const UINT clientWidth, const UINT clientHeight,
+							   const UINT itemIDStart)
 	{
 		m_hInstance     = hInstance;
 		m_hParentWnd	= hParentWnd;
@@ -81,6 +82,7 @@ namespace GUI
 		m_style		    = style;
 		m_clientWidth   = clientWidth;
 		m_clientHeight  = clientHeight;
+		m_itemIDStart	= itemIDStart;
 
 		const POINT windowSize = getWindowSize();
 
@@ -110,5 +112,18 @@ namespace GUI
 		windowPosition.x = rect.left;
 		windowPosition.y = rect.top;
 		return windowPosition;
+	}
+
+	int Subwindow::getItemID(const UINT i) const
+	{
+		return (i < (UINT)m_items.size()) ? m_itemIDStart + i : -1;
+	}
+
+	int Subwindow::getItemID(const std::string& itemName) const
+	{
+		for (UINT i = 0; i < (UINT)m_items.size(); i++)
+			if (m_items[i].first == itemName)
+				return m_itemIDStart + i;
+		return -1;
 	}
 }

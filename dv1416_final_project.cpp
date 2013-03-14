@@ -2,6 +2,7 @@
 #include "dv1416_final_project.h"
 #include "TextureToolWindow.h"
 #include "TerrainOptions.h"
+#include "SelectionOptions.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -76,6 +77,12 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			bool check = menu.isItemChecked(eventName);
 			menu.checkItem(eventName, !check);
 			GUI::TerrainOptions::getInstance().show(!check);
+		}
+		else if (eventName == "Selection Options")
+		{
+			bool check = menu.isItemChecked(eventName);
+			menu.checkItem(eventName, !check);
+			GUI::SelectionOptions::getInstance().show(!check);
 		}
 	}
 
@@ -228,6 +235,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	menu.addItem("File", "Exit", this);
 	menu.addItem("View", "Toolbar", this, true, true);
 	menu.addItem("Options", "Terrain Options", this);
+	menu.addItem("Options", "Selection Options", this);
 	menu.assignToWindow(hWnd);
 
 	GUI::SubwindowDesc sd;
@@ -276,4 +284,12 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	terrainOptions.addTrackbar("Maximum Tessellation", &m_terrain, 0, 6, 6);
 	terrainOptions.addTrackbar("Minimum Tessellation Distance", &m_terrain, 1, 1000, 20);
 	terrainOptions.addTrackbar("Maximum Tessellation Distance", &m_terrain, 1, 1000, 500);
+
+	sd.caption = "Selection Options";
+	sd.x	   = 500;
+	sd.y	   = 400;
+	GUI::SelectionOptions& selectionOptions = GUI::SelectionOptions::getInstance();
+	selectionOptions.init(m_hInstance, hWnd, sd);
+	selectionOptions.addTrackbar("Interval Sample", &m_terrain, 1, 100, 10);
+	selectionOptions.addTrackbar("Distance", &m_terrain, 1, 1000, 500);
 }

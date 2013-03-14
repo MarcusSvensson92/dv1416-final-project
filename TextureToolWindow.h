@@ -1,7 +1,6 @@
 #ifndef TEXTURETOOLWINDOW_H
 #define TEXTURETOOLWINDOW_H
 
-#include "StdAfx.h"
 #include "Subwindow.h"
 
 namespace GUI
@@ -30,10 +29,15 @@ namespace GUI
 						 const UINT minValue, const UINT maxValue, const UINT startValue);
 
 		UINT getTrackbarValue(const std::string& itemName) const;
-	protected:
-		int getItemID(const UINT i) const;
-		int getItemID(const std::string& itemName) const;
 	private:
+		UINT m_textureButtonsPerRow;
+		UINT m_textureButtonSize;
+		UINT m_loadFileButtonHeight;
+		UINT m_loadFileButtonTextSize;
+		UINT m_trackbarHeight;
+		UINT m_trackbarTextSize;
+		UINT m_itemMargin;
+
 		std::vector<UINT> m_checkableButtonIDs;
 
 		UINT m_trackbarCount;

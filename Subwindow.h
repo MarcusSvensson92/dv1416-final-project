@@ -35,14 +35,17 @@ namespace GUI
 		UINT		  m_clientHeight;
 
 		std::vector<EventElement> m_items;
+		UINT					  m_itemIDStart;
 
 		void initWindow(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc,
-						const DWORD style, const UINT clientWidth, const UINT clientHeight);
+						const DWORD style, const UINT clientWidth, const UINT clientHeight,
+						const UINT itemIDStart);
 	
 		POINT getWindowSize(void) const;
 		POINT getWindowPosition(void) const;
 
-		virtual int getItemID(const UINT i) const = 0;
+		int getItemID(const UINT i) const;
+		int getItemID(const std::string& itemName) const;
 	};
 }
 

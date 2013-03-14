@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Terrain.h"
 #include "TerrainOptions.h"
+#include "SelectionOptions.h"
 
 const UINT g_cellsPerPatch = 64;
 
@@ -77,6 +78,9 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 	m_textureScale	  = 5.f;
 	m_targetPosition  = XMFLOAT3(0.f, 0.f, 0.f);
 	m_targetDiameter  = 10.f;
+
+	m_selectionIntervalSample = 0.1f;
+	m_selectionDistance		  = 500.f;
 }
 
 void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext,
@@ -178,6 +182,16 @@ void Terrain::onEvent(const std::string& sender, const std::string& eventName)
 		else if (eventName == "Maximum Tessellation Distance")
 			m_maxDistance = (float)terrainOptions.getTrackbarValue(eventName);
 	}
+
+	if (sender == "Selection Options")
+	{
+		GUI::SelectionOptions& selectionOptions = GUI::SelectionOptions::getInstance();
+
+		if (eventName == "Interval Sample")
+			m_selectionIntervalSample = (float)selectionOptions.getTrackbarValue(eventName) / 100.f;
+		else if (eventName == "Distance")
+			m_selectionDistance = (float)selectionOptions.getTrackbarValue(eventName);
+	}
 }
 
 float Terrain::getHeight(const XMFLOAT2 position)
@@ -231,13 +245,15 @@ bool Terrain::computeIntersection(const Ray& ray)
 		const float absDirectionZ = abs(directionZ);
 		direction /= (absDirectionX > absDirectionZ) ? absDirectionX : absDirectionZ;
 	}
-	direction *= 0.1f;
+	direction *= m_selectionIntervalSample;
 
 	float t = -1.f;
 
 	XMVECTOR position = origin;
+
+	int prevRow, prevCol;
 	
-	const UINT n = (UINT)(500 / 0.1);
+	const UINT n = (UINT)(m_selectionDistance / m_selectionIntervalSample);
 	for (UINT i = 0; i < n; i++)
 	{
 		if (i > 0)
@@ -251,7 +267,8 @@ bool Terrain::computeIntersection(const Ray& ray)
 		const int row = (int)floorf(d);
 		const int col = (int)floorf(c);
 
-		if (inBounds(row, col) && inBounds(row + 1, col + 1))
+		if ((i <= 0 || (row != prevRow || col != prevCol)) &&
+			inBounds(row, col) && inBounds(row + 1, col + 1))
 		{
 			const float x0 = -halfHeightmapWidth + (float)col * heightmapDx;
 			const float x1 = -halfHeightmapWidth + (float)(col + 1) * heightmapDx;
@@ -288,6 +305,9 @@ bool Terrain::computeIntersection(const Ray& ray)
 				break;
 			}
 		}
+
+		prevRow = row;
+		prevCol = col;
 	}
 
 	if (t >= 0.f)

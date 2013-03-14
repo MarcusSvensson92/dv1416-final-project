@@ -76,8 +76,12 @@ private:
 	float m_minTessellation;
 	float m_maxTessellation;
 	float m_textureScale;
+
 	XMFLOAT3 m_targetPosition;
 	float m_targetDiameter;
+
+	float m_selectionIntervalSample;
+	float m_selectionDistance;
 
 	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 

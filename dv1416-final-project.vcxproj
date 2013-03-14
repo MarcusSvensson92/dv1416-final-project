@@ -91,6 +91,7 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="renderTarget.cpp" />
+    <ClCompile Include="SelectionOptions.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Tool.cpp" />
     <ClCompile Include="Toolbar.cpp" />
+    <ClCompile Include="TrackbarWindow.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
@@ -118,6 +120,7 @@
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="renderTarget.h" />
+    <ClInclude Include="SelectionOptions.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowManager.h" />
@@ -130,6 +133,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Tool.h" />
     <ClInclude Include="Toolbar.h" />
+    <ClInclude Include="TrackbarWindow.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>

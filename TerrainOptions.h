@@ -1,12 +1,11 @@
 #ifndef TERRAINOPTIONS_H
 #define TERRAINOPTIONS_H
 
-#include "StdAfx.h"
-#include "Subwindow.h"
+#include "TrackbarWindow.h"
 
 namespace GUI
 {
-	class TerrainOptions : public Subwindow
+	class TerrainOptions : public TrackbarWindow
 	{
 	public:
 		static TerrainOptions& getInstance(void)
@@ -22,14 +21,7 @@ namespace GUI
 	public:
 		void init(HINSTANCE hInstance, HWND hParentWnd,
 				  const SubwindowDesc subwindowDesc);
-
-		void addTrackbar(const std::string& name, EventReceiver* eventReceiver,
-						 const UINT minValue, const UINT maxValue, const UINT startValue);
-
-		UINT getTrackbarValue(const std::string& itemName) const;
-	protected:
-		int getItemID(const UINT i) const;
-		int getItemID(const std::string& itemName) const;
 	};
 }
+
 #endif

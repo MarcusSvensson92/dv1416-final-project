@@ -72,6 +72,12 @@
     <ClCompile Include="TerrainOptions.cpp">
       <Filter>GUI\Subwindows\Options</Filter>
     </ClCompile>
+    <ClCompile Include="SelectionOptions.cpp">
+      <Filter>GUI\Subwindows\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackbarWindow.cpp">
+      <Filter>GUI\Subwindows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -197,6 +203,12 @@
     </ClInclude>
     <ClInclude Include="TerrainOptions.h">
       <Filter>GUI\Subwindows\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectionOptions.h">
+      <Filter>GUI\Subwindows\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackbarWindow.h">
+      <Filter>GUI\Subwindows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
