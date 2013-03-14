@@ -37,8 +37,7 @@ private:
 		RaisingLevel,
 		LoweringLevel,
 		Texturing,
-		AddLight,
-		RemoveLight
+		Light,
 	} m_activity;
 
 	HWND m_hWnd;

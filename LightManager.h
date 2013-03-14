@@ -34,12 +34,15 @@ public:
 
 	void		setState(State state) { m_state = state; }
 
-	bool		AddLight(XMFLOAT3, LightType);
+	PointLight*	AddLight(XMFLOAT3, LightType);
 	void		RemoveLight(PointLight*);
+	void		MoveLightY(PointLight*);
+	void		MoveLightXZ(PointLight*,const Ray&);
 	void		ClearLights();
 	void		update(float);
 
 	PointLight*	computeIntersection(const Ray& ray);
+	XMFLOAT3	computePlaneIntersection(float Y, const Ray& ray);
 
 	std::vector<PointLight> getLights();
 
@@ -52,6 +55,9 @@ private:
 
 	HWND m_hWnd;
 	Camera* m_camera;
+
+	bool MouseDown;
+	PointLight* m_light;
 };
 
 #endif

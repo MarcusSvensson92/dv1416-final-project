@@ -21,6 +21,7 @@ LightManager::LightManager(void)
 	}
 
 	m_state = Add;
+	MouseDown = false;
 }
 
 LightManager::~LightManager(void)
@@ -34,7 +35,7 @@ void LightManager::init(HWND hWnd, ID3D11Device* device, Camera* camera)
 	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/light.png", 0, 0, &m_texture, 0 );
 }
 
-bool LightManager::AddLight( XMFLOAT3 position, LightType type )
+PointLight* LightManager::AddLight( XMFLOAT3 position, LightType type )
 {
 	for(int i = 0; i < m_Lights.size(); i++)
 	{
@@ -42,15 +43,24 @@ bool LightManager::AddLight( XMFLOAT3 position, LightType type )
 		{
 			m_Lights[i].Position	= position;
 			m_Lights[i].Range		= 500;
-			return true;
+			return &m_Lights[i];
 		}
 	}
-	return false;
+	return NULL;
 }
 void LightManager::RemoveLight( PointLight* light )
 {
 	light->Position		= XMFLOAT3(0.0f, 1.0f, 0.0f);
 	light->Range		= -1.f;
+}
+void LightManager::MoveLightY( PointLight* light )
+{
+	light->Position		= XMFLOAT3(0.0f, 1.0f, 0.0f);
+	light->Range		= -1.f;
+}
+void LightManager::MoveLightXZ( PointLight* light, const Ray& ray )
+{
+	light->Position = computePlaneIntersection(light->Position.y, ray);
 }
 void LightManager::ClearLights()
 {
@@ -73,25 +83,41 @@ void LightManager::update(float dt)
 		if (GetCursorPos(&cursorPosition))
 		{
 			ScreenToClient(m_hWnd, &cursorPosition);
-
 			Ray ray = m_camera->computeRay(cursorPosition);
 
 			switch (m_state)
 			{
 			case Add:
-
+				if (!MouseDown)
+					m_light = AddLight(computePlaneIntersection(0.f, ray), POINT_LIGHT);
 				break;
 			case Remove:
-				PointLight* selected_light = computeIntersection(ray);
-				if (selected_light != NULL)
-					RemoveLight(selected_light);
+				m_light = computeIntersection(ray);
+				if (m_light != NULL)
+					RemoveLight(m_light);
+				break;
+			case MoveXZ:
+				if (!MouseDown)
+					m_light = computeIntersection(ray);
+				if (m_light != NULL)
+					MoveLightXZ(m_light, ray);
+				break;
+			case MoveY:
+				if (!MouseDown)
+					m_light = computeIntersection(ray);
+				if (m_light != NULL)
+					MoveLightY(m_light);
 				break;
 			}
-
-
 		}
+
+		MouseDown = true;
 	}
+	else
+		MouseDown = false;
 }
+
+
 
 void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
 {
@@ -183,4 +209,12 @@ PointLight* LightManager::computeIntersection(const Ray& ray)
 		return tempLight;
 	else
 		return NULL;
+}
+XMFLOAT3	LightManager::computePlaneIntersection(float Y, const Ray& ray)
+{
+	XMVECTOR pnormal = XMVectorSet(0,1,0,0);
+	float t = (Y - XMVectorGetX(XMVector3Dot(ray.origin, pnormal))) / XMVectorGetX(XMVector3Dot(ray.direction, pnormal));
+	XMFLOAT3 m_targetPosition;
+	XMStoreFloat3(&m_targetPosition, ray.origin + t * ray.direction);
+	return m_targetPosition;
 }

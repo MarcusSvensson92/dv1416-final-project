@@ -47,7 +47,10 @@ void Toolbox::initGUI(HINSTANCE hInstance, HWND hWnd)
 	toolbar.addButton("Raising Level", this, "Content/img/raise_level.bmp");
 	toolbar.addButton("Lowering Level", this, "Content/img/lower_level.bmp");
 	toolbar.addButton("Texturing", this, "Content/img/texturing.bmp");
+	toolbar.addButton("Add Light", this, "Content/img/add_light.bmp");
 	toolbar.addButton("Remove Light", this, "Content/img/remove_light.bmp");
+	toolbar.addButton("Move LightXZ", this, "Content/img/movexz_light.bmp");
+	toolbar.addButton("Move LightY", this, "Content/img/movey_light.bmp");
 	toolbar.show(true);
 
 	sd.caption = "Level Tool";
@@ -100,7 +103,7 @@ void Toolbox::update(const float dt)
 		case Texturing:
 			m_textureTool.update(dt);
 			break;
-		case RemoveLight:
+		case Light:
 			m_lightManager->update(dt);
 			break;
 		}
@@ -126,10 +129,25 @@ void Toolbox::onEvent(const std::string& sender, const std::string& eventName)
 			m_activity = Texturing;
 			m_textureTool.onEvent("Texture Tool", "Brush Diameter");
 		}
+		else if (eventName == "Add Light")
+		{
+			m_activity = Light;
+			m_lightManager->setState(LightManager::State::Add);
+		}
 		else if (eventName == "Remove Light")
 		{
-			m_activity = RemoveLight;
+			m_activity = Light;
 			m_lightManager->setState(LightManager::State::Remove);
+		}
+		else if (eventName == "Move LightXZ")
+		{
+			m_activity = Light;
+			m_lightManager->setState(LightManager::State::MoveXZ);
+		}
+		else if (eventName == "Move LightY")
+		{
+			m_activity = Light;
+			m_lightManager->setState(LightManager::State::MoveY);
 		}
 	}
 }
