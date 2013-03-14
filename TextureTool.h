@@ -27,7 +27,7 @@ private:
 	Terrain* m_terrain;
 
 	XMFLOAT3 m_targetPosition;
-	XMFLOAT4 m_brush;
+	XMVECTOR m_brush;
 	UINT m_brushIndex;
 
 	float m_brushDiameter;

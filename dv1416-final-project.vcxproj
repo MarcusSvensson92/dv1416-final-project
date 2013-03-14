@@ -96,6 +96,7 @@
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="Subwindow.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainOptions.cpp" />
     <ClCompile Include="TextureTool.cpp" />
     <ClCompile Include="TextureToolWindow.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Subwindow.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainOptions.h" />
     <ClInclude Include="TextureTool.h" />
     <ClInclude Include="TextureToolWindow.h" />
     <ClInclude Include="Timer.h" />

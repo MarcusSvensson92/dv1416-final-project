@@ -10,7 +10,7 @@ TextureTool::TextureTool(void)
 	m_brushDiameter = 10.f;
 	m_brushStrength = 5.f;
 
-	m_brush = XMFLOAT4(1.f, -1.f, -1.f, -1.f);
+	m_brush = XMVectorSet(m_brushStrength, -m_brushStrength, -m_brushStrength, -m_brushStrength);
 	m_brushIndex = 0;
 }
 
@@ -53,22 +53,22 @@ void TextureTool::onEvent(const std::string& sender, const std::string& eventNam
 
 		if (eventName == "Texture R")
 		{
-			m_brush = XMFLOAT4(m_brushStrength, -m_brushStrength, -m_brushStrength, -m_brushStrength);
+			m_brush = XMVectorSet(m_brushStrength, -m_brushStrength, -m_brushStrength, -m_brushStrength);
 			m_brushIndex = 0;
 		}
 		else if (eventName == "Texture G")
 		{
-			m_brush = XMFLOAT4(-m_brushStrength, m_brushStrength, -m_brushStrength, -m_brushStrength);
+			m_brush = XMVectorSet(-m_brushStrength, m_brushStrength, -m_brushStrength, -m_brushStrength);
 			m_brushIndex = 1;
 		}
 		else if (eventName == "Texture B")
 		{
-			m_brush = XMFLOAT4(-m_brushStrength, -m_brushStrength, m_brushStrength, -m_brushStrength);
+			m_brush = XMVectorSet(-m_brushStrength, -m_brushStrength, m_brushStrength, -m_brushStrength);
 			m_brushIndex = 2;
 		}
 		else if (eventName == "Texture A")
 		{
-			m_brush = XMFLOAT4(-m_brushStrength, -m_brushStrength, -m_brushStrength, m_brushStrength);
+			m_brush = XMVectorSet(-m_brushStrength, -m_brushStrength, -m_brushStrength, m_brushStrength);
 			m_brushIndex = 3;
 		}
 
@@ -78,7 +78,11 @@ void TextureTool::onEvent(const std::string& sender, const std::string& eventNam
 		else if (eventName == "Brush Diameter")
 			m_brushDiameter = (float)textureToolWindow.getTrackbarValue(eventName);
 		else if (eventName == "Brush Strength")
+		{
+			m_brush /= m_brushStrength;
 			m_brushStrength = (float)textureToolWindow.getTrackbarValue(eventName) / 10.f;
+			m_brush *= m_brushStrength;
+		}
 	}
 }
 
@@ -89,22 +93,12 @@ void TextureTool::updateTerrainBlendmap(const float dt)
 	std::vector<std::pair<float, XMFLOAT4*>> vertices = m_terrain->getBlendmapDataWithinRadius(m_targetPosition, brushRadius);
 	for (std::vector<std::pair<float, XMFLOAT4*>>::iterator it = vertices.begin(); it != vertices.end(); it++)
 	{
-		if ((*it).first <= 1.f)
+		if (it->first <= 1.f)
 		{
-			it->second->x += m_brush.x * dt * m_brushStrength;
-			it->second->y += m_brush.y * dt * m_brushStrength;
-			it->second->z += m_brush.z * dt * m_brushStrength;
-			it->second->w += m_brush.w * dt * m_brushStrength;
-
-			if (it->second->x > 1.f) it->second->x = 1.f;
-			if (it->second->y > 1.f) it->second->y = 1.f;
-			if (it->second->z > 1.f) it->second->z = 1.f;
-			if (it->second->w > 1.f) it->second->w = 1.f;
-
-			if (it->second->x < 0.f) it->second->x = 0.f;
-			if (it->second->y < 0.f) it->second->y = 0.f;
-			if (it->second->z < 0.f) it->second->z = 0.f;
-			if (it->second->w < 0.f) it->second->w = 0.f;
+			XMVECTOR texel = XMLoadFloat4(&(*it->second));
+			texel += m_brush * dt;
+			texel = XMVectorSaturate(texel);
+			XMStoreFloat4(it->second, texel);
 		}
 	}
 	m_terrain->updateBlendmapTexture(m_deviceContext);

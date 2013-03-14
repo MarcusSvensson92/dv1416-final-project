@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Terrain.h"
+#include "TerrainOptions.h"
 
 const UINT g_cellsPerPatch = 64;
 
@@ -61,6 +62,14 @@ void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 	m_heightmap.resize((m_terrainDesc.width + 1) * (m_terrainDesc.depth + 1), 0);
 	buildHeightmapSRV(device);
 
+	m_blendmap.texels.resize(m_terrainDesc.width * m_terrainDesc.depth, XMFLOAT4(0.f, 0.f, 0.f, 0.f));
+	m_blendmap.width	 = m_terrainDesc.width;
+	m_blendmap.height	 = m_terrainDesc.depth;
+	m_blendmap.colorType = PNG_COLOR_TYPE_RGB_ALPHA;
+	m_blendmap.bitDepth  = 8;
+	buildBlendmapSRV(device);
+	m_useBlendmap = true;
+
 	m_minDistance     = 20.f;
 	m_maxDistance	  = 500.f;
 	m_minTessellation = 0.f;
@@ -92,12 +101,12 @@ void Terrain::loadHeightmap(ID3D11DeviceContext* deviceContext,
 	updateHeightmapTexture(deviceContext);
 }
 
-void Terrain::loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+void Terrain::loadBlendmap(ID3D11DeviceContext* deviceContext,
 						   const std::string& blendmapFilename,
 						   std::vector<std::string> layermapFilenames)
 {
 	Utilities::loadPNG(blendmapFilename, m_blendmap);
-	buildBlendmapSRV(device);
+	updateBlendmapTexture(deviceContext);
 
 	m_useBlendmap = true;
 }
@@ -150,6 +159,25 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 
 	deviceContext->HSSetShader(NULL, NULL, 0);
 	deviceContext->DSSetShader(NULL, NULL, 0);
+}
+
+void Terrain::onEvent(const std::string& sender, const std::string& eventName)
+{
+	if (sender == "Terrain Options")
+	{
+		GUI::TerrainOptions& terrainOptions = GUI::TerrainOptions::getInstance();
+
+		if (eventName == "Texture Scale")
+			m_textureScale = (float)terrainOptions.getTrackbarValue(eventName);
+		else if (eventName == "Minimum Tessellation")
+			m_minTessellation = (float)terrainOptions.getTrackbarValue(eventName);
+		else if (eventName == "Maximum Tessellation")
+			m_maxTessellation = (float)terrainOptions.getTrackbarValue(eventName);
+		else if (eventName == "Minimum Tessellation Distance")
+			m_minDistance = (float)terrainOptions.getTrackbarValue(eventName);
+		else if (eventName == "Maximum Tessellation Distance")
+			m_maxDistance = (float)terrainOptions.getTrackbarValue(eventName);
+	}
 }
 
 float Terrain::getHeight(const XMFLOAT2 position)
@@ -209,7 +237,7 @@ bool Terrain::computeIntersection(const Ray& ray)
 
 	XMVECTOR position = origin;
 	
-	const UINT n = 300 / 0.1;
+	const UINT n = (UINT)(500 / 0.1);
 	for (UINT i = 0; i < n; i++)
 	{
 		if (i > 0)

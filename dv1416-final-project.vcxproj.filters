@@ -69,6 +69,9 @@
     <ClCompile Include="GUI.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainOptions.cpp">
+      <Filter>GUI\Subwindows\Options</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -115,6 +118,9 @@
     </Filter>
     <Filter Include="Shadow">
       <UniqueIdentifier>{f71ca997-9cbd-45a4-aeb4-f88bdcb9ba91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindows\Options">
+      <UniqueIdentifier>{c87f86cf-40b7-47c2-81d4-a1a349d00b84}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="GUI.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainOptions.h">
+      <Filter>GUI\Subwindows\Options</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

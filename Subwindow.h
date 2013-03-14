@@ -27,6 +27,7 @@ namespace GUI
 	protected:
 		HINSTANCE m_hInstance;
 		HWND	  m_hWnd;
+		HWND	  m_hParentWnd;
 
 		SubwindowDesc m_subwindowDesc;
 		DWORD		  m_style;

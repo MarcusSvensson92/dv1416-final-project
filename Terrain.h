@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Utilities.h"
+#include "EventReceiver.h"
 
 struct TerrainDesc
 {
@@ -14,7 +15,7 @@ struct TerrainDesc
 	UINT depth;
 };
 
-class Terrain
+class Terrain : public GUI::EventReceiver
 {
 public:
 	Terrain(void);
@@ -26,12 +27,14 @@ public:
 	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
 	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
 					   const float heightmapScale);
-	void loadBlendmap(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+	void loadBlendmap(ID3D11DeviceContext* deviceContext,
 					  const std::string& blendmapFilename,
 					  std::vector<std::string> layermapFilenames);
 	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
+
+	void onEvent(const std::string& sender, const std::string& eventName);
 
 	float getHeight(const XMFLOAT2 position);
 

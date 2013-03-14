@@ -1,38 +1,38 @@
 #include "StdAfx.h"
-#include "LevelToolWindow.h"
+#include "TerrainOptions.h"
 
 namespace GUI
 {
-	const UINT g_itemIDStart = 3001;
+	const UINT g_itemIDStart = 5001;
 
 	const UINT g_trackbarWidth		= 143;
 	const UINT g_trackbarHeight		= 30;
 	const UINT g_trackbarTextHeight = 12;
 	const UINT g_margin				= 5;
 
-	LevelToolWindow* g_levelToolWindow;
+	TerrainOptions* g_terrainOptions;
 
-	LRESULT CALLBACK levelToolWindowMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubClass, DWORD_PTR refDat)
+	LRESULT CALLBACK terrainOptionsMsgRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubClass, DWORD_PTR refDat)
 	{
-		return g_levelToolWindow->subWndProc(hWnd, message, wParam, lParam);
+		return g_terrainOptions->subWndProc(hWnd, message, wParam, lParam);
 	}
 
-	LevelToolWindow::LevelToolWindow(void)
+	TerrainOptions::TerrainOptions(void)
 	{
-		g_levelToolWindow = this;
+		g_terrainOptions = this;
 	}
 
-	void LevelToolWindow::init(HINSTANCE hInstance, HWND hParentWnd,
-							   const SubwindowDesc subwindowDesc)
+	void TerrainOptions::init(HINSTANCE hInstance, HWND hParentWnd,
+							  const SubwindowDesc subwindowDesc)
 	{
 		initWindow(hInstance, hParentWnd, subwindowDesc,
 				   WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
 				   g_trackbarWidth + 2 * g_margin, g_margin);
 
-		SetWindowSubclass(m_hWnd, levelToolWindowMsgRouter, 0, 0);
+		SetWindowSubclass(m_hWnd, terrainOptionsMsgRouter, 0, 0);
 	}
 
-	void LevelToolWindow::addTrackbar(const std::string& name, EventReceiver* eventReceiver,
+	void TerrainOptions::addTrackbar(const std::string& name, EventReceiver* eventReceiver,
 									  const UINT minValue, const UINT maxValue, const UINT startValue)
 	{
 		const UINT count  = (UINT)m_items.size();
@@ -68,7 +68,7 @@ namespace GUI
 		SetWindowPos(m_hWnd, HWND_TOP, windowPosition.x, windowPosition.y, windowSize.x, windowSize.y, NULL);
 	}
 
-	UINT LevelToolWindow::getTrackbarValue(const std::string& itemName) const
+	UINT TerrainOptions::getTrackbarValue(const std::string& itemName) const
 	{
 		const int id = getItemID(itemName);
 		if (id != -1)
@@ -76,12 +76,12 @@ namespace GUI
 		return 0;
 	}
 
-	int LevelToolWindow::getItemID(const UINT i) const
+	int TerrainOptions::getItemID(const UINT i) const
 	{
 		return (i < (UINT)m_items.size()) ? g_itemIDStart + i : -1;
 	}
 
-	int LevelToolWindow::getItemID(const std::string& itemName) const
+	int TerrainOptions::getItemID(const std::string& itemName) const
 	{
 		for (UINT i = 0; i < (UINT)m_items.size(); i++)
 			if (m_items[i].first == itemName)

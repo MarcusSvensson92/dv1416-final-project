@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "dv1416_final_project.h"
 #include "TextureToolWindow.h"
+#include "TerrainOptions.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -57,16 +58,25 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 void dv1416_final_project::onEvent(const std::string& sender, const std::string& eventName)
 {
 	DOUT("Sender: " << sender << " | Event: " << eventName << std::endl);
-	if (sender == "Menu" && eventName == "Exit")
-	{
-		DestroyWindow(m_hWnd);
-	}
-	if (sender == "Menu" && eventName == "Tools")
+
+	if (sender == "Menu")
 	{
 		GUI::Menu& menu = GUI::Menu::getInstance();
-		bool check = menu.isItemChecked(eventName);
-		menu.checkItem(eventName, !check);
-		GUI::Toolbar::getInstance().show(!check);
+
+		if (eventName == "Exit")
+			DestroyWindow(m_hWnd);
+		else if (eventName == "Toolbar")
+		{
+			bool check = menu.isItemChecked(eventName);
+			menu.checkItem(eventName, !check);
+			GUI::Toolbar::getInstance().show(!check);
+		}
+		else if (eventName == "Terrain Options")
+		{
+			bool check = menu.isItemChecked(eventName);
+			menu.checkItem(eventName, !check);
+			GUI::TerrainOptions::getInstance().show(!check);
+		}
 	}
 
 	if (sender == "Toolbar")
@@ -88,7 +98,6 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			m_currentActivity = RemoveLight;
 			m_LightManager.setState(LightManager::State::Remove);
 		}
-		SetFocus(m_hWnd);
 	}
 }
 
@@ -199,8 +208,8 @@ void dv1416_final_project::initLights(void)
 void dv1416_final_project::initTerrain(void)
 {
 	TerrainDesc td;
-	td.width = 256;
-	td.depth = 256;
+	td.width = 2048;
+	td.depth = 2048;
 	m_terrain.init(m_device, td);
 	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
@@ -210,14 +219,15 @@ void dv1416_final_project::initTerrain(void)
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	for (UINT i = 0; i < 4; i++)
 		m_terrain.loadLayermap(m_device, i, layermapFilenames[i]);
-	m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
+	//m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
 }
 
 void dv1416_final_project::initGUI(HWND hWnd)
 {
 	GUI::Menu& menu = GUI::Menu::getInstance();
 	menu.addItem("File", "Exit", this);
-	menu.addItem("View", "Tools", this);
+	menu.addItem("View", "Toolbar", this, true, true);
+	menu.addItem("Options", "Terrain Options", this);
 	menu.assignToWindow(hWnd);
 
 	GUI::SubwindowDesc sd;
@@ -255,4 +265,15 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	textureToolWindow.addTrackbar("Brush Diameter", &m_textureTool, 1, 100, 10);
 	textureToolWindow.addTrackbar("Brush Strength", &m_textureTool, 1, 100, 50);
 	textureToolWindow.show(true);
+
+	sd.caption = "Terrain Options";
+	sd.x	   = 500;
+	sd.y	   = 400;
+	GUI::TerrainOptions& terrainOptions = GUI::TerrainOptions::getInstance();
+	terrainOptions.init(m_hInstance, hWnd, sd);
+	terrainOptions.addTrackbar("Texture Scale", &m_terrain, 1, 100, 5);
+	terrainOptions.addTrackbar("Minimum Tessellation", &m_terrain, 0, 6, 0);
+	terrainOptions.addTrackbar("Maximum Tessellation", &m_terrain, 0, 6, 6);
+	terrainOptions.addTrackbar("Minimum Tessellation Distance", &m_terrain, 1, 1000, 20);
+	terrainOptions.addTrackbar("Maximum Tessellation Distance", &m_terrain, 1, 1000, 500);
 }
