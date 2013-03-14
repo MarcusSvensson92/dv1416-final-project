@@ -90,23 +90,23 @@ void Toolbox::update(const float dt)
 	}
 
 	
-	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
+	switch (m_activity)
 	{
-		switch (m_activity)
-		{
-		case RaisingLevel:
+	case RaisingLevel:
+		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
 			m_levelTool.update(dt);
-			break;
-		case LoweringLevel:
+		break;
+	case LoweringLevel:
+		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
 			m_levelTool.update(-dt);
-			break;
-		case Texturing:
+		break;
+	case Texturing:
+		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
 			m_textureTool.update(dt);
-			break;
-		case Light:
-			m_lightManager->update(dt);
-			break;
-		}
+		break;
+	case Light:
+		m_lightManager->update(dt);
+		break;
 	}
 }
 
