@@ -3,11 +3,14 @@
 #include "Toolbar.h"
 #include "LevelToolWindow.h"
 #include "TextureToolWindow.h"
+#include "Menu.h"
 
 Toolbox::Toolbox(void)
 {
 	m_activity = RaisingLevel;
 	m_targetPosition = XMFLOAT3(0.f, 0.f, 0.f);
+	m_prevMouseDown = false;
+	m_prevZDown = false;
 
 	m_levelTool.setTargetPosition(&m_targetPosition);
 	m_textureTool.setTargetPosition(&m_targetPosition);
@@ -84,29 +87,76 @@ void Toolbox::update(const float dt)
 	if (GetCursorPos(&cursorPosition))
 	{
 		ScreenToClient(m_hWnd, &cursorPosition);
-		Ray ray = m_camera->computeRay(cursorPosition);
-		if (m_terrain->computeIntersection(ray))
-			m_targetPosition = m_terrain->getTargetPosition();
+
+		RECT rect;
+		GetClientRect(m_hWnd, &rect);
+		if (cursorPosition.x >= rect.left && cursorPosition.x <= rect.right &&
+			cursorPosition.y >= rect.top  && cursorPosition.y <= rect.bottom)
+		{
+			Ray ray = m_camera->computeRay(cursorPosition);
+			if (m_terrain->computeIntersection(ray))
+				m_targetPosition = m_terrain->getTargetPosition();
+
+			if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
+			{
+				if (!m_prevMouseDown)
+				{
+					if (m_activity == RaisingLevel || m_activity == LoweringLevel)
+					{
+						m_levelTool.addUndoStack();
+						m_undoStack.push_back(m_activity);
+					}
+					else if (m_activity == Texturing)
+					{
+						m_textureTool.addUndoStack();
+						m_undoStack.push_back(m_activity);
+					}
+				}
+
+				switch (m_activity)
+				{
+				case RaisingLevel:
+					m_levelTool.update(dt);
+					break;
+				case LoweringLevel:
+					m_levelTool.update(-dt);
+					break;
+				case Texturing:
+					m_textureTool.update(dt);
+					break;
+				}
+
+				m_prevMouseDown = true;
+			}
+			else
+				m_prevMouseDown = false;
+
+			if (m_activity == Light)
+				m_lightManager->update(dt);
+		}
 	}
 
-	
-	switch (m_activity)
+	if (GetAsyncKeyState(0x5A) && GetFocus() == m_hWnd)
 	{
-	case RaisingLevel:
-		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
-			m_levelTool.update(dt);
-		break;
-	case LoweringLevel:
-		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
-			m_levelTool.update(-dt);
-		break;
-	case Texturing:
-		if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 && GetFocus() == m_hWnd)
-			m_textureTool.update(dt);
-		break;
-	case Light:
-		m_lightManager->update(dt);
-		break;
+		if (!m_prevZDown && GetAsyncKeyState(VK_LCONTROL))
+			undo();
+
+		m_prevZDown = true;
+	}
+	else
+		m_prevZDown = false;
+}
+
+void Toolbox::undo(void)
+{
+	if (!m_undoStack.empty())
+	{
+		if (m_undoStack.back() == RaisingLevel || m_undoStack.back() == LoweringLevel)
+			m_levelTool.undo();
+		else if (m_undoStack.back() == Texturing)
+			m_textureTool.undo();
+
+		m_undoStack.pop_back();
 	}
 }
 

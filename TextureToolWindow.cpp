@@ -26,7 +26,7 @@ namespace GUI
 	void TextureToolWindow::init(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc)
 	{
 		initWindow(hInstance, hParentWnd, subwindowDesc,
-				   WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
+				   WS_POPUP | WS_CAPTION | WS_CHILD,
 				   m_textureButtonsPerRow * (m_textureButtonSize + m_itemMargin) + m_itemMargin, m_itemMargin,
 				   4001);
 

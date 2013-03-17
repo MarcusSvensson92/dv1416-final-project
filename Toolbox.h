@@ -30,6 +30,8 @@ public:
 	void initGUI(HINSTANCE hInstance, HWND hWnd);
 	void update(const float dt);
 
+	void undo(void);
+
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	enum Activity
@@ -50,6 +52,11 @@ private:
 	LightManager* m_lightManager;
 
 	XMFLOAT3 m_targetPosition;
+
+	bool m_prevMouseDown;
+	bool m_prevZDown;
+
+	std::vector<Activity> m_undoStack;
 };
 
 #endif

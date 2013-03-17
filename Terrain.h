@@ -24,6 +24,11 @@ public:
 	XMFLOAT3 getTargetPosition(void) const { return m_targetPosition; }
 	void setTargetDiameter(const float targetDiameter) { m_targetDiameter = targetDiameter; }
 
+	void getHeightmapData(std::vector<float>& data);
+	void getBlendmapData(std::vector<XMFLOAT4>& data);
+	void setHeightmapData(std::vector<float> data);
+	void setBlendmapData(std::vector<XMFLOAT4> data);
+
 	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
 	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
 					   const float heightmapScale);

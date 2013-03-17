@@ -17,6 +17,9 @@ public:
 
 	void update(const float dt);
 
+	void addUndoStack(void);
+	void undo(void);
+
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	ID3D11DeviceContext* m_deviceContext;
@@ -28,6 +31,8 @@ private:
 	float m_brushDiameter;
 	float m_brushHardness;
 	float m_brushStrength;
+
+	std::vector<std::map<float*, float>> m_undoStacks;
 };
 
 #endif

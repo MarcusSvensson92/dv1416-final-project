@@ -20,6 +20,9 @@ public:
 
 	void update(const float dt);
 
+	void addUndoStack(void);
+	void undo(void);
+
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	HWND m_hWnd;
@@ -34,6 +37,8 @@ private:
 
 	float m_brushDiameter;
 	float m_brushStrength;
+
+	std::vector<std::map<XMFLOAT4*, XMFLOAT4>> m_undoStacks;
 };
 
 #endif

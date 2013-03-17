@@ -15,13 +15,8 @@ namespace GUI
 		{
 			const UINT id = LOWORD(wParam);
 			for (UINT i = 0; i < (UINT)m_items.size(); i++)
-			{
 				if (getItemID(i) == id)
-				{
 					m_items[i].second->onEvent(m_subwindowDesc.caption, m_items[i].first);
-					SetFocus(m_hParentWnd);
-				}
-			}
 			break;
 		}
 		case WM_NOTIFY:
@@ -40,6 +35,10 @@ namespace GUI
 			}
 			break;
 		}
+
+		case WM_SETCURSOR:
+			SetFocus(m_hParentWnd);
+			break;
 
 		case WM_VSCROLL:
 		case WM_HSCROLL:

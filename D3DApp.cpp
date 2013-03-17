@@ -210,7 +210,7 @@ bool D3DApp::initMainWindow(void)
 	}
 
 	RECT rect = {0, 0, m_clientWidth, m_clientHeight};
-	AdjustWindowRect(&rect, m_wndStyle, true);
+	AdjustWindowRect(&rect, m_wndStyle, false);
 	int wndWidth  = rect.right  - rect.left;
 	int wndHeight = rect.bottom - rect.top;
 

@@ -55,6 +55,7 @@ namespace GUI
 	void Menu::assignToWindow(HWND hWnd)
 	{
 		SetMenu(hWnd, m_hMenu);
+		m_hWnd = hWnd;
 	}
 
 	void Menu::processWindowsMessages(UINT message, WPARAM wParam)
@@ -71,6 +72,16 @@ namespace GUI
 	void Menu::update(HWND hWnd)
 	{
 		DrawMenuBar(hWnd);
+	}
+
+	bool Menu::isFocused(HWND hWnd)
+	{
+		MENUBARINFO mbi;
+		mbi.cbSize = sizeof(MENUBARINFO);
+		if (GetMenuBarInfo(m_hWnd, OBJID_MENU, 1, &mbi))
+			if (mbi.fFocused)
+				return true;
+		return false;
 	}
 
 	bool Menu::isItemNameAvailable(const std::string& itemName)

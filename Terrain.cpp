@@ -30,6 +30,30 @@ Terrain::~Terrain(void)
 	RELEASE(m_layermapArraySRV[3]);
 }
 
+void Terrain::getHeightmapData(std::vector<float>& data)
+{
+	const UINT n = (UINT)m_heightmap.size();
+	data.resize(n);
+	memcpy(&data[0], &m_heightmap[0], sizeof(float) * n);
+}
+
+void Terrain::getBlendmapData(std::vector<XMFLOAT4>& data)
+{
+	const UINT n = (UINT)m_blendmap.texels.size();
+	data.resize(n);
+	memcpy(&data[0], &m_blendmap.texels[0], sizeof(XMFLOAT4) * n);
+}
+
+void Terrain::setHeightmapData(std::vector<float> data)
+{
+	memcpy(&m_heightmap[0], &data[0], sizeof(float) * (UINT)m_heightmap.size());
+}
+
+void Terrain::setBlendmapData(std::vector<XMFLOAT4> data)
+{
+	memcpy(&m_blendmap.texels[0], &data[0], sizeof(XMFLOAT4) * (UINT)m_blendmap.texels.size());
+}
+
 void Terrain::init(ID3D11Device* device, const TerrainDesc terrainDesc)
 {
 	m_terrainDesc = terrainDesc;

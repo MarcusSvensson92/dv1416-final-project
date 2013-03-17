@@ -22,7 +22,7 @@ namespace GUI
 	void Toolbar::init(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc)
 	{
 		initWindow(hInstance, hParentWnd, subwindowDesc,
-				   WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
+				   WS_POPUP | WS_CAPTION | WS_CHILD,
 				   m_buttonsPerRow * (m_buttonSize + m_buttonMargin) + m_buttonMargin, m_buttonMargin,
 				   2001);
 

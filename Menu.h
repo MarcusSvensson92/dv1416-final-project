@@ -30,7 +30,12 @@ namespace GUI
 		void assignToWindow(HWND hWnd);
 		void processWindowsMessages(UINT message, WPARAM wParam);
 		void update(HWND hWnd);
+
+		bool isFocused(HWND hWnd);
 	private:
+		// TEMP!
+		HWND m_hWnd;
+
 		HMENU m_hMenu;
 		std::map<const std::string, HMENU> m_subMenus;
 		std::vector<EventElement> m_items;

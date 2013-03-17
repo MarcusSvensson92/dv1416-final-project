@@ -54,14 +54,14 @@ LRESULT dv1416_final_project::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 void dv1416_final_project::onEvent(const std::string& sender, const std::string& eventName)
 {
-	DOUT("Sender: " << sender << " | Event: " << eventName << std::endl);
-
 	if (sender == "Menu")
 	{
 		GUI::Menu& menu = GUI::Menu::getInstance();
 
 		if (eventName == "Exit")
 			DestroyWindow(m_hWnd);
+		else if (eventName == "Undo")
+			Toolbox::getInstance().undo();
 		else if (eventName == "Toolbar")
 		{
 			bool check = menu.isItemChecked(eventName);
@@ -194,6 +194,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 {
 	GUI::Menu& menu = GUI::Menu::getInstance();
 	menu.addItem("File", "Exit", this);
+	menu.addItem("Edit", "Undo", this);
 	menu.addItem("View", "Toolbar", this, true, true);
 	menu.addItem("Options", "Terrain Options", this);
 	menu.addItem("Options", "Selection Options", this);

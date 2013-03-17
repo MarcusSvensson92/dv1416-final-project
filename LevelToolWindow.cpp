@@ -19,7 +19,7 @@ namespace GUI
 							   const SubwindowDesc subwindowDesc)
 	{
 		initWindow(hInstance, hParentWnd, subwindowDesc,
-				   WS_POPUP | WS_CAPTION | WS_CLIPCHILDREN | WS_CHILD,
+				   WS_POPUP | WS_CAPTION | WS_CHILD,
 				   m_trackbarSize.x + 2 * m_trackbarMargin, m_trackbarMargin,
 				   3001);
 
