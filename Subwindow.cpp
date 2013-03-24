@@ -15,7 +15,7 @@ namespace GUI
 		{
 			const UINT id = LOWORD(wParam);
 			for (UINT i = 0; i < (UINT)m_items.size(); i++)
-				if (getItemID(i) == id)
+				if (m_items[i].second && getItemID(i) == id)
 					m_items[i].second->onEvent(m_subwindowDesc.caption, m_items[i].first);
 			break;
 		}
@@ -26,7 +26,7 @@ namespace GUI
 				const UINT id = ((LPNMHDR)lParam)->idFrom;
 				for (UINT i = 0; i < (UINT)m_items.size(); i++)
 				{
-					if (getItemID(i) == id)
+					if (m_items[i].second && getItemID(i) == id)
 					{
 						m_items[i].second->onEvent(m_subwindowDesc.caption, m_items[i].first);
 						SetFocus(m_hParentWnd);
@@ -69,6 +69,11 @@ namespace GUI
 	{
 		const int cmdShow = (show) ? SW_SHOW : SW_HIDE;
 		ShowWindow(m_hWnd, cmdShow);
+	}
+
+	void Subwindow::enable(const bool enable)
+	{
+		EnableWindow(m_hWnd, enable);
 	}
 
 	void Subwindow::initWindow(HINSTANCE hInstance, HWND hParentWnd, const SubwindowDesc subwindowDesc,

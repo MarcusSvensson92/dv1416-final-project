@@ -169,7 +169,7 @@ namespace Utilities
 
 	bool savePNG(const std::string& filename, PNGData data)
 	{
-		FILE* file = fopen(filename.c_str(), "rb");
+		FILE* file = fopen(filename.c_str(), "wb");
 		if (!file)
 			return false;
 
@@ -180,13 +180,13 @@ namespace Utilities
 		png_infop infoStruct = png_create_info_struct(writeStruct);
 		if (!infoStruct)
 		{
-			png_destroy_read_struct(&writeStruct, (png_infopp)NULL, (png_infopp)NULL);
+			png_destroy_write_struct(&writeStruct, &infoStruct);
 			return false;
 		}
 
 		if (setjmp(png_jmpbuf(writeStruct)))
 		{
-			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			png_destroy_write_struct(&writeStruct, &infoStruct);
 			return false;
 		}
 
@@ -194,7 +194,7 @@ namespace Utilities
 
 		if (setjmp(png_jmpbuf(writeStruct)))
 		{
-			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			png_destroy_write_struct(&writeStruct, &infoStruct);
 			return false;
 		}
 
@@ -206,7 +206,7 @@ namespace Utilities
 
 		if (setjmp(png_jmpbuf(writeStruct)))
 		{
-			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			png_destroy_write_struct(&writeStruct, &infoStruct);
 			return false;
 		}
 
@@ -220,10 +220,10 @@ namespace Utilities
 			for (UINT j = 0; j < data.width; j++)
 			{
 				png_byte* texel = &(row[j * 4]);
-				texel[0] = (png_byte)data.texels[i * data.width + j].x * 255.f;
-				texel[1] = (png_byte)data.texels[i * data.width + j].y * 255.f;
-				texel[2] = (png_byte)data.texels[i * data.width + j].z * 255.f;
-				texel[3] = (png_byte)data.texels[i * data.width + j].w * 255.f;
+				texel[0] = (png_byte)(data.texels[i * data.width + j].x * 255.f);
+				texel[1] = (png_byte)(data.texels[i * data.width + j].y * 255.f);
+				texel[2] = (png_byte)(data.texels[i * data.width + j].z * 255.f);
+				texel[3] = (png_byte)(data.texels[i * data.width + j].w * 255.f);
 			}
 		}
 
@@ -234,18 +234,19 @@ namespace Utilities
 			for (UINT i = 0; i < data.height; i++)
 				free(rows[i]);
 			free(rows);
-			png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+			png_destroy_write_struct(&writeStruct, &infoStruct);
 			return false;
 		}
 
 		png_write_end(writeStruct, NULL);
 
-		fclose(file);
-
 		for (UINT i = 0; i < data.height; i++)
 			free(rows[i]);
 		free(rows);
-		png_destroy_read_struct(&writeStruct, &infoStruct, (png_infopp)NULL);
+
+		fclose(file);
+
+		png_destroy_write_struct(&writeStruct, &infoStruct);
 
 		return true;
 	}

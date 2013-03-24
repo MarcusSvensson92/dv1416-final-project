@@ -16,6 +16,7 @@
 #include <Windows.h>
 #include <WindowsX.h>
 #include <CommCtrl.h>
+#include <Shlwapi.h>
 
 #include <string>
 #include <vector>

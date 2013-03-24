@@ -166,7 +166,7 @@ void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, co
 		shader->setResource("gDiffuseMap", m_texture);
 
 		shader->Apply();
-		deviceContext->DrawIndexed(1, 0, 0);
+		deviceContext->Draw(1, 0);
 	}
 }
 

@@ -3,6 +3,8 @@
 #include "Toolbox.h"
 #include "TerrainOptions.h"
 #include "SelectionOptions.h"
+#include "NewTerrainWindow.h"
+#include "GUI.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -58,7 +60,88 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 	{
 		GUI::Menu& menu = GUI::Menu::getInstance();
 
-		if (eventName == "Exit")
+		if (eventName == "New...")
+		{
+			GUI::NewTerrainWindow::getInstance().show(true);
+			EnableWindow(m_hWnd, false);
+		}
+		else if (eventName == "Load...")
+		{
+			std::string filepath;
+			if (GUI::openFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0", ".map", filepath))
+			{
+				std::string extension = PathFindExtension(&filepath[0]);
+				if (extension == ".map")
+				{
+					std::ifstream file;
+					file.open(filepath);
+					if (file)
+					{
+						std::string heightmapFilepath, blendmapFilepath;
+
+						while (!file.eof())
+						{
+							std::string command;
+							file >> command;
+
+							if (command == "heightmap")
+								file >> heightmapFilepath;
+							else if (command == "blendmap")
+								file >> blendmapFilepath;
+
+							file.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+						}
+
+						if (!heightmapFilepath.empty() &&
+							!blendmapFilepath.empty())
+						{
+							m_terrain.create(m_device, m_deviceContext,
+											 heightmapFilepath, blendmapFilepath);
+
+							m_camera.setPosition(0.f, 50.f, 0.f);
+						}
+					}
+				}
+				else
+				{
+					std::string errorMessage = "Invalid extension: '" + extension + "'";
+					MessageBox(m_hWnd, errorMessage.c_str(), m_wndCaption.c_str(), MB_ICONERROR);
+				}
+			}
+		}
+		else if (eventName == "Save as...")
+		{
+			std::string filepath;
+			if (GUI::saveFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0", "map", filepath) && m_terrain.isCreated())
+			{
+				std::string extension = PathFindExtension(&filepath[0]);
+				if (extension == ".map")
+				{
+					PathRemoveExtension(&filepath[0]);
+					filepath.erase(std::find(filepath.begin(), filepath.end(), '\0'), filepath.end());
+					std::string heightmapFilepath = filepath + "_heightmap.raw";
+					std::string blendmapFilepath  = filepath + "_blendmap.png";
+
+					std::ofstream file;
+					file.open(filepath + ".map");
+					if (file)
+					{
+						file << "heightmap " << heightmapFilepath <<
+								"\nblendmap " << blendmapFilepath;
+						file.close();
+
+						m_terrain.saveHeightmap(heightmapFilepath);
+						m_terrain.saveBlendmap(blendmapFilepath);
+					}
+				}
+				else
+				{
+					std::string errorMessage = "Invalid extension: '" + extension + "'";
+					MessageBox(m_hWnd, errorMessage.c_str(), m_wndCaption.c_str(), MB_ICONERROR);
+				}
+			}
+		}
+		else if (eventName == "Exit")
 			DestroyWindow(m_hWnd);
 		else if (eventName == "Undo")
 			Toolbox::getInstance().undo();
@@ -81,6 +164,26 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			GUI::SelectionOptions::getInstance().show(!check);
 		}
 	}
+
+	if (sender == "New...")
+	{
+		GUI::NewTerrainWindow& newTerrainWindow = GUI::NewTerrainWindow::getInstance();
+
+		if (eventName == "Create")
+		{
+			POINT size = newTerrainWindow.getDropdownListPairValues("Terrain Size");
+			m_terrain.create(m_device, m_deviceContext, size.x, size.y);
+
+			GUI::NewTerrainWindow::getInstance().show(false);
+			EnableWindow(m_hWnd, true);
+			SetFocus(m_hWnd);
+		}
+		else if (eventName == "Cancel")
+		{
+			GUI::NewTerrainWindow::getInstance().show(false);
+			EnableWindow(m_hWnd, true);
+		}
+	}
 }
 
 void dv1416_final_project::update(void)
@@ -98,7 +201,8 @@ void dv1416_final_project::update(void)
 
 	m_camera.updateViewMatrix();
 
-	Toolbox::getInstance().update(dt);
+	if (m_terrain.isCreated())
+		Toolbox::getInstance().update(dt);
 }
 
 void dv1416_final_project::render(void)
@@ -175,11 +279,6 @@ void dv1416_final_project::initLights(void)
 
 void dv1416_final_project::initTerrain(void)
 {
-	TerrainDesc td;
-	td.width = 2048;
-	td.depth = 2048;
-	m_terrain.init(m_device, td);
-	//m_terrain.loadHeightmap(m_deviceContext, "temp-textures/DV1222_heightmap.raw", 80.f);
 	std::vector<std::string> layermapFilenames;
 	layermapFilenames.push_back("temp-textures/longGrass.png");
 	layermapFilenames.push_back("temp-textures/cliff.png");
@@ -187,12 +286,14 @@ void dv1416_final_project::initTerrain(void)
 	layermapFilenames.push_back("temp-textures/sandripple.png");
 	for (UINT i = 0; i < 4; i++)
 		m_terrain.loadLayermap(m_device, i, layermapFilenames[i]);
-	//m_terrain.loadBlendmap(m_device, m_deviceContext, "temp-textures/DV1222_blendmap.png", layermapFilenames);
 }
 
 void dv1416_final_project::initGUI(HWND hWnd)
 {
 	GUI::Menu& menu = GUI::Menu::getInstance();
+	menu.addItem("File", "New...", this);
+	menu.addItem("File", "Load...", this);
+	menu.addItem("File", "Save as...", this);
 	menu.addItem("File", "Exit", this);
 	menu.addItem("Edit", "Undo", this);
 	menu.addItem("View", "Toolbar", this, true, true);
@@ -201,6 +302,18 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	menu.assignToWindow(hWnd);
 
 	GUI::SubwindowDesc sd;
+	sd.caption = "New...";
+	sd.x	   = 400;
+	sd.y	   = 300;
+	GUI::NewTerrainWindow& newTerrainWindow = GUI::NewTerrainWindow::getInstance();
+	newTerrainWindow.init(m_hInstance, hWnd, sd);
+	std::vector<UINT> listData;
+	for (UINT value = 64; value <= 2048; value *= 2)
+		listData.push_back(value);
+	newTerrainWindow.addDropdownListPair("Terrain Size", listData);
+	newTerrainWindow.addButton("Create", this);
+	newTerrainWindow.addButton("Cancel", this);
+
 	sd.caption = "Terrain Options";
 	sd.x	   = 500;
 	sd.y	   = 400;

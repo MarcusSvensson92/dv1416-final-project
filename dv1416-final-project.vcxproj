@@ -58,7 +58,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>External\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;d3dx10d.lib;d3dx11d.lib;d3dcompiler.lib;Effects11d.lib;DxErr.lib;dxgi.lib;dxguid.lib;Comctl32.lib;libpng16d.lib;zlibd.lib;vld.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dx10d.lib;d3dx11d.lib;d3dcompiler.lib;Effects11d.lib;DxErr.lib;dxgi.lib;dxguid.lib;Comctl32.lib;Shlwapi.lib;libpng16d.lib;zlibd.lib;vld.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -90,6 +90,7 @@
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="NewTerrainWindow.cpp" />
     <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="SelectionOptions.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="NewTerrainWindow.h" />
     <ClInclude Include="renderTarget.h" />
     <ClInclude Include="SelectionOptions.h" />
     <ClInclude Include="Shader.h" />

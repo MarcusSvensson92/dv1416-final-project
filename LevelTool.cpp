@@ -27,6 +27,9 @@ void LevelTool::update(const float dt)
 				m_undoStacks.back()[it->second] = *it->second;
 
 			*it->second += s * y;
+
+			*it->second = (*it->second < 0.f)   ? 0.f   : *it->second;
+			*it->second = (*it->second > 256.f) ? 256.f : *it->second;
 		}
 	}
 	m_terrain->updateHeightmapTexture(m_deviceContext);

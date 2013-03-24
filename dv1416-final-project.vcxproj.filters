@@ -81,6 +81,9 @@
     <ClCompile Include="Toolbox.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="NewTerrainWindow.cpp">
+      <Filter>GUI\Subwindows\File</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -130,6 +133,9 @@
     </Filter>
     <Filter Include="GUI\Subwindows\Options">
       <UniqueIdentifier>{c87f86cf-40b7-47c2-81d4-a1a349d00b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI\Subwindows\File">
+      <UniqueIdentifier>{3fcd526c-dd24-4100-9f04-89123a524b97}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +221,9 @@
     </ClInclude>
     <ClInclude Include="Toolbox.h">
       <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="NewTerrainWindow.h">
+      <Filter>GUI\Subwindows\File</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -24,6 +24,7 @@ namespace GUI
 		virtual LRESULT subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		void show(const bool show);
+		void enable(const bool enable);
 	protected:
 		HINSTANCE m_hInstance;
 		HWND	  m_hWnd;

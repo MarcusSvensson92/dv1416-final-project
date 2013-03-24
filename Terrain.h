@@ -9,32 +9,25 @@
 #include "Utilities.h"
 #include "EventReceiver.h"
 
-struct TerrainDesc
-{
-	UINT width;
-	UINT depth;
-};
-
 class Terrain : public GUI::EventReceiver
 {
 public:
 	Terrain(void);
 	~Terrain(void);
 
+	bool isCreated(void) const { return m_created; }
+
 	XMFLOAT3 getTargetPosition(void) const { return m_targetPosition; }
 	void setTargetDiameter(const float targetDiameter) { m_targetDiameter = targetDiameter; }
 
-	void getHeightmapData(std::vector<float>& data);
-	void getBlendmapData(std::vector<XMFLOAT4>& data);
-	void setHeightmapData(std::vector<float> data);
-	void setBlendmapData(std::vector<XMFLOAT4> data);
+	void create(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+				const UINT width, const UINT depth);
+	void create(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
+				const std::string& heightmapFilename, const std::string& blendmapFilename);
 
-	void init(ID3D11Device* device, const TerrainDesc terrainDesc);
-	void loadHeightmap(ID3D11DeviceContext* deviceContext, const std::string& heightmapFilename,
-					   const float heightmapScale);
-	void loadBlendmap(ID3D11DeviceContext* deviceContext,
-					  const std::string& blendmapFilename,
-					  std::vector<std::string> layermapFilenames);
+	void saveHeightmap(const std::string& filepath);
+	void saveBlendmap(const std::string& filepath);
+
 	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
@@ -51,13 +44,13 @@ public:
 	void updateHeightmapTexture(ID3D11DeviceContext* deviceContext);
 	void updateBlendmapTexture(ID3D11DeviceContext* deviceContext);
 private:
-	TerrainDesc m_terrainDesc;
+	UINT m_width;
+	UINT m_depth;
 
-	std::vector<Vertex::Terrain> m_vertices;
 	UINT m_indexCount;
 
-	Buffer m_vertexBuffer;
-	Buffer m_indexBuffer;
+	Buffer* m_vertexBuffer;
+	Buffer* m_indexBuffer;
 
 	UINT m_patchVertexCount;
 	UINT m_patchQuadFaceCount;
@@ -74,7 +67,7 @@ private:
 	ID3D11ShaderResourceView* m_blendmapSRV;
 	ID3D11ShaderResourceView* m_layermapArraySRV[4];
 
-	bool m_useBlendmap;
+	bool m_created;
 
 	float m_minDistance;
 	float m_maxDistance;
@@ -82,11 +75,13 @@ private:
 	float m_maxTessellation;
 	float m_textureScale;
 
+	float m_selectionIntervalSample;
+	float m_selectionDistance;
+
 	XMFLOAT3 m_targetPosition;
 	float m_targetDiameter;
 
-	float m_selectionIntervalSample;
-	float m_selectionDistance;
+	void createBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 
 	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 

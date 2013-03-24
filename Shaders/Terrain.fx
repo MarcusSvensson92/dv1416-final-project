@@ -16,8 +16,6 @@ cbuffer cbPerFrame
 
 	float2 gTexelSize;
 
-	bool gUseBlendmap;
-
 	float3 gTargetPosition;
 	float  gTargetDiameter;
 };
@@ -183,85 +181,74 @@ float4 PS(PSIn input) : SV_TARGET
 	if (l > gTargetDiameter / 2.f && l < gTargetDiameter / 2.f + 0.5f)
 		return float4(1.f, 0.f, 0.f, 1.f);
 
-	if (gUseBlendmap)
-	{
-		float4 c0 = gLayermap0.Sample(linearSampler, input.tiledTex0);
-		float4 c1 = gLayermap1.Sample(linearSampler, input.tiledTex0);
-		float4 c2 = gLayermap2.Sample(linearSampler, input.tiledTex0);
-		float4 c3 = gLayermap3.Sample(linearSampler, input.tiledTex0);
-		//float4 c4 = gLayermapArray.Sample(linearSampler, float3(input.tiledTex0, 4.f));
+	float4 c0 = gLayermap0.Sample(linearSampler, input.tiledTex0);
+	float4 c1 = gLayermap1.Sample(linearSampler, input.tiledTex0);
+	float4 c2 = gLayermap2.Sample(linearSampler, input.tiledTex0);
+	float4 c3 = gLayermap3.Sample(linearSampler, input.tiledTex0);
 		
-		float4 t = gBlendmap.Sample(linearSampler, input.tex0);
+	float4 t = gBlendmap.Sample(linearSampler, input.tex0);
 
-		/*float4 texColor = c0;
-		texColor = lerp(texColor, c1, t.r);
-		texColor = lerp(texColor, c2, t.g);
-		texColor = lerp(texColor, c3, t.b);*/
-		//texColor = lerp(texColor, c4, t.a);
-		float4 texColor = float4(1.f, 1.f, 1.f, 1.f);
-		texColor = lerp(texColor, c0, t.r);
-		texColor = lerp(texColor, c1, t.g);
-		texColor = lerp(texColor, c2, t.b);
-		texColor = lerp(texColor, c3, t.a);
+	float4 texColor = float4(1.f, 1.f, 1.f, 1.f);
+	texColor = lerp(texColor, c0, t.r);
+	texColor = lerp(texColor, c1, t.g);
+	texColor = lerp(texColor, c2, t.b);
+	texColor = lerp(texColor, c3, t.a);
 
 
-		float3 toEye = gCameraPosition - input.positionW;
-		float distToEye = length(toEye); 
-		toEye /= distToEye;
-		float4 litColor = texColor;
+	float3 toEye = gCameraPosition - input.positionW;
+	float distToEye = length(toEye); 
+	toEye /= distToEye;
+	float4 litColor = texColor;
 
-		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		//[loop]
-		for( uint i = 0;i < POINTLIGHTS; i++ )
+	//[loop]
+	for( uint i = 0;i < POINTLIGHTS; i++ )
+	{
+		float shadow;
+		shadow = 1.0f;
+		/*if ( gPointLights[i].Pad > 0 )
 		{
-			float shadow;
+			shadow = 0.0f;
+			uint x = gPointLights[i].Pad*6;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
+			shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] );
+		}*/
+
+		float4 A,D,S;
+		ComputePointLight(gMaterial, gPointLights[i], input.positionW, input.normalW, toEye, A, D, S);
+		ambient += A;
+		diffuse += shadow*D;
+		spec += shadow*S;
+	}
+	[loop]
+	for( uint i = 0;i < DIRECTIONALLIGHTS; i++ )
+	{
+		float shadow;
+		if ( gDirectionalLights[i].Pad == 1.f )
+			shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP0 ), gDLightShadow0 );
+		else if ( gDirectionalLights[i].Pad == 2.f )
+			shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP1 ), gDLightShadow1 );
+		else
 			shadow = 1.0f;
-			/*if ( gPointLights[i].Pad > 0 )
-			{
-				shadow = 0.0f;
-				uint x = gPointLights[i].Pad*6;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] ); x++;
-				shadow += ComputeShadowMap( mul( float4(input.positionW,1.f), gPLVP[x] ), gPLightShadow[x] );
-			}*/
 
-			float4 A,D,S;
-			ComputePointLight(gMaterial, gPointLights[i], input.positionW, input.normalW, toEye, A, D, S);
-			ambient += A;
-			diffuse += shadow*D;
-			spec += shadow*S;
-		}
-		[loop]
-		for( uint i = 0;i < DIRECTIONALLIGHTS; i++ )
-		{
-			float shadow;
-			if ( gDirectionalLights[i].Pad == 1.f )
-				shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP0 ), gDLightShadow0 );
-			else if ( gDirectionalLights[i].Pad == 2.f )
-				shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP1 ), gDLightShadow1 );
-			else
-				shadow = 1.0f;
-
-			float4 A,D,S;
-			ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
-			ambient += A;
-			diffuse += shadow*D;
-			spec += shadow*S;
-		}
-
-		// Modulate with late add.
-		litColor = texColor*(ambient + diffuse) + spec;
-		litColor.a = gMaterial.Diffuse.a * texColor.a;
-		return litColor;
+		float4 A,D,S;
+		ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
+		ambient += A;
+		diffuse += shadow*D;
+		spec += shadow*S;
 	}
 
-	return float4(1.f, 1.f, 1.f, 1.f);
+	// Modulate with late add.
+	litColor = texColor*(ambient + diffuse) + spec;
+	litColor.a = gMaterial.Diffuse.a * texColor.a;
+	return litColor;
 }
 
 technique11 RenderTech
