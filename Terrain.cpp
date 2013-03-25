@@ -95,6 +95,26 @@ void Terrain::create(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 	createBuffers(device, deviceContext);
 }
 
+void Terrain::saveHeightmap(void)
+{
+	if (!m_currentHeightmapFilepath.empty())
+	{
+		UINT size = (m_width + 1) * (m_depth + 1);
+
+		std::vector<unsigned char> out(size);
+		for (UINT i = 0; i < size; i++)
+			out[i] = (unsigned char)floor(m_heightmap[i] + 0.5f);
+
+		std::ofstream file;
+		file.open(m_currentHeightmapFilepath, std::ios_base::binary | std::ios_base::out);
+		if (file)
+		{
+			file.write((char*)&out[0], (std::streamsize)out.size());
+			file.close();
+		}
+	}
+}
+
 void Terrain::saveHeightmap(const std::string& filepath)
 {
 	UINT size = (m_width + 1) * (m_depth + 1);
@@ -110,11 +130,21 @@ void Terrain::saveHeightmap(const std::string& filepath)
 		file.write((char*)&out[0], (std::streamsize)out.size());
 		file.close();
 	}
+
+	m_currentHeightmapFilepath = filepath;
+}
+
+void Terrain::saveBlendmap(void)
+{
+	if (!m_currentBlendmapFilepath.empty())
+		Utilities::savePNG(m_currentBlendmapFilepath, m_blendmap);
 }
 
 void Terrain::saveBlendmap(const std::string& filepath)
 {
 	Utilities::savePNG(filepath, m_blendmap);
+
+	m_currentBlendmapFilepath = filepath;
 }
 
 void Terrain::loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename)
@@ -475,6 +505,9 @@ void Terrain::createBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 	updateBlendmapTexture(deviceContext);
 
 	m_created = true;
+
+	m_currentHeightmapFilepath.clear();
+	m_currentBlendmapFilepath.clear();
 }
 
 void Terrain::createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices)

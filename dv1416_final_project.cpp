@@ -110,6 +110,14 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 				}
 			}
 		}
+		else if (eventName == "Save")
+		{
+			if (m_terrain.isCreated())
+			{
+				m_terrain.saveHeightmap();
+				m_terrain.saveBlendmap();
+			}
+		}
 		else if (eventName == "Save as...")
 		{
 			std::string filepath;
@@ -294,6 +302,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	GUI::Menu& menu = GUI::Menu::getInstance();
 	menu.addItem("File", "New...", this);
 	menu.addItem("File", "Open...", this);
+	menu.addItem("File", "Save", this);
 	menu.addItem("File", "Save as...", this);
 	menu.addItem("File", "Exit", this);
 	menu.addItem("Edit", "Undo", this);

@@ -36,6 +36,7 @@ public:
 private:
 	enum Activity
 	{
+		None,
 		RaisingLevel,
 		LoweringLevel,
 		Texturing,

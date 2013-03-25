@@ -54,8 +54,8 @@ namespace GUI
 			SetWindowPos(m_hWnd, HWND_TOP, windowPosition.x, windowPosition.y, windowSize.x, windowSize.y, NULL);
 		}
 
-		if (count <= 0)
-			Button_SetState(GetDlgItem(m_hWnd, id), true);
+		/*if (count <= 0)
+			Button_SetState(GetDlgItem(m_hWnd, id), true);*/
 	}
 
 	LRESULT Toolbar::subWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

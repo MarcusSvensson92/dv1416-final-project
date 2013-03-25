@@ -25,7 +25,9 @@ public:
 	void create(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 				const std::string& heightmapFilename, const std::string& blendmapFilename);
 
+	void saveHeightmap(void);
 	void saveHeightmap(const std::string& filepath);
+	void saveBlendmap(void);
 	void saveBlendmap(const std::string& filepath);
 
 	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
@@ -80,6 +82,9 @@ private:
 
 	XMFLOAT3 m_targetPosition;
 	float m_targetDiameter;
+
+	std::string m_currentHeightmapFilepath;
+	std::string m_currentBlendmapFilepath;
 
 	void createBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 

@@ -7,7 +7,7 @@
 
 Toolbox::Toolbox(void)
 {
-	m_activity = RaisingLevel;
+	m_activity = None;
 	m_targetPosition = XMFLOAT3(0.f, 0.f, 0.f);
 	m_prevMouseDown = false;
 	m_prevZDown = false;
@@ -64,7 +64,6 @@ void Toolbox::initGUI(HINSTANCE hInstance, HWND hWnd)
 	levelToolWindow.addTrackbar("Brush Diameter", &m_levelTool, 1, 100, 10);
 	levelToolWindow.addTrackbar("Brush Hardness", &m_levelTool, 0, 100, 50);
 	levelToolWindow.addTrackbar("Brush Strength", &m_levelTool, 1, 100, 5);
-	levelToolWindow.show(true);
 
 	sd.caption = "Texture Tool";
 	sd.x	   = 700;
@@ -78,7 +77,6 @@ void Toolbox::initGUI(HINSTANCE hInstance, HWND hWnd)
 	textureToolWindow.addLoadFileButton("Load Texture", &m_textureTool);
 	textureToolWindow.addTrackbar("Brush Diameter", &m_textureTool, 1, 100, 10);
 	textureToolWindow.addTrackbar("Brush Strength", &m_textureTool, 1, 100, 50);
-	textureToolWindow.show(true);
 }
 
 void Toolbox::update(const float dt)
@@ -164,20 +162,26 @@ void Toolbox::onEvent(const std::string& sender, const std::string& eventName)
 {
 	if (sender == "Toolbar")
 	{
+		GUI::LevelToolWindow::getInstance().show(false);
+		GUI::TextureToolWindow::getInstance().show(false);
+
 		if (eventName == "Raising Level")
 		{
 			m_activity = RaisingLevel;
 			m_levelTool.onEvent("Level Tool", "Brush Diameter");
+			GUI::LevelToolWindow::getInstance().show(true);
 		}
 		else if (eventName == "Lowering Level")
 		{
 			m_activity = LoweringLevel;
 			m_levelTool.onEvent("Level Tool", "Brush Diameter");
+			GUI::LevelToolWindow::getInstance().show(true);
 		}
 		else if (eventName == "Texturing")
 		{
 			m_activity = Texturing;
 			m_textureTool.onEvent("Texture Tool", "Brush Diameter");
+			GUI::TextureToolWindow::getInstance().show(true);
 		}
 		else if (eventName == "Add Light")
 		{
