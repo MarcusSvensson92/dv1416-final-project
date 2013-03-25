@@ -3,6 +3,7 @@
 #include "Toolbox.h"
 #include "TerrainOptions.h"
 #include "SelectionOptions.h"
+#include "PointLightOptions.h"
 #include "NewTerrainWindow.h"
 #include "GUI.h"
 
@@ -332,6 +333,16 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	selectionOptions.init(m_hInstance, hWnd, sd);
 	selectionOptions.addTrackbar("Interval Sample", &m_terrain, 1, 100, 10);
 	selectionOptions.addTrackbar("Distance", &m_terrain, 1, 1000, 500);
+
+	sd.caption = "PointLight Options";
+	sd.x	   = 500;
+	sd.y	   = 400;
+	GUI::PointLightOptions& pointlightOptions = GUI::PointLightOptions::getInstance();
+	pointlightOptions.init(m_hInstance, hWnd, sd);
+	pointlightOptions.addTrackbar("Ambient Range", &m_LightManager, 1, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient R", &m_LightManager, 1, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient G", &m_LightManager, 1, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient B", &m_LightManager, 1, 1000, 100);
 
 	Toolbox::getInstance().initGUI(m_hInstance, hWnd);
 }

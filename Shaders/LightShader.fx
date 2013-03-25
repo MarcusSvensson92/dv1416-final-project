@@ -22,6 +22,7 @@ cbuffer cbPerFrame
 	matrix gWorldViewProj;
 	float3 gCameraPosition;
 
+	bool gSelected;
 	PointLight gLight;
 };
 
@@ -114,9 +115,16 @@ void GS(point GSIn input[1], inout TriangleStream<PSIn> stream)
 }
 
 float4 PS(PSIn input) : SV_TARGET
-{
+{	
+	if (gSelected)
+	{
+		float l = length(input.positionW.xyz - gLight.Position.xyz);
+		if (l > 0.9f && l < 0.9f + 0.1f)
+			return float4(1.f, 0.f, 0.f, 1.f);
+	}
 	float4 texColor = gDiffuseMap.Sample( linSampler, input.tex0 );
 	float4 litColor = texColor*gLight.Diffuse;
+
 	return litColor;
 }
 

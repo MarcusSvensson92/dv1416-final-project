@@ -84,6 +84,9 @@
     <ClCompile Include="NewTerrainWindow.cpp">
       <Filter>GUI\Subwindows\File</Filter>
     </ClCompile>
+    <ClCompile Include="PointLightOptions.cpp">
+      <Filter>GUI\Subwindows\Options</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -224,6 +227,9 @@
     </ClInclude>
     <ClInclude Include="NewTerrainWindow.h">
       <Filter>GUI\Subwindows\File</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLightOptions.h">
+      <Filter>GUI\Subwindows\Options</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,9 @@
 #include "Buffer.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "EventReceiver.h"
+#include "PointLightOptions.h"
+
 #include <algorithm>
 
 using namespace Light;
@@ -16,7 +19,7 @@ enum LightType
 	POINT_LIGHT,
 };
 
-class LightManager
+class LightManager : public GUI::EventReceiver
 {
 public:
 	enum State
@@ -47,9 +50,12 @@ public:
 	std::vector<PointLight> getLights();
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
+
+	void onEvent(const std::string& sender, const std::string& eventName);
 private:
 	std::vector<PointLight>				m_Lights;
 	ID3D11ShaderResourceView*			m_texture;
+	ID3D11ShaderResourceView*			m_selection;
 
 	State m_state;
 

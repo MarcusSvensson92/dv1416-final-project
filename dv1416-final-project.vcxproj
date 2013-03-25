@@ -91,6 +91,7 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="NewTerrainWindow.cpp" />
+    <ClCompile Include="PointLightOptions.cpp" />
     <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="SelectionOptions.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -122,6 +123,7 @@
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="NewTerrainWindow.h" />
+    <ClInclude Include="PointLightOptions.h" />
     <ClInclude Include="renderTarget.h" />
     <ClInclude Include="SelectionOptions.h" />
     <ClInclude Include="Shader.h" />

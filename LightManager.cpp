@@ -20,6 +20,7 @@ LightManager::LightManager(void)
 		m_Lights.push_back(standardLight);
 	}
 
+	m_light = NULL;
 	m_state = Add;
 	MouseDown = false;
 }
@@ -33,6 +34,7 @@ void LightManager::init(HWND hWnd, ID3D11Device* device, Camera* camera)
 	m_hWnd			= hWnd;
 	m_camera		= camera;
 	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/light.png", 0, 0, &m_texture, 0 );
+	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/selection.png", 0, 0, &m_selection, 0 );
 }
 
 PointLight* LightManager::AddLight( XMFLOAT3 position, LightType type )
@@ -76,6 +78,13 @@ std::vector<PointLight> LightManager::getLights()
 
 void LightManager::update(float dt)
 {
+	if (m_light != NULL)
+	{
+		GUI::PointLightOptions::getInstance().show(true);
+	}
+	else
+		GUI::PointLightOptions::getInstance().show(false);
+
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 	{
 		POINT cursorPosition;
@@ -153,12 +162,17 @@ void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, co
 	}
 	std::sort(drawList.begin(), drawList.end());
 
+	XMMATRIX world			= XMMatrixIdentity();
+	XMMATRIX worldViewProj  = world * camera.getViewProj();
+	XMFLOAT3 cameraPosition = camera.getPosition();
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (int i = 0; i < drawList.size(); i++) 
 	{
-		XMMATRIX world			= XMMatrixIdentity();
-		XMMATRIX worldViewProj  = world * camera.getViewProj();
-		XMFLOAT3 cameraPosition = camera.getPosition();
+		if (drawList[i].light == m_light)
+			shader->setBool("gSelected", true);
+		else
+			shader->setBool("gSelected", false);
+
 		shader->setMatrix("gWorld", world);
 		shader->setMatrix("gWorldViewProj", worldViewProj);
 		shader->setFloat3("gCameraPosition", cameraPosition);
@@ -226,4 +240,23 @@ XMFLOAT3	LightManager::computePlaneIntersection(float Y, XMFLOAT3 normal, const 
 	XMFLOAT3 m_targetPosition;
 	XMStoreFloat3(&m_targetPosition, ray.origin + t * ray.direction);
 	return m_targetPosition;
+}
+
+void LightManager::onEvent(const std::string& sender, const std::string& eventName)
+{
+	if (sender == "PointLight Options")
+	{
+		GUI::PointLightOptions& pointlightOptions = GUI::PointLightOptions::getInstance();
+		if (m_light != NULL)
+		{
+			if (eventName == "Ambient Range")
+				m_light->Range = (float)pointlightOptions.getTrackbarValue(eventName);
+			else if (eventName == "Ambient R")
+				m_light->Ambient.x = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Ambient G")
+				m_light->Ambient.y = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Ambient B")
+				m_light->Ambient.z = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+		}
+	}
 }
