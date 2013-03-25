@@ -67,10 +67,10 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			GUI::NewTerrainWindow::getInstance().show(true);
 			EnableWindow(m_hWnd, false);
 		}
-		else if (eventName == "Load...")
+		else if (eventName == "Open...")
 		{
 			std::string filepath;
-			if (GUI::openFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0", ".map", filepath))
+			if (GUI::openFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0\0", ".map", filepath))
 			{
 				std::string extension = PathFindExtension(&filepath[0]);
 				if (extension == ".map")
@@ -111,10 +111,18 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 				}
 			}
 		}
+		else if (eventName == "Save")
+		{
+			if (m_terrain.isCreated())
+			{
+				m_terrain.saveHeightmap();
+				m_terrain.saveBlendmap();
+			}
+		}
 		else if (eventName == "Save as...")
 		{
 			std::string filepath;
-			if (GUI::saveFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0", "map", filepath) && m_terrain.isCreated())
+			if (m_terrain.isCreated() && GUI::saveFileBox(m_hWnd, "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0\0", "map", filepath))
 			{
 				std::string extension = PathFindExtension(&filepath[0]);
 				if (extension == ".map")
@@ -292,7 +300,8 @@ void dv1416_final_project::initGUI(HWND hWnd)
 {
 	GUI::Menu& menu = GUI::Menu::getInstance();
 	menu.addItem("File", "New...", this);
-	menu.addItem("File", "Load...", this);
+	menu.addItem("File", "Open...", this);
+	menu.addItem("File", "Save", this);
 	menu.addItem("File", "Save as...", this);
 	menu.addItem("File", "Exit", this);
 	menu.addItem("Edit", "Undo", this);
