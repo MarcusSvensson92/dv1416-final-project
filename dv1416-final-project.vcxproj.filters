@@ -85,6 +85,9 @@
       <Filter>GUI\Subwindows\File</Filter>
     </ClCompile>
     <ClCompile Include="PointLightOptions.cpp">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLightOptions.cpp">
       <Filter>GUI\Subwindows\Options</Filter>
     </ClCompile>
   </ItemGroup>
@@ -229,6 +232,9 @@
       <Filter>GUI\Subwindows\File</Filter>
     </ClInclude>
     <ClInclude Include="PointLightOptions.h">
+      <Filter>GUI\Subwindows\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLightOptions.h">
       <Filter>GUI\Subwindows\Options</Filter>
     </ClInclude>
   </ItemGroup>

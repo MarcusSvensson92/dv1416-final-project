@@ -82,6 +82,7 @@
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3DApp.cpp" />
+    <ClCompile Include="DirectionalLightOptions.cpp" />
     <ClCompile Include="dv1416_final_project.cpp" />
     <ClCompile Include="EventReceiver.cpp" />
     <ClCompile Include="GUI.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="D3DApp.h" />
+    <ClInclude Include="DirectionalLightOptions.h" />
     <ClInclude Include="dv1416_final_project.h" />
     <ClInclude Include="EventReceiver.h" />
     <ClInclude Include="GUI.h" />

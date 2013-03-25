@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "EventReceiver.h"
 #include "PointLightOptions.h"
+#include "DirectionalLightOptions.h"
 
 #include <algorithm>
 
@@ -47,15 +48,16 @@ public:
 	PointLight*	computeIntersection(const Ray& ray);
 	XMFLOAT3	computePlaneIntersection(float Y, XMFLOAT3 normal, const Ray& ray);
 
-	std::vector<PointLight> getLights();
+	std::vector<PointLight>			getPLights();
+	std::vector<DirectionalLight>	getDLights();
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 
 	void onEvent(const std::string& sender, const std::string& eventName);
 private:
-	std::vector<PointLight>				m_Lights;
+	std::vector<PointLight>				m_PLights;
+	std::vector<DirectionalLight>		m_DLights;
 	ID3D11ShaderResourceView*			m_texture;
-	ID3D11ShaderResourceView*			m_selection;
 
 	State m_state;
 

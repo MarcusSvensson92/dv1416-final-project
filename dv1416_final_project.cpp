@@ -4,6 +4,7 @@
 #include "TerrainOptions.h"
 #include "SelectionOptions.h"
 #include "PointLightOptions.h"
+#include "DirectionalLightOptions.h"
 #include "NewTerrainWindow.h"
 #include "GUI.h"
 
@@ -164,6 +165,12 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			menu.checkItem(eventName, !check);
 			GUI::SelectionOptions::getInstance().show(!check);
 		}
+		else if (eventName == "DirectionalLight Options")
+		{
+			bool check = menu.isItemChecked(eventName);
+			menu.checkItem(eventName, !check);
+			GUI::DirectionalLightOptions::getInstance().show(!check);
+		}
 	}
 
 	if (sender == "New...")
@@ -219,7 +226,8 @@ void dv1416_final_project::render(void)
 	mMaterial.Specular = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	m_shaderManager.get("Terrain")->setRawData("gMaterial", &mMaterial, sizeof(Material)); 
-	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_LightManager.getLights()[0], sizeof(PointLight)*m_LightManager.getLights().size());
+	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_LightManager.getPLights()[0], sizeof(PointLight)*m_LightManager.getPLights().size());
+	m_shaderManager.get("Terrain")->setRawData("gDirectionalLights", &m_LightManager.getDLights()[0], sizeof(DirectionalLight)*m_LightManager.getDLights().size());
 
 	m_terrain.render(m_deviceContext, m_shaderManager.get("Terrain"), m_camera);
 	m_LightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
@@ -267,15 +275,6 @@ void dv1416_final_project::initShaders(void)
 void dv1416_final_project::initLights(void)
 {
 	m_LightManager.init(m_hWnd, m_device, &m_camera);
-
-	m_LightManager.AddLight(XMFLOAT3(-80,30,-80),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3(-80,30, 80),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3( 80,30,-80),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3( 80,30, 80),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3( 80,30, 00),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3(-80,30, 00),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3( 00,30,-80),POINT_LIGHT);
-	m_LightManager.AddLight(XMFLOAT3( 00,30, 80),POINT_LIGHT);
 }
 
 void dv1416_final_project::initTerrain(void)
@@ -300,6 +299,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	menu.addItem("View", "Toolbar", this, true, true);
 	menu.addItem("Options", "Terrain Options", this);
 	menu.addItem("Options", "Selection Options", this);
+	menu.addItem("Options", "DirectionalLight Options", this);
 	menu.assignToWindow(hWnd);
 
 	GUI::SubwindowDesc sd;
@@ -340,9 +340,29 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	GUI::PointLightOptions& pointlightOptions = GUI::PointLightOptions::getInstance();
 	pointlightOptions.init(m_hInstance, hWnd, sd);
 	pointlightOptions.addTrackbar("Ambient Range", &m_LightManager, 1, 1000, 100);
-	pointlightOptions.addTrackbar("Ambient R", &m_LightManager, 1, 1000, 100);
-	pointlightOptions.addTrackbar("Ambient G", &m_LightManager, 1, 1000, 100);
-	pointlightOptions.addTrackbar("Ambient B", &m_LightManager, 1, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient R", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient G", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Ambient B", &m_LightManager, 0, 1000, 100);
+
+	pointlightOptions.addTrackbar("Linear Modifier", &m_LightManager, 1, 100, 10);
+	pointlightOptions.addTrackbar("Diffuse R", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Diffuse G", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Diffuse B", &m_LightManager, 0, 1000, 100);
+
+	pointlightOptions.addTrackbar("Specular Power", &m_LightManager, 1, 1000, 100);
+	pointlightOptions.addTrackbar("Specular R", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Specular G", &m_LightManager, 0, 1000, 100);
+	pointlightOptions.addTrackbar("Specular B", &m_LightManager, 0, 1000, 100);
+
+	sd.caption = "DirectionalLight Options";
+	sd.x	   = 500;
+	sd.y	   = 400;
+	GUI::DirectionalLightOptions& directionallightOptions = GUI::DirectionalLightOptions::getInstance();
+	directionallightOptions.init(m_hInstance, hWnd, sd);
+	directionallightOptions.addTrackbar("Directional Light", &m_LightManager, 1, m_LightManager.getDLights().size(), 1);
+	directionallightOptions.addTrackbar("OFF / ON", &m_LightManager, 0, 1, 1);
+	directionallightOptions.addTrackbar("X", &m_LightManager, 0, 200, 100);
+	directionallightOptions.addTrackbar("Z", &m_LightManager, 0, 200, 100);
 
 	Toolbox::getInstance().initGUI(m_hInstance, hWnd);
 }

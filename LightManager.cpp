@@ -4,20 +4,32 @@
 LightManager::LightManager(void)
 {
 	// Should be same as in Light.fx
-	int POINTLIGHTS = 10;
+	int POINTLIGHTS			= 10;
+	int DIRECTIONALLIGHTS	= 2;
 
-	PointLight standardLight;
-	standardLight.Ambient  = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	standardLight.Diffuse  = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	standardLight.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 4.0f);
-	standardLight.Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	standardLight.Range    = -1.0f;
-	standardLight.Att      = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	standardLight.Pad	   = 0;
+	PointLight pointLight;
+	pointLight.Ambient		= XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	pointLight.Diffuse		= XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	pointLight.Specular		= XMFLOAT4(0.0f, 0.0f, 0.0f, 4.0f);
+	pointLight.Position		= XMFLOAT3(0.0f, 0.0f, 0.0f);
+	pointLight.Range		= -1.0f;
+	pointLight.Att			= XMFLOAT3(0.0f, 0.1f, 0.0f);
+	pointLight.Pad			= 0;
 
 	for(int i = 0; i < POINTLIGHTS; i++)
 	{
-		m_Lights.push_back(standardLight);
+		m_PLights.push_back(pointLight);
+		}
+
+	DirectionalLight directionalLight;
+	directionalLight.Ambient	= XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	directionalLight.Diffuse	= XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	directionalLight.Specular	= XMFLOAT4(1.0f, 1.0f, 1.0f, 4.0f);
+	directionalLight.Direction	= XMFLOAT3(0.0f, -1.0f, 0.0f);
+	directionalLight.Pad		= 1;
+	for(int i = 0; i < DIRECTIONALLIGHTS; i++)
+	{
+		m_DLights.push_back(directionalLight);
 	}
 
 	m_light = NULL;
@@ -34,18 +46,17 @@ void LightManager::init(HWND hWnd, ID3D11Device* device, Camera* camera)
 	m_hWnd			= hWnd;
 	m_camera		= camera;
 	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/light.png", 0, 0, &m_texture, 0 );
-	D3DX11CreateShaderResourceViewFromFile(device, "Content/img/selection.png", 0, 0, &m_selection, 0 );
 }
 
 PointLight* LightManager::AddLight( XMFLOAT3 position, LightType type )
 {
-	for(int i = 0; i < m_Lights.size(); i++)
+	for(int i = 0; i < m_PLights.size(); i++)
 	{
-		if (m_Lights[i].Range < 0)
+		if (m_PLights[i].Range < 0)
 		{
-			m_Lights[i].Position	= position;
-			m_Lights[i].Range		= 500;
-			return &m_Lights[i];
+			m_PLights[i].Position	= position;
+			m_PLights[i].Range		= 500;
+			return &m_PLights[i];
 		}
 	}
 	return NULL;
@@ -65,15 +76,20 @@ void LightManager::MoveLightXZ( PointLight* light, const Ray& ray )
 }
 void LightManager::ClearLights()
 {
-	for(int i = 0; i < m_Lights.size(); i++)
+	for(int i = 0; i < m_PLights.size(); i++)
 	{
-		RemoveLight(&m_Lights[i]);
+		RemoveLight(&m_PLights[i]);
 	}
 }
 
-std::vector<PointLight> LightManager::getLights()
+std::vector<PointLight> LightManager::getPLights()
 {
-	return m_Lights;
+	return m_PLights;
+}
+
+std::vector<DirectionalLight> LightManager::getDLights()
+{
+	return m_DLights;
 }
 
 void LightManager::update(float dt)
@@ -155,10 +171,10 @@ void LightManager::render(ID3D11DeviceContext* deviceContext, Shader* shader, co
 	};
 
 	std::vector<data> drawList;
-	for(int i = 0; i < m_Lights.size(); i++)
+	for(int i = 0; i < m_PLights.size(); i++)
 	{
-		if (m_Lights[i].Range > 0.f)
-			drawList.push_back(data(&m_Lights[i], camera.getPosition()));
+		if (m_PLights[i].Range > 0.f)
+			drawList.push_back(data(&m_PLights[i], camera.getPosition()));
 	}
 	std::sort(drawList.begin(), drawList.end());
 
@@ -191,11 +207,11 @@ PointLight* LightManager::computeIntersection(const Ray& ray)
 	float light_r = 2.f;
 
 	// Check for the closest light intersecting the ray.
-	for(int i = 0; i < m_Lights.size(); i++)
+	for(int i = 0; i < m_PLights.size(); i++)
 	{
-		if (m_Lights[i].Range > 0.f)
+		if (m_PLights[i].Range > 0.f)
 		{
-		XMVECTOR light_pos = XMLoadFloat3(&m_Lights[i].Position);
+		XMVECTOR light_pos = XMLoadFloat3(&m_PLights[i].Position);
 		XMVECTOR l = light_pos - ray.origin;	
 		float l2 = XMVectorGetX(XMVector3Dot(l, ray.direction));
 		if (l2 > 0)
@@ -219,7 +235,7 @@ PointLight* LightManager::computeIntersection(const Ray& ray)
 							if ((distance > 0 && distance > t) || distance < 0)
 							{
 								distance = t;
-								tempLight = &m_Lights[i];
+								tempLight = &m_PLights[i];
 							}
 						}
 					}
@@ -257,6 +273,43 @@ void LightManager::onEvent(const std::string& sender, const std::string& eventNa
 				m_light->Ambient.y = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
 			else if (eventName == "Ambient B")
 				m_light->Ambient.z = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+
+			else if (eventName == "Linear Modifier")
+				m_light->Att.y = (float)pointlightOptions.getTrackbarValue(eventName) / 100;
+			else if (eventName == "Diffuse R")
+				m_light->Diffuse.x = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Diffuse G")
+				m_light->Diffuse.y = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Diffuse B")
+				m_light->Diffuse.z = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+
+			else if (eventName == "Specular Power")
+				m_light->Specular.w = (float)pointlightOptions.getTrackbarValue(eventName) / 100;
+			else if (eventName == "Specular R")
+				m_light->Specular.x = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Specular G")
+				m_light->Specular.y = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+			else if (eventName == "Specular B")
+				m_light->Specular.z = (float)pointlightOptions.getTrackbarValue(eventName) / 1000;
+		}
+	}
+	if (sender == "DirectionalLight Options")
+	{
+		GUI::DirectionalLightOptions& directionallightOptions = GUI::DirectionalLightOptions::getInstance();
+		if (eventName == "OFF / ON")
+		{
+			int lightnr = (int)directionallightOptions.getTrackbarValue("Directional Light") - 1;
+			m_DLights[lightnr].Pad = (float)directionallightOptions.getTrackbarValue(eventName);
+		}
+		else if (eventName == "X")
+		{
+			int lightnr = (int)directionallightOptions.getTrackbarValue("Directional Light") - 1;
+			m_DLights[lightnr].Direction.x = ((float)directionallightOptions.getTrackbarValue(eventName) - 100)/10;
+		}
+		else if (eventName == "Z")
+		{
+			int lightnr = (int)directionallightOptions.getTrackbarValue("Directional Light") - 1;
+			m_DLights[lightnr].Direction.z = ((float)directionallightOptions.getTrackbarValue(eventName) - 100)/10;
 		}
 	}
 }

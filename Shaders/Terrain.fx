@@ -230,19 +230,25 @@ float4 PS(PSIn input) : SV_TARGET
 	[loop]
 	for( uint i = 0;i < DIRECTIONALLIGHTS; i++ )
 	{
-		float shadow;
-		if ( gDirectionalLights[i].Pad == 1.f )
-			shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP0 ), gDLightShadow0 );
-		else if ( gDirectionalLights[i].Pad == 2.f )
-			shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP1 ), gDLightShadow1 );
-		else
-			shadow = 1.0f;
+		if ( gDirectionalLights[i].Pad > 0 )
+		{
+			float shadow;
+			if ( gDirectionalLights[i].Pad == 2.f )
+			{
+				if ( i == 0 )
+					shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP0 ), gDLightShadow0 );
+				else
+					shadow = ComputeShadowMap( mul( float4(input.positionW,1.f), gDLVP1 ), gDLightShadow1 );
+			}
+			else
+				shadow = 1.0f;
 
-		float4 A,D,S;
-		ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
-		ambient += A;
-		diffuse += shadow*D;
-		spec += shadow*S;
+			float4 A,D,S;
+			ComputeDirectionalLight(gMaterial, gDirectionalLights[i], input.normalW, toEye, A, D, S);
+			ambient += A;
+			diffuse += shadow*D;
+			spec += shadow*S;
+		}
 	}
 
 	// Modulate with late add.

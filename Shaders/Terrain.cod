@@ -868,257 +868,263 @@ fxgroup
                 loop 
                   ult r3.w, r2.w, l(2)
                   breakc_z r3.w
-                
-                #line 234
                   imul null, r3.w, r2.w, l(4)
-                  eq r4.w, cb1[r3.w + 53].w, l(1.000000)
+                  lt r4.w, l(0.000000), cb1[r3.w + 53].w
                   if_nz r4.w
-                    nop 
-                    mov r8.xyz, v1.xyzx
-                    mov r8.w, l(1.000000)
-                    dp4 r9.x, r8.xyzw, cb2[240].xyzw  // lpos<0:NaN:Inf>
-                    dp4 r9.y, r8.xyzw, cb2[241].xyzw  // lpos<1:NaN:Inf>
-                    dp4 r9.z, r8.xyzw, cb2[242].xyzw  // lpos<2:NaN:Inf>
-                    dp4 r4.w, r8.xyzw, cb2[243].xyzw  // lpos<3:NaN:Inf>
                 
-                #line 25 "Shadow.fx"
-                    div r8.xyz, r9.xyzx, r4.wwww  // lpos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                
-                #line 29
-                    lt r4.w, r8.x, l(-1.000000)
-                    lt r5.w, l(1.000000), r8.x
-                    or r4.w, r4.w, r5.w
-                    lt r5.w, r8.y, l(-1.000000)
-                    or r4.w, r4.w, r5.w
-                    lt r5.w, l(1.000000), r8.y
-                    or r4.w, r4.w, r5.w
-                    lt r5.w, r8.z, l(0.000000)
-                    or r4.w, r4.w, r5.w
-                    lt r5.w, l(1.000000), r8.z
-                    or r4.w, r4.w, r5.w
-                    if_nz r4.w
-                
-                #line 32
-                      mov r5.w, l(0)  // ComputeShadowMap<0: 0f>
-                
-                #line 29
-                    endif 
-                
-                #line 35
-                    if_z r4.w
-                      div r4.w, r8.x, l(2.000000)
-                      add r9.x, r4.w, l(0.500000)  // lpos<0:NaN:Inf>
-                      div r4.w, r8.y, l(-2.000000)
-                      add r9.y, r4.w, l(0.500000)  // lpos<1:NaN:Inf>
-                      itof r4.w, cb0[0].x
-                      div r10.y, l(1.000000), r4.w  // dx<0:Inf>
-                      mov r4.w, r10.y  // dx<0:Inf>
-                
-                #line 45
-                      mov r8.y, -r4.w  // offsets<3:Inf>
-                      mov r10.z, -r4.w  // offsets<5:Inf>
-                      mov r11.x, -r4.w  // offsets<6:Inf>
-                      mov r10.x, -r4.w  // offsets<12:Inf>
-                
-                #line 51
-                      mov r4.w, -r4.w
-                      add r9.zw, r4.wwww, r9.xxxy
-                      sample_c_lz r4.w, r9.zwzz, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, l(0.000000)  // percentLit<0:[0f,1f]>
-                      mov r8.x, l(0)
-                      add r8.xy, r8.xyxx, r9.xyxx
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,2f]>
-                      add r8.xy, r9.xyxx, r10.yzyy
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,3f]>
-                      mov r11.y, l(0)
-                      add r8.xy, r9.xyxx, r11.xyxx
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,4f]>
-                      add r8.xy, r9.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,5f]>
-                      mov r10.w, l(0)
-                      add r8.xy, r9.xyxx, r10.ywyy
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,6f]>
-                      add r8.xy, r9.xyxx, r10.xyxx
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,7f]>
-                      add r8.xy, r9.xyxx, r10.wyww
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,8f]>
-                      add r8.xy, r9.xyxx, r10.yyyy
-                      sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
-                      add r4.w, r4.w, r6.w  // percentLit<0:[0f,9f]>
-                
-                #line 54
-                      div r5.w, r4.w, l(9.000000)  // ComputeShadowMap<0:[0f,1f]>
-                
-                #line 35
-                    endif 
-                
-                #line 235 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
-                    mov r5.w, r5.w  // shadow<0:Inf>
-                  else 
+                #line 236
                     eq r4.w, cb1[r3.w + 53].w, l(2.000000)
                     if_nz r4.w
-                      nop 
-                      mov r8.xyz, v1.xyzx
-                      mov r8.w, l(1.000000)
-                      dp4 r9.x, r8.xyzw, cb2[244].xyzw  // lpos<0:NaN:Inf>
-                      dp4 r9.y, r8.xyzw, cb2[245].xyzw  // lpos<1:NaN:Inf>
-                      dp4 r9.z, r8.xyzw, cb2[246].xyzw  // lpos<2:NaN:Inf>
-                      dp4 r4.w, r8.xyzw, cb2[247].xyzw  // lpos<3:NaN:Inf>
+                      if_z r2.w
+                        nop 
+                        mov r8.xyz, v1.xyzx
+                        mov r8.w, l(1.000000)
+                        dp4 r9.x, r8.xyzw, cb2[240].xyzw  // lpos<0:NaN:Inf>
+                        dp4 r9.y, r8.xyzw, cb2[241].xyzw  // lpos<1:NaN:Inf>
+                        dp4 r9.z, r8.xyzw, cb2[242].xyzw  // lpos<2:NaN:Inf>
+                        dp4 r4.w, r8.xyzw, cb2[243].xyzw  // lpos<3:NaN:Inf>
                 
                 #line 25 "Shadow.fx"
-                      div r8.xyz, r9.xyzx, r4.wwww  // lpos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                        div r8.xyz, r9.xyzx, r4.wwww  // lpos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 29
-                      lt r4.w, r8.x, l(-1.000000)
-                      lt r6.w, l(1.000000), r8.x
-                      or r4.w, r4.w, r6.w
-                      lt r6.w, r8.y, l(-1.000000)
-                      or r4.w, r4.w, r6.w
-                      lt r6.w, l(1.000000), r8.y
-                      or r4.w, r4.w, r6.w
-                      lt r6.w, r8.z, l(0.000000)
-                      or r4.w, r4.w, r6.w
-                      lt r6.w, l(1.000000), r8.z
-                      or r4.w, r4.w, r6.w
-                      if_nz r4.w
+                        lt r4.w, r8.x, l(-1.000000)
+                        lt r5.w, l(1.000000), r8.x
+                        or r4.w, r4.w, r5.w
+                        lt r5.w, r8.y, l(-1.000000)
+                        or r4.w, r4.w, r5.w
+                        lt r5.w, l(1.000000), r8.y
+                        or r4.w, r4.w, r5.w
+                        lt r5.w, r8.z, l(0.000000)
+                        or r4.w, r4.w, r5.w
+                        lt r5.w, l(1.000000), r8.z
+                        or r4.w, r4.w, r5.w
+                        if_nz r4.w
                 
                 #line 32
-                        mov r5.w, l(0)  // ComputeShadowMap<0: 0f>
+                          mov r5.w, l(0)  // ComputeShadowMap<0: 0f>
                 
                 #line 29
-                      endif 
+                        endif 
                 
                 #line 35
-                      if_z r4.w
-                        div r4.w, r8.x, l(2.000000)
-                        add r9.x, r4.w, l(0.500000)  // lpos<0:NaN:Inf>
-                        div r4.w, r8.y, l(-2.000000)
-                        add r9.y, r4.w, l(0.500000)  // lpos<1:NaN:Inf>
-                        itof r4.w, cb0[0].x
-                        div r10.y, l(1.000000), r4.w  // dx<0:Inf>
-                        mov r4.w, r10.y  // dx<0:Inf>
+                        if_z r4.w
+                          div r4.w, r8.x, l(2.000000)
+                          add r9.x, r4.w, l(0.500000)  // lpos<0:NaN:Inf>
+                          div r4.w, r8.y, l(-2.000000)
+                          add r9.y, r4.w, l(0.500000)  // lpos<1:NaN:Inf>
+                          itof r4.w, cb0[0].x
+                          div r10.y, l(1.000000), r4.w  // dx<0:Inf>
+                          mov r4.w, r10.y  // dx<0:Inf>
                 
                 #line 45
-                        mov r8.y, -r4.w  // offsets<3:Inf>
-                        mov r10.z, -r4.w  // offsets<5:Inf>
-                        mov r11.x, -r4.w  // offsets<6:Inf>
-                        mov r10.x, -r4.w  // offsets<12:Inf>
+                          mov r8.y, -r4.w  // offsets<3:Inf>
+                          mov r10.z, -r4.w  // offsets<5:Inf>
+                          mov r11.x, -r4.w  // offsets<6:Inf>
+                          mov r10.x, -r4.w  // offsets<12:Inf>
                 
                 #line 51
-                        mov r4.w, -r4.w
-                        add r9.zw, r4.wwww, r9.xxxy
-                        sample_c_lz r4.w, r9.zwzz, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, l(0.000000)  // percentLit<0:[0f,1f]>
-                        mov r8.x, l(0)
-                        add r8.xy, r8.xyxx, r9.xyxx
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,2f]>
-                        add r8.xy, r9.xyxx, r10.yzyy
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,3f]>
-                        mov r11.y, l(0)
-                        add r8.xy, r9.xyxx, r11.xyxx
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,4f]>
-                        add r8.xy, r9.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,5f]>
-                        mov r10.w, l(0)
-                        add r8.xy, r9.xyxx, r10.ywyy
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,6f]>
-                        add r8.xy, r9.xyxx, r10.xyxx
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,7f]>
-                        add r8.xy, r9.xyxx, r10.wyww
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,8f]>
-                        add r8.xy, r9.xyxx, r10.yyyy
-                        sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
-                        add r4.w, r4.w, r6.w  // percentLit<0:[0f,9f]>
+                          mov r4.w, -r4.w
+                          add r9.zw, r4.wwww, r9.xxxy
+                          sample_c_lz r4.w, r9.zwzz, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, l(0.000000)  // percentLit<0:[0f,1f]>
+                          mov r8.x, l(0)
+                          add r8.xy, r8.xyxx, r9.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,2f]>
+                          add r8.xy, r9.xyxx, r10.yzyy
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,3f]>
+                          mov r11.y, l(0)
+                          add r8.xy, r9.xyxx, r11.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,4f]>
+                          add r8.xy, r9.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,5f]>
+                          mov r10.w, l(0)
+                          add r8.xy, r9.xyxx, r10.ywyy
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,6f]>
+                          add r8.xy, r9.xyxx, r10.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,7f]>
+                          add r8.xy, r9.xyxx, r10.wyww
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,8f]>
+                          add r8.xy, r9.xyxx, r10.yyyy
+                          sample_c_lz r6.w, r8.xyxx, t0.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,9f]>
                 
                 #line 54
-                        div r5.w, r4.w, l(9.000000)  // ComputeShadowMap<0:[0f,1f]>
+                          div r5.w, r4.w, l(9.000000)  // ComputeShadowMap<0:[0f,1f]>
                 
                 #line 35
-                      endif 
+                        endif 
                 
-                #line 237 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
-                      mov r5.w, r5.w  // shadow<0:Inf>
+                #line 239 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                        mov r5.w, r5.w  // shadow<0:Inf>
+                      else 
+                
+                #line 241
+                        nop 
+                        mov r8.xyz, v1.xyzx
+                        mov r8.w, l(1.000000)
+                        dp4 r9.x, r8.xyzw, cb2[244].xyzw  // lpos<0:NaN:Inf>
+                        dp4 r9.y, r8.xyzw, cb2[245].xyzw  // lpos<1:NaN:Inf>
+                        dp4 r9.z, r8.xyzw, cb2[246].xyzw  // lpos<2:NaN:Inf>
+                        dp4 r4.w, r8.xyzw, cb2[247].xyzw  // lpos<3:NaN:Inf>
+                
+                #line 25 "Shadow.fx"
+                        div r8.xyz, r9.xyzx, r4.wwww  // lpos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 29
+                        lt r4.w, r8.x, l(-1.000000)
+                        lt r6.w, l(1.000000), r8.x
+                        or r4.w, r4.w, r6.w
+                        lt r6.w, r8.y, l(-1.000000)
+                        or r4.w, r4.w, r6.w
+                        lt r6.w, l(1.000000), r8.y
+                        or r4.w, r4.w, r6.w
+                        lt r6.w, r8.z, l(0.000000)
+                        or r4.w, r4.w, r6.w
+                        lt r6.w, l(1.000000), r8.z
+                        or r4.w, r4.w, r6.w
+                        if_nz r4.w
+                
+                #line 32
+                          mov r5.w, l(0)  // ComputeShadowMap<0: 0f>
+                
+                #line 29
+                        endif 
+                
+                #line 35
+                        if_z r4.w
+                          div r4.w, r8.x, l(2.000000)
+                          add r9.x, r4.w, l(0.500000)  // lpos<0:NaN:Inf>
+                          div r4.w, r8.y, l(-2.000000)
+                          add r9.y, r4.w, l(0.500000)  // lpos<1:NaN:Inf>
+                          itof r4.w, cb0[0].x
+                          div r10.y, l(1.000000), r4.w  // dx<0:Inf>
+                          mov r4.w, r10.y  // dx<0:Inf>
+                
+                #line 45
+                          mov r8.y, -r4.w  // offsets<3:Inf>
+                          mov r10.z, -r4.w  // offsets<5:Inf>
+                          mov r11.x, -r4.w  // offsets<6:Inf>
+                          mov r10.x, -r4.w  // offsets<12:Inf>
+                
+                #line 51
+                          mov r4.w, -r4.w
+                          add r9.zw, r4.wwww, r9.xxxy
+                          sample_c_lz r4.w, r9.zwzz, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, l(0.000000)  // percentLit<0:[0f,1f]>
+                          mov r8.x, l(0)
+                          add r8.xy, r8.xyxx, r9.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,2f]>
+                          add r8.xy, r9.xyxx, r10.yzyy
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,3f]>
+                          mov r11.y, l(0)
+                          add r8.xy, r9.xyxx, r11.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,4f]>
+                          add r8.xy, r9.xyxx, l(0.000000, 0.000000, 0.000000, 0.000000)
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,5f]>
+                          mov r10.w, l(0)
+                          add r8.xy, r9.xyxx, r10.ywyy
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,6f]>
+                          add r8.xy, r9.xyxx, r10.xyxx
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,7f]>
+                          add r8.xy, r9.xyxx, r10.wyww
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,8f]>
+                          add r8.xy, r9.xyxx, r10.yyyy
+                          sample_c_lz r6.w, r8.xyxx, t1.xxxx, s0, r8.z
+                          add r4.w, r4.w, r6.w  // percentLit<0:[0f,9f]>
+                
+                #line 54
+                          div r5.w, r4.w, l(9.000000)  // ComputeShadowMap<0:[0f,1f]>
+                
+                #line 35
+                        endif 
+                
+                #line 241 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                        mov r5.w, r5.w  // shadow<0:Inf>
+                
+                #line 238
+                      endif 
                     else 
                 
-                #line 239
+                #line 244
                       mov r5.w, l(1.000000)  // shadow<0: 1f>
                 
                 #line 236
                     endif 
-                  endif 
                 
-                #line 242
-                  nop 
-                  mov r8.xyz, cb4[0].xyzx  // mat<0,1,2>
-                  mov r9.xyz, cb4[1].xyzx  // mat<4,5,6>
-                  mov r10.xyzw, cb4[2].xyzw  // mat<8,9,10,11>
-                  mov r11.xyz, cb1[r3.w + 50].xyzx  // L<0,1,2>
-                  mov r12.xyz, cb1[r3.w + 51].xyzx  // L<4,5,6>
-                  mov r13.xyz, cb1[r3.w + 52].xyzx  // L<8,9,10>
-                  mov r14.xyz, cb1[r3.w + 53].xyzx  // L<12,13,14>
-                  mov r15.xyz, v2.xyzx  // normal<0,1,2>
-                  mov r16.xyz, r1.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 247
+                    nop 
+                    mov r8.xyz, cb4[0].xyzx  // mat<0,1,2>
+                    mov r9.xyz, cb4[1].xyzx  // mat<4,5,6>
+                    mov r10.xyzw, cb4[2].xyzw  // mat<8,9,10,11>
+                    mov r11.xyz, cb1[r3.w + 50].xyzx  // L<0,1,2>
+                    mov r12.xyz, cb1[r3.w + 51].xyzx  // L<4,5,6>
+                    mov r13.xyz, cb1[r3.w + 52].xyzx  // L<8,9,10>
+                    mov r14.xyz, cb1[r3.w + 53].xyzx  // L<12,13,14>
+                    mov r15.xyz, v2.xyzx  // normal<0,1,2>
+                    mov r16.xyz, r1.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 73 "Light.fx"
-                  mov r14.xyz, -r14.xyzx  // lightVec<0,1,2>
-                  mul r8.xyz, r8.xyzx, r11.xyzx
-                  add r8.xyz, r8.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // ambient<0:Inf,1:Inf,2:Inf>
-                  dp3 r3.w, r14.xyzx, r15.xyzx  // diffuseFactor<0:NaN:Inf>
+                    mov r14.xyz, -r14.xyzx  // lightVec<0,1,2>
+                    mul r8.xyz, r8.xyzx, r11.xyzx
+                    add r8.xyz, r8.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // ambient<0:Inf,1:Inf,2:Inf>
+                    dp3 r3.w, r14.xyzx, r15.xyzx  // diffuseFactor<0:NaN:Inf>
                 
                 #line 80
-                  lt r4.w, l(0.000000), r3.w
-                  max r6.w, r10.w, l(1.000000)  // specPower<0:[1f,3.40282e+038f]>
-                  mov r11.xyz, -r14.xyzx
-                  dp3 r7.w, r11.xyzx, r15.xyzx
-                  add r7.w, r7.w, r7.w
-                  mov r7.w, -r7.w
-                  mul r14.xyz, r7.wwww, r15.xyzx
-                  add r11.xyz, r11.xyzx, r14.xyzx  // v<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  dp3 r7.w, r11.xyzx, r16.xyzx
-                  max r7.w, r7.w, l(0.000000)
-                  log r7.w, r7.w
-                  mul r6.w, r6.w, r7.w
-                  exp r6.w, r6.w  // specFactor<0:Inf:[0f,1.#INFf]>
-                  mul r9.xyz, r9.xyzx, r3.wwww
-                  mul r9.xyz, r12.xyzx, r9.xyzx
-                  add r9.xyz, r9.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  mul r10.xyz, r10.xyzx, r6.wwww
-                  mul r10.xyz, r13.xyzx, r10.xyzx
-                  add r10.xyz, r10.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    lt r4.w, l(0.000000), r3.w
+                    max r6.w, r10.w, l(1.000000)  // specPower<0:[1f,3.40282e+038f]>
+                    mov r11.xyz, -r14.xyzx
+                    dp3 r7.w, r11.xyzx, r15.xyzx
+                    add r7.w, r7.w, r7.w
+                    mov r7.w, -r7.w
+                    mul r14.xyz, r7.wwww, r15.xyzx
+                    add r11.xyz, r11.xyzx, r14.xyzx  // v<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    dp3 r7.w, r11.xyzx, r16.xyzx
+                    max r7.w, r7.w, l(0.000000)
+                    log r7.w, r7.w
+                    mul r6.w, r6.w, r7.w
+                    exp r6.w, r6.w  // specFactor<0:Inf:[0f,1.#INFf]>
+                    mul r9.xyz, r9.xyzx, r3.wwww
+                    mul r9.xyz, r12.xyzx, r9.xyzx
+                    add r9.xyz, r9.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mul r10.xyz, r10.xyzx, r6.wwww
+                    mul r10.xyz, r13.xyzx, r10.xyzx
+                    add r10.xyz, r10.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 80
-                  movc r9.xyz, r4.wwww, r9.xyzx, l(0,0,0,0)  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  movc r10.xyz, r4.wwww, r10.xyzx, l(0,0,0,0)  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    movc r9.xyz, r4.wwww, r9.xyzx, l(0,0,0,0)  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    movc r10.xyz, r4.wwww, r10.xyzx, l(0,0,0,0)  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 242 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
-                  mov r8.xyz, r8.xyzx  // A<0:Inf,1:Inf,2:Inf>
-                  mov r9.xyz, r9.xyzx  // D<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  mov r10.xyz, r10.xyzx  // S<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  add r2.xyz, r2.xyzx, r8.xyzx  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  mul r8.xyz, r5.wwww, r9.xyzx
-                  add r6.xyz, r6.xyzx, r8.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  mul r8.xyz, r5.wwww, r10.xyzx
-                  add r7.xyz, r7.xyzx, r8.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 247 "C:\Users\Anders\Documents\GitHub\dv1416-final-project\Shaders\Terrain.fx"
+                    mov r8.xyz, r8.xyzx  // A<0:Inf,1:Inf,2:Inf>
+                    mov r9.xyz, r9.xyzx  // D<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mov r10.xyz, r10.xyzx  // S<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    add r2.xyz, r2.xyzx, r8.xyzx  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mul r8.xyz, r5.wwww, r9.xyzx
+                    add r6.xyz, r6.xyzx, r8.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mul r8.xyz, r5.wwww, r10.xyzx
+                    add r7.xyz, r7.xyzx, r8.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 231
+                #line 233
+                  endif 
                   iadd r2.w, r2.w, l(1)  // i<0:[1u,3u]>
                 endloop 
                 
-                #line 249
+                #line 255
                 add r1.xyz, r2.xyzx, r6.xyzx
                 mul r0.xyz, r0.xyzx, r1.xyzx
                 add r0.xyz, r7.xyzx, r0.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1126,7 +1132,7 @@ fxgroup
                 mov o0.xyz, r0.xyzx  // PS<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 mov o0.w, r0.w  // PS<3:NaN:Inf>
                 ret 
-                // Approximately 314 instruction slots used
+                // Approximately 316 instruction slots used
                             
             };
         }
