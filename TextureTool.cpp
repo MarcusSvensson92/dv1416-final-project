@@ -89,7 +89,7 @@ void TextureTool::onEvent(const std::string& sender, const std::string& eventNam
 			m_brushIndex = 3;
 		}
 
-		else if (eventName == "Load Texture" && GUI::openFileBox(m_hWnd, "PNG Files (*.png)\0*.png\0All Files (*.*)\0*.*\0", "png", filepath))
+		else if (eventName == "Load Texture" && GUI::openFileBox(m_hWnd, "PNG Files (*.png)\0*.png\0All Files (*.*)\0*.*\0\0", ".png", filepath))
 			m_terrain->loadLayermap(m_device, m_brushIndex, filepath);
 
 		else if (eventName == "Brush Diameter")

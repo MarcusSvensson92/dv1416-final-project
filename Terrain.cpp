@@ -101,7 +101,7 @@ void Terrain::saveHeightmap(const std::string& filepath)
 
 	std::vector<unsigned char> out(size);
 	for (UINT i = 0; i < size; i++)
-		out[i] = (unsigned char)m_heightmap[i];
+		out[i] = (unsigned char)floor(m_heightmap[i] + 0.5f);
 
 	std::ofstream file;
 	file.open(filepath, std::ios_base::binary | std::ios_base::out);
