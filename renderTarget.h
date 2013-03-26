@@ -29,15 +29,12 @@ public:
 	void ClearRenderTarget(ID3D11DeviceContext*, float red, float green, float blue, float alpha);
 	ID3D11ShaderResourceView* GetShaderResourceView();
 
-	D3DXMATRIX GetProjectionMatrix();
-
 private:
 	ID3D11RenderTargetView*		m_renderTargetView;
 	ID3D11ShaderResourceView*	m_shaderResourceView;
 	ID3D11DepthStencilView*		m_depthStencilView;
 
 	D3D11_VIEWPORT m_viewport;
-	D3DXMATRIX m_projectionMatrix;
 
 	RENDER_TARGET_TYPE			m_Type;
 };

@@ -5,9 +5,8 @@ cbuffer cbPerObj
 
 struct vertexIn
 {
-	float3 Pos		: POSITION;
-	float3 Normal	: NORMAL;
-	float2 Tex		: TEXCOORD;
+	float3 position : POSITION;
+	float2 tex0     : TEX0;
 };
 
 // ------------------------
@@ -15,7 +14,7 @@ struct vertexIn
 // ------------------------
 float4 VS(vertexIn input) : SV_POSITION
 {
-	return mul(float4(input.Pos, 1.0f), gWVP);
+	return mul(float4(input.position, 1.0f), gWVP);
 }
 RasterizerState Depth
 {

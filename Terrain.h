@@ -33,6 +33,7 @@ public:
 	void loadLayermap(ID3D11Device* device, const UINT i, const std::string& filename);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
+	void shadowmaprender(ID3D11DeviceContext* deviceContext, Shader* shader);
 
 	void onEvent(const std::string& sender, const std::string& eventName);
 

@@ -50,6 +50,7 @@ public:
 
 	std::vector<PointLight>			getPLights();
 	std::vector<DirectionalLight>	getDLights();
+	std::vector<DirectionalLight>*	getDLightsPointer() { return &m_DLights; };
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
 

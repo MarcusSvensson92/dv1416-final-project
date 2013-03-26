@@ -153,6 +153,24 @@ void Terrain::loadLayermap(ID3D11Device* device, const UINT i, const std::string
 	D3DX11CreateShaderResourceViewFromFile(device, filename.c_str(), NULL, NULL, &m_layermapArraySRV[i], NULL);
 }
 
+void Terrain::shadowmaprender(ID3D11DeviceContext* deviceContext, Shader* shader)
+{
+	if (m_created)
+	{
+		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		m_vertexBuffer->apply(deviceContext);
+		m_indexBuffer->apply(deviceContext);
+
+		shader->Apply();
+
+		deviceContext->DrawIndexed(m_indexCount, 0, 0);
+
+		deviceContext->HSSetShader(NULL, NULL, 0);
+		deviceContext->DSSetShader(NULL, NULL, 0);
+	}
+}
+
 void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
 {
 	if (m_created)

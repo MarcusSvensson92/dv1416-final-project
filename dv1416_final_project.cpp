@@ -223,6 +223,25 @@ void dv1416_final_project::update(void)
 
 void dv1416_final_project::render(void)
 {
+	for (int i = 0; i < m_ShadowManager.m_DLightShadowMaps.size(); i++) 
+	{
+		float distance = 1500;
+		XMVECTOR shadowmapDirection = XMLoadFloat3( &m_ShadowManager.m_DLightShadowMaps[i].Light->Direction );
+		shadowmapDirection = XMVector3Normalize(shadowmapDirection);
+		XMVECTOR shadowmapPos = shadowmapDirection*-1*distance;
+		XMMATRIX view = XMMatrixLookAtLH(shadowmapPos, XMVectorZero(), XMLoadFloat3(&XMFLOAT3(1.0f,0.0f,0.0f)));
+		XMMATRIX proj = XMMatrixPerspectiveFovLH(0.1f, 1.f, 1.f, 2000);
+
+		m_shaderManager.get("ShadowMap")->setMatrix("gWVP", XMMatrixMultiply(view, proj));
+
+		m_ShadowManager.m_DLightShadowMaps[i].ShadowMap.SetRenderTarget(m_deviceContext);
+		m_ShadowManager.m_DLightShadowMaps[i].ShadowMap.ClearRenderTarget(m_deviceContext,0,0,0,0);
+		m_terrain.shadowmaprender(m_deviceContext, m_shaderManager.get("ShadowMap"));
+	}
+
+	m_deviceContext->OMSetRenderTargets( 1, &m_renderTargetView, m_depthStencilView );
+	m_deviceContext->RSSetViewports( 1, &m_viewport );
+
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -236,6 +255,7 @@ void dv1416_final_project::render(void)
 	m_shaderManager.get("Terrain")->setRawData("gMaterial", &mMaterial, sizeof(Material)); 
 	m_shaderManager.get("Terrain")->setRawData("gPointLights", &m_LightManager.getPLights()[0], sizeof(PointLight)*m_LightManager.getPLights().size());
 	m_shaderManager.get("Terrain")->setRawData("gDirectionalLights", &m_LightManager.getDLights()[0], sizeof(DirectionalLight)*m_LightManager.getDLights().size());
+	m_ShadowManager.SetupShadowMaps(m_shaderManager.get("Terrain"));
 
 	m_terrain.render(m_deviceContext, m_shaderManager.get("Terrain"), m_camera);
 	m_LightManager.render(m_deviceContext, m_shaderManager.get("Light"), m_camera);
@@ -278,11 +298,13 @@ void dv1416_final_project::initShaders(void)
 	};
 	m_shaderManager.add("Terrain", "Shaders/Terrain.fxo", terrainInputDesc, 2);
 	m_shaderManager.add("Light", "Shaders/LightShader.fxo", NULL, 0);
+	m_shaderManager.add("ShadowMap", "Shaders/ShadowmapShader.fxo", terrainInputDesc, 2);
 }
 
 void dv1416_final_project::initLights(void)
 {
 	m_LightManager.init(m_hWnd, m_device, &m_camera);
+	m_ShadowManager.initDirectionalShadows(m_device, 4096, 1, 10000, m_LightManager.getDLightsPointer());
 }
 
 void dv1416_final_project::initTerrain(void)
@@ -369,7 +391,7 @@ void dv1416_final_project::initGUI(HWND hWnd)
 	GUI::DirectionalLightOptions& directionallightOptions = GUI::DirectionalLightOptions::getInstance();
 	directionallightOptions.init(m_hInstance, hWnd, sd);
 	directionallightOptions.addTrackbar("Directional Light", &m_LightManager, 1, m_LightManager.getDLights().size(), 1);
-	directionallightOptions.addTrackbar("OFF / ON", &m_LightManager, 0, 1, 1);
+	directionallightOptions.addTrackbar("OFF / ON / SHADOW", &m_LightManager, 0, 2, 1);
 	directionallightOptions.addTrackbar("X", &m_LightManager, 0, 200, 100);
 	directionallightOptions.addTrackbar("Z", &m_LightManager, 0, 200, 100);
 

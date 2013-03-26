@@ -9,18 +9,10 @@
 #include "Camera.h"
 #include <algorithm>
 
-struct PLightShadowMap
-{
-	PLightShadowMap() { ZeroMemory(this, sizeof(this)); }
-
-	int							id;
-	std::string					ShaderNames [6];
-	std::string					MatrixNames [6];
-	renderTarget				ShadowMaps [6];
-	Light::PointLight*			Light;
-};
 struct DLightShadowMap
 {
+	DLightShadowMap() { ZeroMemory(this, sizeof(this)); }
+
 	std::string					ShaderName;
 	std::string					MatrixName;
 	renderTarget				ShadowMap;
@@ -35,20 +27,13 @@ public:
 
 	void		init(ID3D11Device* device);
 
-	bool		AddPointShadow(ID3D11Device*, int, float, float, Light::PointLight*);
-	void		RemovePointShadow(Light::PointLight*);
-	void		ClearPointShadows();
+	void		initDirectionalShadows(ID3D11Device*, int, float, float, std::vector<Light::DirectionalLight>*);
 
 	void		SetupShadowMaps(Shader*);
 
 	void render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera);
-private:
-	std::vector<PLightShadowMap>		m_PLightShadowMaps;
-	std::vector<DLightShadowMap>		m_DLightShadowMaps;
 
-	void		CreatePLightShadowMap(int,
-										std::string, std::string, std::string, std::string, std::string, std::string,
-										std::string, std::string, std::string, std::string, std::string, std::string);
+	std::vector<DLightShadowMap>		m_DLightShadowMaps;
 };
 
 #endif

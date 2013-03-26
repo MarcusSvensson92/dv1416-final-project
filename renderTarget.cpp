@@ -6,6 +6,7 @@ renderTarget::renderTarget(void)
 	m_renderTargetView = 0;
 	m_shaderResourceView = 0;
 	m_depthStencilView = 0;
+
 }
 
 renderTarget::~renderTarget(void)
@@ -122,9 +123,6 @@ void renderTarget::Init(ID3D11Device* device, RENDER_TARGET_DESC& initDesc)
     m_viewport.MaxDepth = 1.0f;
     m_viewport.TopLeftX = 0.0f;
     m_viewport.TopLeftY = 0.0f;
-
-	// Setup the projection matrix
-	D3DXMatrixPerspectiveFovLH(&m_projectionMatrix, (float)D3DX_PI * 0.5f, (float)initDesc.textureWidth / (float)initDesc.textureHeight, initDesc.screenNear, initDesc.screenDepth);
 }
 
 void renderTarget::SetRenderTarget(ID3D11DeviceContext* deviceContext)
@@ -167,9 +165,4 @@ void renderTarget::ClearRenderTarget(ID3D11DeviceContext* deviceContext, float r
 ID3D11ShaderResourceView* renderTarget::GetShaderResourceView()
 {
 	return m_shaderResourceView;
-}
-
-D3DXMATRIX renderTarget::GetProjectionMatrix()
-{
-	return m_projectionMatrix;
 }
