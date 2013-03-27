@@ -91,8 +91,13 @@ void Terrain::create(ID3D11Device* device, ID3D11DeviceContext* deviceContext,
 	m_heightmap.resize(size);
 	for (UINT i = 0; i < size; i++)
 		m_heightmap[i] = (float)in[i];
+
+	smooth();
 	
 	createBuffers(device, deviceContext);
+
+	m_currentHeightmapFilepath = heightmapFilename;
+	m_currentBlendmapFilepath  = blendmapFilename;
 }
 
 void Terrain::saveHeightmap(void)
@@ -617,6 +622,33 @@ void Terrain::buildBlendmapSRV(ID3D11Device* device)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels		  = -1;
 	device->CreateShaderResourceView(m_blendmapTexture, &srvDesc, &m_blendmapSRV);
+}
+
+void Terrain::smooth(void)
+{
+	for (UINT i = 0; i < m_depth + 1; i++)
+		for (UINT j = 0; j < m_width + 1; j++)
+			m_heightmap[i * (m_width + 1) + j] = average(i, j);
+}
+
+float Terrain::average(int i, int j)
+{
+	float sum	 = 0.f;
+	UINT  amount = 0;
+
+	for (int m = i - 1; m <= i + 1; m++)
+	{
+		for (int n = j - 1; n <= j + 1; n++)
+		{
+			if (inBounds(m, n))
+			{
+				sum += m_heightmap[m * (m_width + 1) + n];
+				amount++;
+			}
+		}
+	}
+
+	return sum / (float)amount;
 }
 
 bool Terrain::inBounds(int i, int j)

@@ -220,10 +220,10 @@ namespace Utilities
 			for (UINT j = 0; j < data.width; j++)
 			{
 				png_byte* texel = &(row[j * 4]);
-				texel[0] = (png_byte)(data.texels[i * data.width + j].x * 255.f);
-				texel[1] = (png_byte)(data.texels[i * data.width + j].y * 255.f);
-				texel[2] = (png_byte)(data.texels[i * data.width + j].z * 255.f);
-				texel[3] = (png_byte)(data.texels[i * data.width + j].w * 255.f);
+				texel[0] = (png_byte)floor(data.texels[i * data.width + j].x * 255.f + 0.5f);
+				texel[1] = (png_byte)floor(data.texels[i * data.width + j].y * 255.f + 0.5f);
+				texel[2] = (png_byte)floor(data.texels[i * data.width + j].z * 255.f + 0.5f);
+				texel[3] = (png_byte)floor(data.texels[i * data.width + j].w * 255.f + 0.5f);
 			}
 		}
 

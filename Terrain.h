@@ -87,12 +87,13 @@ private:
 	std::string m_currentBlendmapFilepath;
 
 	void createBuffers(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
-
 	void createQuadPatchGrid(std::vector<Vertex::Terrain>& vertices, std::vector<UINT>& indices);
 
 	void buildHeightmapSRV(ID3D11Device* device);
 	void buildBlendmapSRV(ID3D11Device* device);
 
+	void smooth(void);
+	float average(int i, int j);
 	bool inBounds(int i, int j);
 
 	float computeTriangleIntersection(const Ray& ray, const XMVECTOR triangle[3]);
