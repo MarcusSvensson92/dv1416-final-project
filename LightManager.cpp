@@ -296,7 +296,7 @@ void LightManager::onEvent(const std::string& sender, const std::string& eventNa
 	if (sender == "DirectionalLight Options")
 	{
 		GUI::DirectionalLightOptions& directionallightOptions = GUI::DirectionalLightOptions::getInstance();
-		if (eventName == "OFF / ON")
+		if (eventName == "OFF / ON / SHADOW")
 		{
 			int lightnr = (int)directionallightOptions.getTrackbarValue("Directional Light") - 1;
 			m_DLights[lightnr].Pad = (float)directionallightOptions.getTrackbarValue(eventName);

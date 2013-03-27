@@ -20,7 +20,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="renderTarget.cpp" />
     <ClCompile Include="Terrain.cpp">
       <Filter>Terrain</Filter>
     </ClCompile>
@@ -89,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="DirectionalLightOptions.cpp">
       <Filter>GUI\Subwindows\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="renderTarget.cpp">
+      <Filter>Shadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,7 +169,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
-    <ClInclude Include="renderTarget.h" />
     <ClInclude Include="Terrain.h">
       <Filter>Terrain</Filter>
     </ClInclude>
@@ -236,6 +237,9 @@
     </ClInclude>
     <ClInclude Include="DirectionalLightOptions.h">
       <Filter>GUI\Subwindows\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="renderTarget.h">
+      <Filter>Shadow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

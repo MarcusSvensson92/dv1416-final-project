@@ -8,6 +8,7 @@
 #include "Terrain.h"
 #include "ShaderManager.h"
 #include "LightManager.h"
+#include "ShadowManager.h"
 
 class dv1416_final_project : public D3DApp, GUI::EventReceiver
 {
@@ -32,6 +33,7 @@ private:
 	Camera m_camera;
 	ShaderManager m_shaderManager;
 	LightManager m_LightManager;
+	ShadowManager m_ShadowManager;
 	Terrain m_terrain;
 
 	void initShaders(void);
