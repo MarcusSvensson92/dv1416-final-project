@@ -18,6 +18,7 @@ public:
 	void update(const float dt);
 
 	void addUndoStack(void);
+	void clearUndoStack(void);
 	void undo(void);
 
 	void onEvent(const std::string& sender, const std::string& eventName);
@@ -32,7 +33,7 @@ private:
 	float m_brushHardness;
 	float m_brushStrength;
 
-	std::vector<std::map<float*, float>> m_undoStacks;
+	std::vector<std::map<float*, float>> m_undoStack;
 };
 
 #endif

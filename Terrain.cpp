@@ -176,7 +176,7 @@ void Terrain::shadowmaprender(ID3D11DeviceContext* deviceContext, Shader* shader
 	}
 }
 
-void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const Camera& camera)
+void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, Camera& camera)
 {
 	if (m_created)
 	{
@@ -208,6 +208,12 @@ void Terrain::render(ID3D11DeviceContext* deviceContext, Shader* shader, const C
 
 		shader->setFloat3("gTargetPosition", m_targetPosition);
 		shader->setFloat("gTargetDiameter", m_targetDiameter);
+
+		XMFLOAT4 frustum[6];
+		camera.extractFrustumPlanes(frustum);
+		shader->setFrustum("gFrustumPlanes", frustum);
+		shader->setFloat("gMinY", 0.f);
+		shader->setFloat("gMaxY", 255.f);
 
 		m_vertexBuffer->apply(deviceContext);
 		m_indexBuffer->apply(deviceContext);

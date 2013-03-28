@@ -101,6 +101,8 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 											 heightmapFilepath, blendmapFilepath);
 
 							m_camera.setPosition(0.f, 50.f, 0.f);
+
+							Toolbox::getInstance().clearUndoStack();
 						}
 					}
 				}
@@ -193,6 +195,8 @@ void dv1416_final_project::onEvent(const std::string& sender, const std::string&
 			GUI::NewTerrainWindow::getInstance().show(false);
 			EnableWindow(m_hWnd, true);
 			SetFocus(m_hWnd);
+
+			Toolbox::getInstance().clearUndoStack();
 		}
 		else if (eventName == "Cancel")
 		{

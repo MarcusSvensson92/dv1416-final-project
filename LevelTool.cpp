@@ -16,15 +16,15 @@ void LevelTool::update(const float dt)
 	const UINT brushRadius = (UINT)ceil(m_brushDiameter / 2.f);
 	std::vector<std::pair<float, float*>> vertices = m_terrain->getHeightmapDataWithinRadius(*m_targetPosition, brushRadius);
 	const float y = m_brushStrength * dt;
-	if (m_undoStacks.empty())
+	if (m_undoStack.empty())
 		addUndoStack();
 	for (std::vector<std::pair<float, float*>>::iterator it = vertices.begin(); it != vertices.end(); it++)
 	{
 		const float s = (m_brushHardness < 0.99f) ? 1 - pow(it->first, 1.f / (1.f - m_brushHardness)) : 1.f;
 		if (s > 0.f)
 		{
-			if (m_undoStacks.back().find(it->second) == m_undoStacks.back().end())
-				m_undoStacks.back()[it->second] = *it->second;
+			if (m_undoStack.back().find(it->second) == m_undoStack.back().end())
+				m_undoStack.back()[it->second] = *it->second;
 
 			*it->second += s * y;
 
@@ -37,25 +37,31 @@ void LevelTool::update(const float dt)
 
 void LevelTool::addUndoStack(void)
 {
-	m_undoStacks.push_back(std::map<float*, float>());
+	m_undoStack.push_back(std::map<float*, float>());
+}
+
+void LevelTool::clearUndoStack(void)
+{
+	m_undoStack.clear();
+	addUndoStack();
 }
 
 void LevelTool::undo(void)
 {
-	while (!m_undoStacks.empty())
+	while (!m_undoStack.empty())
 	{
-		if (!m_undoStacks.back().empty())
+		if (!m_undoStack.back().empty())
 		{
-			for (std::map<float*, float>::iterator it = m_undoStacks.back().begin(); it != m_undoStacks.back().end(); it++)
+			for (std::map<float*, float>::iterator it = m_undoStack.back().begin(); it != m_undoStack.back().end(); it++)
 				*it->first = it->second;
-			m_undoStacks.back().clear();
+			m_undoStack.back().clear();
 			break;
 		}
 		else
-			m_undoStacks.pop_back();
+			m_undoStack.pop_back();
 	}
 
-	if (m_undoStacks.empty())
+	if (m_undoStack.empty())
 		addUndoStack();
 
 	m_terrain->updateHeightmapTexture(m_deviceContext);

@@ -145,6 +145,13 @@ void Toolbox::update(const float dt)
 		m_prevZDown = false;
 }
 
+void Toolbox::clearUndoStack(void)
+{
+	m_undoStack.clear();
+	m_levelTool.clearUndoStack();
+	m_textureTool.clearUndoStack();
+}
+
 void Toolbox::undo(void)
 {
 	if (!m_undoStack.empty())

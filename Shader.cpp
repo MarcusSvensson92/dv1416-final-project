@@ -114,6 +114,11 @@ void Shader::setFloat4(const std::string& variable, const XMFLOAT4 value)
 	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVector((float*)&value);
 }
 
+void Shader::setFrustum(const std::string& variable, const XMFLOAT4 value[6])
+{
+	m_pEffect->GetVariableByName(variable.c_str())->AsVector()->SetFloatVectorArray((float*)value, 0, 6);
+}
+
 void Shader::setMatrix(const std::string& variable, const XMMATRIX& value)
 {
 	m_pEffect->GetVariableByName(variable.c_str())->AsMatrix()->SetMatrix((float*)&value);
@@ -128,40 +133,3 @@ void Shader::setRawData(const std::string& variable, const void* data, const UIN
 {
 	m_pEffect->GetVariableByName(variable.c_str())->SetRawValue(data, 0, size);
 }
-
-/*void Shader::SetFloat(char* variable, float value)
-{
-	m_pEffect->GetVariableByName(variable)->AsScalar()->SetFloat(value);
-}
-void Shader::SetMatrix(char* variable, D3DXMATRIX& mat)
-{
-	m_pEffect->GetVariableByName(variable)->AsMatrix()->SetMatrix((float*)&mat);
-}
-void Shader::SetFloat3(char* variable, D3DXVECTOR3 value)
-{
-	m_pEffect->GetVariableByName(variable)->AsVector()->SetFloatVector((float*)&value);
-}
-void Shader::SetFloat4(char* variable, D3DXVECTOR4 value)
-{
-	m_pEffect->GetVariableByName(variable)->AsVector()->SetFloatVector((float*)&value);
-}
-void Shader::SetResource(char* variable, ID3D11ShaderResourceView* value)
-{
-	m_pEffect->GetVariableByName(variable)->AsShaderResource()->SetResource(value);
-}
-void Shader::SetUnorderedAccessView(char* variable, ID3D11UnorderedAccessView* value)
-{
-	m_pEffect->GetVariableByName(variable)->AsUnorderedAccessView()->SetUnorderedAccessView(value);
-}
-void Shader::SetInt(char* variable, int value)
-{
-	m_pEffect->GetVariableByName(variable)->AsScalar()->SetInt(value);
-}
-void Shader::SetBool(char* variable, bool value)
-{
-	m_pEffect->GetVariableByName(variable)->AsScalar()->SetBool(value);
-}
-void Shader::SetRawData(char* variable, void* data, size_t size)
-{
-	m_pEffect->GetVariableByName(variable)->SetRawValue(data, 0, (UINT)size);
-}*/

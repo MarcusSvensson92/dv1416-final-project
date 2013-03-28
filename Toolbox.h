@@ -30,6 +30,7 @@ public:
 	void initGUI(HINSTANCE hInstance, HWND hWnd);
 	void update(const float dt);
 
+	void clearUndoStack(void);
 	void undo(void);
 
 	void onEvent(const std::string& sender, const std::string& eventName);
