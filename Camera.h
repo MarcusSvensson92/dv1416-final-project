@@ -37,6 +37,8 @@ public:
 	void updateViewMatrix(void);
 
 	Ray computeRay(POINT cursorPosition);
+
+	void extractFrustumPlanes(XMFLOAT4 planes[6]);
 private:
 	XMFLOAT3 m_position;
 	XMFLOAT3 m_right;

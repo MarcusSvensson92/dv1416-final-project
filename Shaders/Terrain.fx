@@ -18,6 +18,11 @@ cbuffer cbPerFrame
 
 	float3 gTargetPosition;
 	float  gTargetDiameter;
+
+	float4 gFrustumPlanes[6];
+
+	float gMinY;
+	float gMaxY;
 };
 
 cbuffer cbPerObject
@@ -77,6 +82,30 @@ HSIn VS(VSIn input)
 	return output;
 }
 
+struct TessellationPatch
+{
+	float edges[4]	 : SV_TessFactor;
+	float insides[2] : SV_InsideTessFactor;
+};
+
+bool isAabbBehindPlane(float3 center, float3 extents, float4 plane)
+{
+	float3 n = abs(plane.xyz);
+
+	float e = dot(extents, n);
+	float s = dot(float4(center, 1.f), plane);
+
+	return (s + e) < 0.f;
+}
+
+bool isAabbOutsideFrustum(float3 center, float3 extents)
+{
+	for (int i = 0; i < 6; i++)
+		if (isAabbBehindPlane(center, extents, gFrustumPlanes[i]))
+			return true;
+	return false;
+}
+
 float computeTessellationFactor(float3 p)
 {
 	float d = distance(p, gCameraPosition);
@@ -84,27 +113,40 @@ float computeTessellationFactor(float3 p)
 	return pow(2, lerp(gMaxTessellation, gMinTessellation, s));
 }
 
-struct TessellationPatch
-{
-	float edges[4]	 : SV_TessFactor;
-	float insides[2] : SV_InsideTessFactor;
-};
-
 TessellationPatch ConstantHS(InputPatch<HSIn, 4> patch, uint patchID : SV_PrimitiveID)
 {
-	float3 edge0  = 0.5f  * (patch[0].positionW + patch[2].positionW);
-	float3 edge1  = 0.5f  * (patch[0].positionW + patch[1].positionW);
-	float3 edge2  = 0.5f  * (patch[1].positionW + patch[3].positionW);
-	float3 edge3  = 0.5f  * (patch[2].positionW + patch[3].positionW);
-	float3 center = 0.25f * (patch[0].positionW + patch[1].positionW + patch[2].positionW + patch[3].positionW);
-
 	TessellationPatch output;
-	output.edges[0]   = computeTessellationFactor(edge0);
-	output.edges[1]   = computeTessellationFactor(edge1);
-	output.edges[2]   = computeTessellationFactor(edge2);
-	output.edges[3]	  = computeTessellationFactor(edge3);
-	output.insides[0] = computeTessellationFactor(center);
-	output.insides[1] = output.insides[0];
+
+	float3 minVector = float3(patch[2].positionW.x, gMinY, patch[2].positionW.z);
+	float3 maxVector = float3(patch[1].positionW.x, gMaxY, patch[1].positionW.z);
+
+	float3 boxCenter  = 0.5f * (maxVector + minVector);
+	float3 boxExtents = 0.5f * (maxVector - minVector);
+	if (isAabbOutsideFrustum(boxCenter, boxExtents))
+	{
+		output.edges[0]   = 0.f;
+		output.edges[1]   = 0.f;
+		output.edges[2]   = 0.f;
+		output.edges[3]	  = 0.f;
+		output.insides[0] = 0.f;
+		output.insides[1] = 0.f;
+	}
+	else
+	{
+		float3 edge0  = 0.5f  * (patch[0].positionW + patch[2].positionW);
+		float3 edge1  = 0.5f  * (patch[0].positionW + patch[1].positionW);
+		float3 edge2  = 0.5f  * (patch[1].positionW + patch[3].positionW);
+		float3 edge3  = 0.5f  * (patch[2].positionW + patch[3].positionW);
+		float3 center = 0.25f * (patch[0].positionW + patch[1].positionW + patch[2].positionW + patch[3].positionW);
+
+		output.edges[0]   = computeTessellationFactor(edge0);
+		output.edges[1]   = computeTessellationFactor(edge1);
+		output.edges[2]   = computeTessellationFactor(edge2);
+		output.edges[3]	  = computeTessellationFactor(edge3);
+		output.insides[0] = computeTessellationFactor(center);
+		output.insides[1] = output.insides[0];
+	}
+
 	return output;
 }
 
